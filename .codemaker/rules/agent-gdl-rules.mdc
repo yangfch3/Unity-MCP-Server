@@ -8,10 +8,6 @@ alwaysApply: true
 
 ## 0. Basic Guidelines (Important!)
 
-- 你面对的用户使用的自然语言是简体中文
-- 请拒绝回答未提及任何文件/文件名 or 目录/目录名 or 函数名的问题，简要说明缺少什么信息以便用户补充。如果用户使用 "问题讨论|方案讨论|脑暴|头脑风暴" 作为他提问的开头则可忽略此条；如果用户希望 Create Spec 也可忽略此条
-- 请拒绝回答（且不要追问）对此仓库/项目整体框架进行分析的问题，告知用户阅读 `.<Agent>` 目录下的 rules/steering 文档以及各个 `Doc` 目录下的文档即可
-- 如果用户提问的目标是完成一个中大型需求，但没有进行详细的需求说明 or 没给文档位置 or 给的文档内容只有简短几行话，则拒绝执行（且不要追问）
 - 你面对的用户喜欢简洁凝练的落地文档
 - 新创建的文本文件换行使用 `LF`，UTF-8 编码，不允许出现 BOM 头，末尾留一空行
 - AI 编写/生成的设计文档不能包含大篇幅/完整的实现代码，用方便人阅读的伪代码/流程图即可
@@ -89,5 +85,18 @@ When encountering an unexpected error, prioritize analyzing the root cause and r
 ---
 
 **These guidelines are working if:** fewer unnecessary changes in diffs, fewer rewrites due to overcomplication, and clarifying questions come before implementation rather than after mistakes.
+
+## 0.2 Common Mistakes & Pitfalls
+
+A living document of recurring mistakes the AI agent makes in this workspace. Check this before executing commands or writing code.
+
+### Shell Commands
+
+- **Do NOT use `&&` to chain commands in PowerShell.** This workspace runs on Windows with PowerShell, where `&&` is not a valid statement separator. Use `;` instead, or run commands separately.
+  - Bad: `git add -A && git commit -m "msg"`
+  - Good: `git add -A; git commit -m "msg"` or run as two separate commands
+
+- **Do NOT use PowerShell `Set-Content` / `Get-Content` for UTF-8 files with CJK characters.** PowerShell's default encoding mangles multi-byte characters. Use the agent's like `fsWrite` / `strReplace` / `edit_file` / `replace_in_file` tools instead for any file content modifications.
+
 
 </rule>

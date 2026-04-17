@@ -12,4 +12,4 @@ A living document of recurring mistakes the AI agent makes in this workspace. Ch
   - Bad: `git add -A && git commit -m "msg"`
   - Good: `git add -A; git commit -m "msg"` or run as two separate commands
 
-- **Do NOT use PowerShell `Set-Content` / `Get-Content` for UTF-8 files with CJK characters.** PowerShell's default encoding mangles multi-byte characters. Use the agent's `fsWrite` / `strReplace` tools instead for any file content modifications.
+- **Do NOT use PowerShell `Set-Content` / `Get-Content` for UTF-8 files with CJK characters.** PowerShell's default encoding mangles multi-byte characters. Use the agent's like `fsWrite` / `strReplace` / `edit_file` / `replace_in_file` tools instead for any file content modifications.
