@@ -16,8 +16,18 @@ Agent（如 Kiro、Cursor、Claude Desktop）可通过标准 MCP 协议连接到
 | 工具 | 分类 | 功能 |
 |------|------|------|
 | `console_getLogs` | debug | 获取 Unity Console 最近 N 条日志 |
+| `debug_getStackTrace` | debug | 获取最近一条 Error/Exception 的完整堆栈 |
+| `debug_getPerformanceStats` | debug | 获取 FPS、DrawCall、内存占用等性能指标 |
+| `debug_screenshot` | debug | 截取 Game/Scene 视图截图（base64 PNG） |
 | `menu_execute` | editor | 按路径执行 Unity 菜单项 |
 | `playmode_control` | editor | 进入/退出/查询 PlayMode 状态 |
+| `editor_getSelection` | editor | 获取当前选中的 GameObject 和 Asset 信息 |
+| `editor_getHierarchy` | editor | 获取场景 GameObject 树结构（可限深度） |
+| `editor_getProjectStructure` | editor | 获取 Assets 目录结构（可限深度） |
+| `editor_getInspector` | editor | 获取选中对象的 Inspector 序列化字段值 |
+| `build_compile` | build | 触发脚本编译并返回结果 |
+| `build_getCompileErrors` | build | 获取当前编译错误列表 |
+| `build_runTests` | build | 运行 Unity Test Runner 测试并返回结果 |
 
 ## 安装
 
@@ -32,7 +42,7 @@ Agent（如 Kiro、Cursor、Claude Desktop）可通过标准 MCP 协议连接到
 ```json
 {
   "dependencies": {
-    "com.gamedevkit.unity-mcp": "file:../../path/to/unity-mcp"
+    "com.yangfch3.unity-mcp": "file:../../path/to/unity-mcp"
   }
 }
 ```
@@ -97,10 +107,20 @@ Editor/
 │   ├── McpServer.cs          # HttpListener 服务端
 │   ├── McpServerManager.cs   # 生命周期管理（静态单例）
 │   └── MainThreadQueue.cs    # 主线程调度队列
-├── Tools/          # 内置工具实现
+├── Tools/          # 内置工具实现（13 个，分 debug/editor/build 三类）
 │   ├── ConsoleTool.cs
+│   ├── StackTraceTool.cs
+│   ├── PerformanceTool.cs
+│   ├── ScreenshotTool.cs
 │   ├── MenuTool.cs
-│   └── PlayModeTool.cs
+│   ├── PlayModeTool.cs
+│   ├── SelectionTool.cs
+│   ├── HierarchyTool.cs
+│   ├── ProjectStructureTool.cs
+│   ├── InspectorTool.cs
+│   ├── CompileTool.cs
+│   ├── CompileErrorsTool.cs
+│   └── TestRunnerTool.cs
 └── UI/             # Editor 界面
     └── ConfigPanel.cs
 ```
