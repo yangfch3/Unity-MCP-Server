@@ -130,6 +130,25 @@ Editor/
 - Unity 2022.3+
 - 仅 Editor 环境，不影响运行时构建
 
+## 协作开发
+
+### 启用 Package 内置测试
+
+本 Package 包含 EditMode 单元测试（位于 `Tests/Editor/`）。要在宿主项目的 Test Runner 中运行这些测试，需在宿主项目的 `Packages/manifest.json` 中添加 `testables`：
+
+```json
+{
+  "dependencies": {
+    "com.yangfch3.unity-mcp": "file:../../path/to/unity-mcp"
+  },
+  "testables": [
+    "com.yangfch3.unity-mcp"
+  ]
+}
+```
+
+保存后 Unity 会自动 reimport，打开 Window → General → Test Runner 即可看到并运行本 Package 的测试。
+
 ## License
 
 MIT
