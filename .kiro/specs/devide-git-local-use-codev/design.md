@@ -73,12 +73,12 @@ graph LR
 ## 版本更新                        ← 新增章节
   - 版本锁定机制说明：UPM 首次安装后会在 packages-lock.json 中锁定 commit hash
   - Git Tag 指定版本示例：
-    UPM GUI 输入：`https://github.com/<owner>/unity-mcp.git#v0.1.0`
+    UPM GUI 输入：`https://github.com/yangfch3/Unity-MCP-Server.git#v0.1.0`
     或直接编辑宿主项目 Packages/manifest.json：
     ```json
     {
       "dependencies": {
-        "com.yangfch3.unity-mcp": "https://github.com/<owner>/unity-mcp.git#v0.1.0"
+        "com.yangfch3.unity-mcp": "https://github.com/yangfch3/Unity-MCP-Server.git#v0.1.0"
       }
     }
     ```
@@ -86,7 +86,7 @@ graph LR
     ```json
     {
       "dependencies": {
-        "com.yangfch3.unity-mcp": "https://github.com/<owner>/unity-mcp.git"
+        "com.yangfch3.unity-mcp": "https://github.com/yangfch3/Unity-MCP-Server.git"
       }
     }
     ```

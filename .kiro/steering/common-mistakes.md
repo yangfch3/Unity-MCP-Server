@@ -11,3 +11,5 @@ A living document of recurring mistakes the AI agent makes in this workspace. Ch
 - **Do NOT use `&&` to chain commands in PowerShell.** This workspace runs on Windows with PowerShell, where `&&` is not a valid statement separator. Use `;` instead, or run commands separately.
   - Bad: `git add -A && git commit -m "msg"`
   - Good: `git add -A; git commit -m "msg"` or run as two separate commands
+
+- **Do NOT use PowerShell `Set-Content` / `Get-Content` for UTF-8 files with CJK characters.** PowerShell's default encoding mangles multi-byte characters. Use the agent's `fsWrite` / `strReplace` tools instead for any file content modifications.

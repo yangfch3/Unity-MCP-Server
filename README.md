@@ -39,7 +39,7 @@ Agent（如 Kiro、Cursor、Claude Desktop）可通过标准 MCP 协议连接到
 2. 输入以下 URL：
 
 ```
-https://github.com/<owner>/unity-mcp.git
+https://github.com/yangfch3/Unity-MCP-Server.git
 ```
 
 或直接编辑宿主项目的 `Packages/manifest.json`：
@@ -47,7 +47,7 @@ https://github.com/<owner>/unity-mcp.git
 ```json
 {
   "dependencies": {
-    "com.yangfch3.unity-mcp": "https://github.com/<owner>/unity-mcp.git"
+    "com.yangfch3.unity-mcp": "https://github.com/yangfch3/Unity-MCP-Server.git"
   }
 }
 ```
@@ -75,7 +75,7 @@ UPM 通过 Git URL 安装后，会在宿主项目的 `packages-lock.json` 中锁
 如需锁定特定版本，可在 URL 末尾追加 Git Tag：
 
 ```
-https://github.com/<owner>/unity-mcp.git#v0.1.0
+https://github.com/yangfch3/Unity-MCP-Server.git#v0.1.0
 ```
 
 对应 `Packages/manifest.json` 配置：
@@ -83,7 +83,7 @@ https://github.com/<owner>/unity-mcp.git#v0.1.0
 ```json
 {
   "dependencies": {
-    "com.yangfch3.unity-mcp": "https://github.com/<owner>/unity-mcp.git#v0.1.0"
+    "com.yangfch3.unity-mcp": "https://github.com/yangfch3/Unity-MCP-Server.git#v0.1.0"
   }
 }
 ```
@@ -93,7 +93,7 @@ https://github.com/<owner>/unity-mcp.git#v0.1.0
 ```json
 {
   "dependencies": {
-    "com.yangfch3.unity-mcp": "https://github.com/<owner>/unity-mcp.git"
+    "com.yangfch3.unity-mcp": "https://github.com/yangfch3/Unity-MCP-Server.git"
   }
 }
 ```

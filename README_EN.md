@@ -39,7 +39,7 @@ Agents (e.g., Kiro, Cursor, Claude Desktop) can connect to Unity Editor through 
 2. Enter the following URL:
 
 ```
-https://github.com/<owner>/unity-mcp.git
+https://github.com/yangfch3/Unity-MCP-Server.git
 ```
 
 Or edit your project's `Packages/manifest.json` directly:
@@ -47,7 +47,7 @@ Or edit your project's `Packages/manifest.json` directly:
 ```json
 {
   "dependencies": {
-    "com.yangfch3.unity-mcp": "https://github.com/<owner>/unity-mcp.git"
+    "com.yangfch3.unity-mcp": "https://github.com/yangfch3/Unity-MCP-Server.git"
   }
 }
 ```
@@ -75,7 +75,7 @@ After installing via Git URL, UPM locks the current commit hash in the host proj
 To lock a specific version, append a Git Tag to the URL:
 
 ```
-https://github.com/<owner>/unity-mcp.git#v0.1.0
+https://github.com/yangfch3/Unity-MCP-Server.git#v0.1.0
 ```
 
 Corresponding `Packages/manifest.json` configuration:
@@ -83,7 +83,7 @@ Corresponding `Packages/manifest.json` configuration:
 ```json
 {
   "dependencies": {
-    "com.yangfch3.unity-mcp": "https://github.com/<owner>/unity-mcp.git#v0.1.0"
+    "com.yangfch3.unity-mcp": "https://github.com/yangfch3/Unity-MCP-Server.git#v0.1.0"
   }
 }
 ```
@@ -93,7 +93,7 @@ Without a Tag, it tracks the latest commit on the default branch:
 ```json
 {
   "dependencies": {
-    "com.yangfch3.unity-mcp": "https://github.com/<owner>/unity-mcp.git"
+    "com.yangfch3.unity-mcp": "https://github.com/yangfch3/Unity-MCP-Server.git"
   }
 }
 ```

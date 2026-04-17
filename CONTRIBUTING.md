@@ -4,13 +4,34 @@
 
 ## 开发环境搭建
 
-### 1. 克隆仓库
+### 核心成员
+
+1. 克隆主仓库：
 
 ```bash
-git clone https://github.com/<owner>/unity-mcp.git
+git clone https://github.com/yangfch3/Unity-MCP-Server.git
 ```
 
-### 2. 本地路径安装到宿主项目
+2. 基于 `main` 创建功能分支进行开发，完成后发起 Pull Request 合入 `main`。
+
+### 外部贡献者
+
+1. 在 GitHub 上 Fork 本仓库到自己名下
+2. 克隆自己的 Fork：
+
+```bash
+git clone https://github.com/<your-username>/Unity-MCP-Server.git
+```
+
+3. 添加上游仓库以便同步：
+
+```bash
+git remote add upstream https://github.com/yangfch3/Unity-MCP-Server.git
+```
+
+4. 基于最新 `main` 创建功能分支，开发完成后向上游仓库发起 Pull Request。
+
+### 本地路径安装到宿主项目
 
 将克隆的仓库以本地路径方式安装到你的 Unity 宿主项目中：
 
@@ -60,7 +81,7 @@ Editor/
 │   ├── McpServer.cs          # HttpListener 服务端
 │   ├── McpServerManager.cs   # 生命周期管理（静态单例）
 │   └── MainThreadQueue.cs    # 主线程调度队列
-├── Tools/          # 内置工具实现（分 debug/editor/build... 数类）
+├── Tools/          # 内置工具实现（分 debug/editor/build 数类）
 │   ├── ...
 └── UI/             # Editor 界面
     └── ConfigPanel.cs

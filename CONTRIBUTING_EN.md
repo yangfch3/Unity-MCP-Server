@@ -4,13 +4,34 @@ Welcome to Unity MCP Server development! This document is for contributors, cove
 
 ## Development Setup
 
-### 1. Clone the Repository
+### Core Members
+
+1. Clone the main repository:
 
 ```bash
-git clone https://github.com/<owner>/unity-mcp.git
+git clone https://github.com/yangfch3/Unity-MCP-Server.git
 ```
 
-### 2. Install to Host Project via Local Path
+2. Create a feature branch from `main`, develop on it, then open a Pull Request to merge into `main`.
+
+### External Contributors
+
+1. Fork this repository on GitHub to your own account
+2. Clone your fork:
+
+```bash
+git clone https://github.com/<your-username>/Unity-MCP-Server.git
+```
+
+3. Add the upstream remote for syncing:
+
+```bash
+git remote add upstream https://github.com/yangfch3/Unity-MCP-Server.git
+```
+
+4. Create a feature branch from the latest `main`, develop on it, then open a Pull Request to the upstream repository.
+
+### Install to Host Project via Local Path
 
 Install the cloned repository into your Unity host project as a local package:
 
@@ -60,7 +81,7 @@ Editor/
 │   ├── McpServer.cs          # HttpListener server
 │   ├── McpServerManager.cs   # Lifecycle management (static singleton)
 │   └── MainThreadQueue.cs    # Main thread dispatch queue
-├── Tools/          # Built-in tool implementations (debug/editor/build... categories)
+├── Tools/          # Built-in tool implementations (debug/editor/build categories)
 │   ├── ...
 └── UI/             # Editor UI
     └── ConfigPanel.cs
