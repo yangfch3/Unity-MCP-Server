@@ -1,37 +1,44 @@
 ---
 name: spec-post-check
-description: "Spec 后处理流程：在一轮 Spec Coding 结束后，检查并同步本次改动涉及的 Spec 文档以及 Steering 文档。当用户说出「Spec 后处理」「后处理流程」「spec post check」「收尾检查」或类似表达时触发此 skill。即使用户只是说「帮我收个尾」或「检查一下文档有没有漏更新的」，也应该触发。"
+description: "Spec post-processing workflow: after a round of Spec Coding, check and sync Spec documents, Steering documents, and Contributing documents affected by the changes. Triggered when the user says 'Spec 后处理', '后处理流程', 'spec post check', '收尾检查', 'post-processing', 'wrap up', 'finalize docs', or similar expressions. Also triggered by phrases like '帮我收个尾', '检查一下文档有没有漏更新的', 'check if any docs need updating', or 'sync the docs'."
 ---
 
-# Spec 后处理流程
+# Spec Post-Processing Workflow
 
-当用户表达"Spec 后处理流程"意思时，执行以下两步检查。
+When the user expresses the intent for "Spec post-processing", execute the following checks.
 
-## 步骤 1：Spec 文档一致性检查
+## Step 1: Spec Document Consistency Check
 
-读取当前 Spec 目录下的 `requirements.md`、`design.md`、`tasks.md`，对照实际已实现的代码，检查：
+Read `requirements.md`, `design.md`, and `tasks.md` from the current Spec directory. Compare against the actually implemented code and check:
 
-- 后续迭代中新增/修改的需求是否已同步到 requirements.md
-- 后续迭代中新增/修改的接口、数据模型、正确性属性是否已同步到 design.md
-- 后续迭代中新增/修改的实现任务和测试任务是否已同步到 tasks.md
+- Whether requirements added/modified during subsequent iterations have been synced to requirements.md
+- Whether interfaces, data models, and correctness properties added/modified during subsequent iterations have been synced to design.md
+- Whether implementation tasks and test tasks added/modified during subsequent iterations have been synced to tasks.md
 
-如发现不一致，直接执行更新。
+If inconsistencies are found, execute updates directly.
 
-## 步骤 2：Steering 更新检查
+## Step 2: Steering Update Check
 
-判断本次 Spec 的内容是否涉及框架级别的修改（如新增/修改 Frame Core、新增公共工具、修改关键约定等）。
+Determine whether the Spec's content involves framework-level changes (e.g., adding/modifying Frame Core, adding public utilities, changing key conventions, etc.).
 
-- 如果是框架级修改：检查 `.kiro/steering/` 下的 `product.md`、`structure.md`、`tech.md` 是否需要同步更新，如需则直接执行。
-- 如果不是框架级修改（纯业务逻辑、UI 面板等）：跳过，无需更新 steering。
+- If framework-level changes: check whether files under `.kiro/steering/` (e.g., `product.md`, `structure.md`, `tech.md`) need to be updated. If so, execute directly.
+- If not framework-level changes (pure business logic, UI panels, etc.): skip, no steering update needed.
 
-## 步骤 3：README 更新检查
+## Step 3: README Update Check
 
-判断本次 Spec 是否新增/修改了用户可见的功能（如新增工具、新增 API、变更配置方式等）。
+Determine whether the Spec added/modified user-visible features (e.g., new tools, new APIs, changed configuration methods, etc.).
 
-- 如果涉及用户可见功能变更：检查项目根目录的 `README.md` 是否需要同步更新（如工具列表、使用说明、配置说明等），如需则直接执行。
-- 如果仅为内部重构或不影响用户使用的改动：跳过，无需更新 README。
+- If user-visible feature changes are involved: check whether `README.md` and `README_EN.md` in the project root need to be updated (e.g., tool list, usage instructions, configuration instructions). If so, execute directly.
+- If only internal refactoring or changes that don't affect user usage: skip, no README update needed.
 
-## 输出要求
+## Step 4: CONTRIBUTING Update Check
 
-- 结果陈述简明扼要，禁止长篇大论
-- 每步只说：检查了什么 → 是否需要更新 → 已更新 / 无需更新
+Determine whether the Spec's changes affect contributor-facing content (e.g., project structure changes, new coding conventions, new test patterns, build process changes, etc.).
+
+- If contributor-facing content is affected: check whether `CONTRIBUTING.md` and `CONTRIBUTING_EN.md` need to be updated. If so, execute directly.
+- If changes don't affect the contributor workflow: skip, no CONTRIBUTING update needed.
+
+## Output Requirements
+
+- Keep statements concise and to the point; no lengthy explanations
+- For each step, only state: what was checked → whether update is needed → updated / no update needed

@@ -1,5 +1,7 @@
 # Unity MCP Server
 
+中文 | [English](README_EN.md)
+
 Unity Editor 插件，通过 [MCP (Model Context Protocol)](https://modelcontextprotocol.io/) 将 Unity Editor 能力暴露给外部 AI Agent。
 
 Agent（如 Kiro、Cursor、Claude Desktop）可通过标准 MCP 协议连接到 Unity Editor，调用编辑器功能。
@@ -31,7 +33,26 @@ Agent（如 Kiro、Cursor、Claude Desktop）可通过标准 MCP 协议连接到
 
 ## 安装
 
-### Unity Package Manager (本地路径)
+### Git URL 安装（推荐）
+
+1. Unity Editor → Window → Package Manager → `+` → Add package from git URL
+2. 输入以下 URL：
+
+```
+https://github.com/<owner>/unity-mcp.git
+```
+
+或直接编辑宿主项目的 `Packages/manifest.json`：
+
+```json
+{
+  "dependencies": {
+    "com.yangfch3.unity-mcp": "https://github.com/<owner>/unity-mcp.git"
+  }
+}
+```
+
+### 本地路径安装
 
 1. 克隆本仓库
 2. Unity Editor → Window → Package Manager → `+` → Add package from disk
@@ -46,6 +67,38 @@ Agent（如 Kiro、Cursor、Claude Desktop）可通过标准 MCP 协议连接到
   }
 }
 ```
+
+## 版本更新
+
+UPM 通过 Git URL 安装后，会在宿主项目的 `packages-lock.json` 中锁定当前 commit hash。后续不会自动更新。
+
+如需锁定特定版本，可在 URL 末尾追加 Git Tag：
+
+```
+https://github.com/<owner>/unity-mcp.git#v0.1.0
+```
+
+对应 `Packages/manifest.json` 配置：
+
+```json
+{
+  "dependencies": {
+    "com.yangfch3.unity-mcp": "https://github.com/<owner>/unity-mcp.git#v0.1.0"
+  }
+}
+```
+
+不带 Tag 则跟踪默认分支最新 commit：
+
+```json
+{
+  "dependencies": {
+    "com.yangfch3.unity-mcp": "https://github.com/<owner>/unity-mcp.git"
+  }
+}
+```
+
+更新版本时，修改 `manifest.json` 中的 `#tag` 后缀为新版本号，或在 UPM GUI 重新 Add package from git URL 输入新 Tag 的 URL 即可。
 
 ## 使用
 
@@ -92,62 +145,14 @@ public class MyCustomTool : IMcpTool
 }
 ```
 
-## 项目结构
-
-```
-Editor/
-├── Core/           # 核心接口与数据模型
-│   ├── IMcpTool.cs         # 工具统一接口
-│   ├── ToolResult.cs       # 执行结果模型
-│   └── ToolRegistry.cs     # 工具注册中心（反射自动发现）
-├── Protocol/       # MCP 协议层
-│   ├── JsonRpcDispatcher.cs  # JSON-RPC 2.0 分发器
-│   └── MiniJson.cs           # 轻量 JSON 解析器
-├── Server/         # HTTP 服务与生命周期
-│   ├── McpServer.cs          # HttpListener 服务端
-│   ├── McpServerManager.cs   # 生命周期管理（静态单例）
-│   └── MainThreadQueue.cs    # 主线程调度队列
-├── Tools/          # 内置工具实现（13 个，分 debug/editor/build 三类）
-│   ├── ConsoleTool.cs
-│   ├── StackTraceTool.cs
-│   ├── PerformanceTool.cs
-│   ├── ScreenshotTool.cs
-│   ├── MenuTool.cs
-│   ├── PlayModeTool.cs
-│   ├── SelectionTool.cs
-│   ├── HierarchyTool.cs
-│   ├── ProjectStructureTool.cs
-│   ├── InspectorTool.cs
-│   ├── CompileTool.cs
-│   ├── CompileErrorsTool.cs
-│   └── TestRunnerTool.cs
-└── UI/             # Editor 界面
-    └── ConfigPanel.cs
-```
-
 ## 要求
 
 - Unity 2022.3+
 - 仅 Editor 环境，不影响运行时构建
 
-## 协作开发
+## 参与贡献
 
-### 启用 Package 内置测试
-
-本 Package 包含 EditMode 单元测试（位于 `Tests/Editor/`）。要在宿主项目的 Test Runner 中运行这些测试，需在宿主项目的 `Packages/manifest.json` 中添加 `testables`：
-
-```json
-{
-  "dependencies": {
-    "com.yangfch3.unity-mcp": "file:../../path/to/unity-mcp"
-  },
-  "testables": [
-    "com.yangfch3.unity-mcp"
-  ]
-}
-```
-
-保存后 Unity 会自动 reimport，打开 Window → General → Test Runner 即可看到并运行本 Package 的测试。
+欢迎参与本项目的开发，详见 [CONTRIBUTING.md](CONTRIBUTING.md)。
 
 ## License
 

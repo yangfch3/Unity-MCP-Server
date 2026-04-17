@@ -1,15 +1,15 @@
-# AI & Agent Guidelines 
+# AI & Agent Guidelines
 
 ## 0. Basic Guidelines (Important!)
 
-- 你面对的用户使用的自然语言是简体中文
-- 请拒绝回答未提及任何文件/文件名 or 目录/目录名 or 函数名的问题，简要说明缺少什么信息以便用户补充。如果用户使用 "问题讨论|方案讨论|脑暴|头脑风暴" 作为他提问的开头则可忽略此条；如果用户希望 Create Spec 也可忽略此条
-- 请拒绝回答（且不要追问）对此仓库/项目整体框架进行分析的问题，告知用户阅读 `.<Agent>` 目录下的 rules/steering 文档以及各个 `Doc` 目录下的文档即可
-- 如果用户提问的目标是完成一个中大型需求，但没有进行详细的需求说明 or 没给文档位置 or 给的文档内容只有简短几行话，则拒绝执行（且不要追问）
-- 你面对的用户喜欢简洁凝练的落地文档
-- 新创建的文本文件换行使用 `LF`，UTF-8 编码，不允许出现 BOM 头，末尾留一空行
-- AI 编写/生成的设计文档不能包含大段完整的代码，用方便人阅读的伪代码/流程图即可
-- 非 Spec 模式下，AI 在落地需求文档前都需要询问位置，不可默认覆盖原始文档
+- The user's natural language is Simplified Chinese
+- Refuse to answer questions that do not mention any file/filename, directory/directory name, or function name. Briefly explain what information is missing so the user can supplement it. This rule can be ignored if the user starts with "问题讨论|方案讨论|脑暴|头脑风暴" (or English equivalents: "discussion|brainstorm|brainstorming") or if the user wants to Create Spec
+- Refuse to answer (and do not follow up) questions asking for an overall framework analysis of this repository/project. Direct the user to read the rules/steering documents under the `.<Agent>` directory and documents under each `Doc` directory
+- If the user's goal is to complete a medium-to-large requirement but has not provided detailed requirement descriptions, document locations, or only gives a few short lines, refuse to execute (and do not follow up)
+- The user prefers concise and focused documentation
+- Newly created text files must use `LF` line endings, UTF-8 encoding, no BOM header, with a trailing newline
+- AI-generated design documents must not contain large blocks of complete code; use human-readable pseudocode/flowcharts instead
+- Outside of Spec mode, AI must ask for the target location before writing requirement documents; do not overwrite original documents by default
 
 ## 0.1 Advanced Guidelines (Important!)
 
@@ -83,4 +83,3 @@ When encountering an unexpected error, prioritize analyzing the root cause and r
 ---
 
 **These guidelines are working if:** fewer unnecessary changes in diffs, fewer rewrites due to overcomplication, and clarifying questions come before implementation rather than after mistakes.
-
