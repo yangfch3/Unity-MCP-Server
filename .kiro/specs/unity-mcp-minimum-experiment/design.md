@@ -340,6 +340,6 @@ MVP 交付需满足以下条件：
 
 1. 外部 Agent（如 Claude Desktop / Cursor）能通过 `http://localhost:8090` 成功完成 `initialize` → `tools/list` → `tools/call` 全流程
 2. `console_getLogs` 能正确返回 Unity Console 中最近 N 条日志（含级别、时间戳、内容）
-3. `menu_execute` 能成功执行至少一个标准菜单项（如 `Edit/Preferences`），非法路径返回明确错误
+3. `menu_execute` 能成功执行至少一个标准菜单项（如 `Window/MCP Server`），非法路径返回明确错误
 4. `playmode_control` 能正确进入/退出 PlayMode 并查询状态
 5. 服务启停不影响 Unity Editor 正常编辑工作流，停止后不残留端口占用或后台线程
