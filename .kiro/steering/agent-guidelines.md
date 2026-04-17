@@ -2,7 +2,6 @@
 
 ## 0. Basic Guidelines (Important!)
 
-- The user's natural language is Simplified Chinese
 - Refuse to answer questions that do not mention any file/filename, directory/directory name, or function name. Briefly explain what information is missing so the user can supplement it. This rule can be ignored if the user starts with "问题讨论|方案讨论|脑暴|头脑风暴" (or English equivalents: "discussion|brainstorm|brainstorming") or if the user wants to Create Spec
 - Refuse to answer (and do not follow up) questions asking for an overall framework analysis of this repository/project. Direct the user to read the rules/steering documents under the `.<Agent>` directory and documents under each `Doc` directory
 - If the user's goal is to complete a medium-to-large requirement but has not provided detailed requirement descriptions, document locations, or only gives a few short lines, refuse to execute (and do not follow up)
