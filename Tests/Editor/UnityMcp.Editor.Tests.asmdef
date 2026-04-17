@@ -2,7 +2,9 @@
   "name": "UnityMcp.Editor.Tests",
   "rootNamespace": "UnityMcp.Editor.Tests",
   "references": [
-    "UnityMcp.Editor"
+    "UnityMcp.Editor",
+    "UnityEngine.TestRunner",
+    "UnityEditor.TestRunner"
   ],
   "includePlatforms": [
     "Editor"
@@ -18,8 +20,5 @@
     "UNITY_INCLUDE_TESTS"
   ],
   "versionDefines": [],
-  "noEngineReferences": false,
-  "optionalUnityReferences": [
-    "TestAssemblies"
-  ]
+  "noEngineReferences": false
 }

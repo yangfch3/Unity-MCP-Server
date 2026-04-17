@@ -40,20 +40,46 @@ namespace UnityMcp.Editor
                 new ContentItem("text", message)
             });
         }
+
+        /// <summary>创建成功结果（单张图片，base64 编码）</summary>
+        public static ToolResult SuccessImage(string base64Data, string mimeType)
+        {
+            return new ToolResult(false, new List<ContentItem>
+            {
+                new ContentItem("image", base64Data, mimeType)
+            });
+        }
     }
 
     /// <summary>
-    /// MCP 内容项。对应协议中的 { "type": "text", "text": "..." }
+    /// MCP 内容项。支持 text 和 image 两种类型。
+    /// text: { "type": "text", "text": "..." }
+    /// image: { "type": "image", "data": "base64...", "mimeType": "image/png" }
     /// </summary>
     public class ContentItem
     {
         public string Type { get; }
         public string Text { get; }
 
+        /// <summary>image 类型的 base64 编码数据（text 类型时为 null）</summary>
+        public string Data { get; }
+
+        /// <summary>image 类型的 MIME 类型（text 类型时为 null）</summary>
+        public string MimeType { get; }
+
+        /// <summary>创建 text 类型内容项</summary>
         public ContentItem(string type, string text)
         {
             Type = type;
             Text = text;
+        }
+
+        /// <summary>创建 image 类型内容项</summary>
+        public ContentItem(string type, string data, string mimeType)
+        {
+            Type = type;
+            Data = data;
+            MimeType = mimeType;
         }
     }
 }

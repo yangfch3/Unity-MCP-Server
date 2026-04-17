@@ -138,7 +138,16 @@ namespace UnityMcp.Editor
                 if (i > 0) sb.Append(',');
                 var item = result.Content[i];
                 sb.Append("{\"type\":").Append(MiniJson.SerializeString(item.Type));
-                sb.Append(",\"text\":").Append(MiniJson.SerializeString(item.Text)).Append('}');
+                if (item.Type == "image")
+                {
+                    sb.Append(",\"data\":").Append(MiniJson.SerializeString(item.Data));
+                    sb.Append(",\"mimeType\":").Append(MiniJson.SerializeString(item.MimeType));
+                }
+                else
+                {
+                    sb.Append(",\"text\":").Append(MiniJson.SerializeString(item.Text));
+                }
+                sb.Append('}');
             }
             sb.Append("],\"isError\":").Append(result.IsError ? "true" : "false").Append('}');
             return SuccessResponse(id, sb.ToString());

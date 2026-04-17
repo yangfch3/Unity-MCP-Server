@@ -1,5 +1,5 @@
 {
-  "name": "com.gamedevkit.unity-mcp",
+  "name": "com.yangfch3.unity-mcp",
   "version": "0.1.0",
   "displayName": "Unity MCP Server",
   "description": "Minimal MCP (Model Context Protocol) server plugin for Unity Editor. Exposes Editor capabilities to external Agents via Streamable HTTP transport.",

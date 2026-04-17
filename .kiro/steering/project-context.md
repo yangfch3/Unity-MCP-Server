@@ -22,7 +22,7 @@ Editor/
 ├── Core/       # IMcpTool 接口、ToolResult、ToolRegistry
 ├── Protocol/   # JsonRpcDispatcher、MiniJson
 ├── Server/     # McpServer、McpServerManager、MainThreadQueue
-├── Tools/      # 内置工具（ConsoleTool、MenuTool、PlayModeTool）
+├── Tools/      # 内置工具（13 个，分 debug/editor/build 三类）
 └── UI/         # ConfigPanel EditorWindow
 ```
 

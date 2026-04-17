@@ -1,0 +1,13 @@
+{
+  "enabled": true,
+  "name": "MCP 工具冒烟测试",
+  "description": "一键调用所有 MCP 工具进行冒烟测试，验证每个工具能正常返回结果不报错",
+  "version": "1",
+  "when": {
+    "type": "userTriggered"
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "请依次调用以下 MCP 工具进行冒烟测试，每个工具调用后检查返回结果是否正常（非错误），最后汇总报告：\n\n1. build_compile — 触发编译\n2. build_getCompileErrors — 获取编译错误\n3. build_runTests — 运行 EditMode 测试\n4. console_getLogs (count=5) — 获取最近日志\n5. debug_getStackTrace — 获取堆栈\n6. debug_getPerformanceStats — 获取性能指标\n7. debug_screenshot (view=game) — 截图\n8. editor_getSelection — 获取选中对象\n9. editor_getHierarchy (maxDepth=2) — 获取场景层级\n10. editor_getProjectStructure (maxDepth=2) — 获取目录结构\n11. editor_getInspector — 获取 Inspector 属性\n12. menu_execute (path=\"Edit/Preferences...\") — 执行菜单\n13. playmode_control (action=status) — 查询 PlayMode 状态\n\n对每个工具报告：✅ 通过 或 ❌ 失败（附错误信息）。最后给出总结：X/13 通过。"
+  }
+}
