@@ -31,5 +31,10 @@
 .DS_Store
 Thumbs.db
 
+# Agent User Profile
 .kiro/steering/user-profile.md
 .codemaker/rules/user-profile.mdc
+
+# Should ignore meta
+LICENSE.meta
+*.md.meta
