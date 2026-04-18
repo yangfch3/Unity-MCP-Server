@@ -95,6 +95,35 @@ Editor/
 - **XML 文档注释**：覆盖所有 public 成员
 - **文件编码**：UTF-8 LF，无 BOM，末尾留空行
 
+## 测试要求
+
+所有新增或修改的功能必须附带对应的测试，PR 不含测试将不予合入。
+
+### 基本规则
+
+- 测试框架：NUnit（Unity Test Runner EditMode）
+- 测试文件位于 `Tests/Editor/`，命名格式：`{ToolName}Tests.cs`
+- 测试命名空间：`UnityMcp.Editor.Tests`
+- 每个新增 Tool 至少包含以下测试：
+  - Name / Category 属性正确性
+  - 参数校验（缺失、无效值）的错误返回
+  - ToolRegistry 自动发现
+  - 核心功能的正向用例
+- 修改现有 Tool 时，需补充覆盖修改点的测试用例
+- 共享测试辅助方法放在 `Tests/Editor/` 下的 Helper 文件中，避免跨测试类重复
+
+### 属性测试（可选但推荐）
+
+对于涉及安全校验、过滤逻辑等组合输入场景，推荐编写属性测试：
+- 使用 `[Category("Slow")]` 标签，CI 可通过 `--where "cat != Slow"` 跳过
+- 最少 100 次随机迭代
+- 注释中标注对应的 Property 和 Requirement
+
+### 提交前检查
+
+- 确保所有测试通过：Unity Editor → Window → General → Test Runner → Run All
+- 新增 Tool 后需同步更新 `Tests/Editor/ToolRegistryTests.cs` 中的断言
+
 ## 分支管理
 
 - `main` 分支作为开发主线，日常开发直接在 `main` 上进行

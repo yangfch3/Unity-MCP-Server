@@ -95,6 +95,35 @@ Editor/
 - **XML Doc Comments**: Required for all public members
 - **File Encoding**: UTF-8 LF, no BOM, trailing newline
 
+## Testing Requirements
+
+All new or modified features must include corresponding tests. PRs without tests will not be merged.
+
+### Basic Rules
+
+- Framework: NUnit (Unity Test Runner EditMode)
+- Test files go in `Tests/Editor/`, naming: `{ToolName}Tests.cs`
+- Test namespace: `UnityMcp.Editor.Tests`
+- Each new Tool must include at least:
+  - Name / Category property correctness
+  - Parameter validation (missing, invalid) error returns
+  - ToolRegistry auto-discovery
+  - Core functionality positive cases
+- When modifying existing Tools, add tests covering the changed behavior
+- Shared test helpers go in `Tests/Editor/` helper files to avoid duplication
+
+### Property Tests (Optional but Recommended)
+
+For security validation, filtering logic, or combinatorial input scenarios, property tests are recommended:
+- Use `[Category("Slow")]` attribute; CI can skip via `--where "cat != Slow"`
+- Minimum 100 random iterations
+- Annotate with corresponding Property and Requirement in comments
+
+### Pre-Submit Checklist
+
+- Ensure all tests pass: Unity Editor → Window → General → Test Runner → Run All
+- After adding a new Tool, update assertions in `Tests/Editor/ToolRegistryTests.cs`
+
 ## Branch Management
 
 - `main` branch is the development mainline; daily development happens directly on `main`

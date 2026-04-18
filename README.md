@@ -17,7 +17,8 @@ Agent（如 Kiro、Cursor、Claude Desktop）可通过标准 MCP 协议连接到
 
 | 工具 | 分类 | 功能 |
 |------|------|------|
-| `console_getLogs` | debug | 获取 Unity Console 最近 N 条日志 |
+| `console_getLogs` | debug | 获取 Unity Console 最近 N 条日志（支持 level/keyword 过滤、上下文模式） |
+| `console_clearLogs` | debug | 清空日志缓冲区 |
 | `debug_getStackTrace` | debug | 获取最近一条 Error/Exception 的完整堆栈 |
 | `debug_getPerformanceStats` | debug | 获取 FPS、DrawCall、内存占用等性能指标 |
 | `debug_screenshot` | debug | 截取 Game/Scene 视图截图（base64 PNG） |
@@ -27,6 +28,7 @@ Agent（如 Kiro、Cursor、Claude Desktop）可通过标准 MCP 协议连接到
 | `editor_getHierarchy` | editor | 获取场景 GameObject 树结构（可限深度） |
 | `editor_getProjectStructure` | editor | 获取 Assets 目录结构（可限深度） |
 | `editor_getInspector` | editor | 获取选中对象的 Inspector 序列化字段值 |
+| `asset_deleteFolder` | editor | 删除指定 Assets 子目录并刷新 AssetDatabase |
 | `build_compile` | build | 触发脚本编译并返回结果 |
 | `build_getCompileErrors` | build | 获取当前编译错误列表 |
 | `build_runTests` | build | 运行 Unity Test Runner 测试并返回结果 |

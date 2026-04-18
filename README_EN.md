@@ -17,7 +17,8 @@ Agents (e.g., Kiro, Cursor, Claude Desktop) can connect to Unity Editor through 
 
 | Tool | Category | Description |
 |------|----------|-------------|
-| `console_getLogs` | debug | Get recent N log entries from Unity Console |
+| `console_getLogs` | debug | Get recent N log entries from Unity Console (supports level/keyword filtering, context mode) |
+| `console_clearLogs` | debug | Clear the log buffer |
 | `debug_getStackTrace` | debug | Get full stack trace of the latest Error/Exception |
 | `debug_getPerformanceStats` | debug | Get FPS, DrawCall, memory usage and other performance metrics |
 | `debug_screenshot` | debug | Capture Game/Scene view screenshot (base64 PNG) |
@@ -27,6 +28,7 @@ Agents (e.g., Kiro, Cursor, Claude Desktop) can connect to Unity Editor through 
 | `editor_getHierarchy` | editor | Get scene GameObject tree structure (depth-limited) |
 | `editor_getProjectStructure` | editor | Get Assets directory structure (depth-limited) |
 | `editor_getInspector` | editor | Get serialized field values of the selected object's Inspector |
+| `asset_deleteFolder` | editor | Delete a specified Assets subdirectory and refresh AssetDatabase |
 | `build_compile` | build | Trigger script compilation and return results |
 | `build_getCompileErrors` | build | Get current compile error list |
 | `build_runTests` | build | Run Unity Test Runner tests and return results |

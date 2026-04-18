@@ -40,8 +40,10 @@ namespace UnityMcp.Editor.Tests
             Assert.Contains("build_compile", names);
             Assert.Contains("build_getCompileErrors", names);
             Assert.Contains("build_runTests", names);
+            Assert.Contains("asset_deleteFolder", names);
+            Assert.Contains("console_clearLogs", names);
 
-            Assert.GreaterOrEqual(all.Count, 13);
+            Assert.GreaterOrEqual(all.Count, 15);
         }
 
         [Test]
@@ -79,6 +81,7 @@ namespace UnityMcp.Editor.Tests
             Assert.Contains("debug_getStackTrace", names);
             Assert.Contains("debug_getPerformanceStats", names);
             Assert.Contains("debug_screenshot", names);
+            Assert.Contains("console_clearLogs", names);
 
             foreach (var tool in debugTools)
                 Assert.AreEqual("debug", tool.Category);
@@ -96,6 +99,7 @@ namespace UnityMcp.Editor.Tests
             Assert.Contains("editor_getHierarchy", names);
             Assert.Contains("editor_getProjectStructure", names);
             Assert.Contains("editor_getInspector", names);
+            Assert.Contains("asset_deleteFolder", names);
 
             foreach (var tool in editorTools)
                 Assert.AreEqual("editor", tool.Category);
