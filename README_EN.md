@@ -25,7 +25,8 @@ Agents (e.g., Kiro, Cursor, Claude Desktop) can connect to Unity Editor through 
 | `menu_execute` | editor | Execute a Unity menu item by path |
 | `playmode_control` | editor | Enter/exit/query PlayMode state |
 | `editor_getSelection` | editor | Get currently selected GameObject and Asset info |
-| `editor_getHierarchy` | editor | Get scene GameObject tree structure (depth-limited) |
+| `editor_getHierarchy` | editor | Get GameObject tree structure (supports Prefab Stage, Selection subtree, depth-limited) |
+| `editor_selectGameObject` | editor | Select a GameObject in the Hierarchy by path |
 | `editor_getProjectStructure` | editor | Get Assets directory structure (depth-limited) |
 | `editor_getInspector` | editor | Get serialized field values of the selected object's Inspector |
 | `asset_deleteFolder` | editor | Delete a specified Assets subdirectory and refresh AssetDatabase |

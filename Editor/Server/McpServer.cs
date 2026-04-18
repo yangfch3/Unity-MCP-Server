@@ -177,6 +177,13 @@ namespace UnityMcp.Editor
                 response.ContentLength64 = responseBytes.Length;
                 response.OutputStream.Write(responseBytes, 0, responseBytes.Length);
             }
+            catch (ThreadAbortException)
+            {
+                // Mono-specific: Domain Reload aborts background threads via Thread.Abort().
+                // On .NET CoreCLR (Unity 6+) this exception is no longer thrown;
+                // remove this catch block when migrating away from Mono runtime.
+                Debug.Log("[McpServer] Request aborted due to Domain Reload, service will auto-recover.");
+            }
             catch (Exception ex)
             {
                 Debug.LogError($"[McpServer] Error processing request: {ex.Message}");

@@ -25,7 +25,8 @@ Agent（如 Kiro、Cursor、Claude Desktop）可通过标准 MCP 协议连接到
 | `menu_execute` | editor | 按路径执行 Unity 菜单项 |
 | `playmode_control` | editor | 进入/退出/查询 PlayMode 状态 |
 | `editor_getSelection` | editor | 获取当前选中的 GameObject 和 Asset 信息 |
-| `editor_getHierarchy` | editor | 获取场景 GameObject 树结构（可限深度） |
+| `editor_getHierarchy` | editor | 获取 GameObject 树结构（支持 Prefab Stage、Selection 子树，可限深度） |
+| `editor_selectGameObject` | editor | 通过路径选中 Hierarchy 中的 GameObject |
 | `editor_getProjectStructure` | editor | 获取 Assets 目录结构（可限深度） |
 | `editor_getInspector` | editor | 获取选中对象的 Inspector 序列化字段值 |
 | `asset_deleteFolder` | editor | 删除指定 Assets 子目录并刷新 AssetDatabase |

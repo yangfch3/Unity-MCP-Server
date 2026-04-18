@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using NUnit.Framework;
+using UnityEditor;
 using UnityEngine;
 using UnityMcp.Editor;
 using UnityMcp.Editor.Tools;
@@ -24,13 +25,14 @@ namespace UnityMcp.Editor.Tests
         [TearDown]
         public void TearDown()
         {
-            foreach (var go in _created)
-                if (go != null) Object.DestroyImmediate(go);
+            Selection.activeGameObject = null;
+            HierarchyToolTestHelper.CleanupGameObjects(_created);
         }
 
         [Test]
         public void Execute_EmptyScene_ReturnsArrayWithExistingObjects()
         {
+            // 注意：EditMode 测试中不存在 Prefab Stage，ResolveDefaultRoots 走的是 Active Scene 分支。
             // 场景可能有默认对象，只验证返回合法 JSON 数组
             var result = _tool.Execute(new Dictionary<string, object>()).Result;
             Assert.IsFalse(result.IsError);
@@ -82,6 +84,85 @@ namespace UnityMcp.Editor.Tests
             var json = result.Content[0].Text;
             Assert.IsTrue(json.Contains("BoxCollider"));
             Assert.IsTrue(json.Contains("Transform"));
+        }
+
+        // ── root 参数相关测试 ──
+
+        [Test]
+        public void Execute_RootEmptyString_EquivalentToDefault()
+        {
+            var go = new GameObject("RootEmptyTest");
+            _created.Add(go);
+
+            var defaultResult = _tool.Execute(new Dictionary<string, object>()).Result;
+            var emptyRootResult = _tool.Execute(new Dictionary<string, object> { { "root", "" } }).Result;
+
+            Assert.IsFalse(defaultResult.IsError);
+            Assert.IsFalse(emptyRootResult.IsError);
+            Assert.AreEqual(defaultResult.Content[0].Text, emptyRootResult.Content[0].Text);
+        }
+
+        [Test]
+        public void Execute_RootSelection_NoSelection_ReturnsError()
+        {
+            Selection.activeGameObject = null;
+
+            var args = new Dictionary<string, object> { { "root", "selection" } };
+            var result = _tool.Execute(args).Result;
+
+            Assert.IsTrue(result.IsError);
+        }
+
+        [Test]
+        public void Execute_RootSelection_WithSelection_ReturnsSubtree()
+        {
+            var parent = new GameObject("SelParent");
+            _created.Add(parent);
+            var child = new GameObject("SelChild");
+            _created.Add(child);
+            child.transform.SetParent(parent.transform);
+            var grandchild = new GameObject("SelGrandchild");
+            _created.Add(grandchild);
+            grandchild.transform.SetParent(child.transform);
+
+            Selection.activeGameObject = child;
+
+            var args = new Dictionary<string, object> { { "root", "selection" } };
+            var result = _tool.Execute(args).Result;
+
+            Assert.IsFalse(result.IsError);
+            var json = result.Content[0].Text;
+            // 返回的树以 child 为根，包含 grandchild，不包含 parent
+            Assert.IsTrue(json.Contains("SelChild"));
+            Assert.IsTrue(json.Contains("SelGrandchild"));
+            // 根数组应只有一个元素（选中的 GO）
+            var parsed = MiniJson.Deserialize(json) as List<object>;
+            Assert.IsNotNull(parsed);
+            Assert.AreEqual(1, parsed.Count);
+            var rootNode = parsed[0] as Dictionary<string, object>;
+            Assert.IsNotNull(rootNode);
+            Assert.AreEqual("SelChild", rootNode["name"]);
+        }
+
+        [Test]
+        public void Execute_RootInvalidValue_ReturnsError()
+        {
+            var args = new Dictionary<string, object> { { "root", "invalid_value" } };
+            var result = _tool.Execute(args).Result;
+
+            Assert.IsTrue(result.IsError);
+        }
+
+        [Test]
+        public void InputSchema_ContainsRootAndMaxDepthProperties()
+        {
+            var schema = MiniJson.Deserialize(_tool.InputSchema) as Dictionary<string, object>;
+            Assert.IsNotNull(schema);
+
+            var properties = schema["properties"] as Dictionary<string, object>;
+            Assert.IsNotNull(properties);
+            Assert.IsTrue(properties.ContainsKey("root"), "InputSchema should contain 'root' property");
+            Assert.IsTrue(properties.ContainsKey("maxDepth"), "InputSchema should contain 'maxDepth' property");
         }
     }
 }

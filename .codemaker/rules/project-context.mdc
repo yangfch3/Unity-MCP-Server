@@ -1,6 +1,8 @@
 ---
-inclusion: always
+description: Unity MCP Server — Project Context
+alwaysApply: true
 ---
+<rule>
 
 # Unity MCP Server — Project Context
 
@@ -22,7 +24,7 @@ Editor/
 ├── Core/       # IMcpTool interface, ToolResult, ToolRegistry
 ├── Protocol/   # JsonRpcDispatcher, MiniJson
 ├── Server/     # McpServer, McpServerManager, MainThreadQueue
-├── Tools/      # Built-in tools (16 tools in debug/editor/build categories)
+├── Tools/      # Built-in tools (15 tools in debug/editor/build categories)
 └── UI/         # ConfigPanel EditorWindow
 ```
 
@@ -34,12 +36,6 @@ Editor/
 - Adding a new tool only requires implementing the `IMcpTool` interface; ToolRegistry auto-discovers via reflection
 - After Domain Reload, the service auto-recovers using an EditorPrefs flag
 - Namespace: `UnityMcp.Editor`, tool sub-namespace: `UnityMcp.Editor.Tools`
-
-## Unity MCP Tool Usage Guidelines
-
-- `build_compile` and `build_runTests` will trigger Domain Reload, which aborts the MCP server's HTTP thread and causes the current request to fail. Only call these tools at explicit checkpoint tasks (e.g., "Compile Checkpoint", "Final Test Checkpoint"), NOT after every sub-task.
-- For incremental code validation during implementation, use `getDiagnostics` (IDE static analysis) instead of `build_compile`. It does not trigger Domain Reload.
-- When `build_compile` or `build_runTests` returns a connection error (e.g., "fetch failed"), it is likely due to Domain Reload. Wait briefly and retry once if needed.
 
 ## Coding Standards
 
@@ -56,3 +52,5 @@ Editor/
 - New Tools must be added to `Tests/Editor/ToolRegistryTests.cs` assertions
 - Property tests (random input, 100+ iterations) recommended for security/filtering logic, tagged `[Category("Slow")]`
 - Shared test helpers go in dedicated helper files under `Tests/Editor/` to avoid duplication
+
+</rule>
