@@ -17,9 +17,9 @@ namespace UnityMcp.Editor
         private const string ServerVersion = "0.1.0";
 
         private readonly ToolRegistry _registry;
-        private readonly MainThreadQueue _mainThreadQueue;
+        private readonly IMainThreadQueue _mainThreadQueue;
 
-        public JsonRpcDispatcher(ToolRegistry registry, MainThreadQueue mainThreadQueue)
+        public JsonRpcDispatcher(ToolRegistry registry, IMainThreadQueue mainThreadQueue)
         {
             _registry = registry ?? throw new ArgumentNullException(nameof(registry));
             _mainThreadQueue = mainThreadQueue ?? throw new ArgumentNullException(nameof(mainThreadQueue));

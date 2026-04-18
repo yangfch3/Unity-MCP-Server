@@ -1,0 +1,17 @@
+{
+  "enabled": true,
+  "name": "Wait After Domain Reload",
+  "description": "在 build_compile 或 build_runTests 调用后等待 12 秒，让 Unity Domain Reload 完成后再继续操作",
+  "version": "1",
+  "when": {
+    "type": "postToolUse",
+    "toolTypes": [
+      ".*build_compile.*",
+      ".*build_runTests.*"
+    ]
+  },
+  "then": {
+    "type": "runCommand",
+    "command": "sleep 12"
+  }
+}

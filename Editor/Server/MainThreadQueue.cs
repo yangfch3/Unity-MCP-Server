@@ -10,7 +10,7 @@ namespace UnityMcp.Editor
     /// 由 EditorApplication.update 回调在主线程逐帧消费。
     /// 每个工作项附带 10 秒超时保护。
     /// </summary>
-    public class MainThreadQueue
+    public class MainThreadQueue : IMainThreadQueue
     {
         private static readonly TimeSpan Timeout = TimeSpan.FromSeconds(10);
 

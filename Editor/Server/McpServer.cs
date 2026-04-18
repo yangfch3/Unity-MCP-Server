@@ -16,7 +16,7 @@ namespace UnityMcp.Editor
         private HttpListener _httpListener;
         private Thread _listenerThread;
         private readonly ToolRegistry _toolRegistry;
-        private readonly MainThreadQueue _mainThreadQueue;
+        private readonly IMainThreadQueue _mainThreadQueue;
         private JsonRpcDispatcher _dispatcher;
 
         private volatile bool _isRunning;
@@ -29,7 +29,7 @@ namespace UnityMcp.Editor
         public int ConnectedAgents => _connectedAgents;
         public string LastError => _lastError;
 
-        public McpServer(ToolRegistry toolRegistry, MainThreadQueue mainThreadQueue)
+        public McpServer(ToolRegistry toolRegistry, IMainThreadQueue mainThreadQueue)
         {
             _toolRegistry = toolRegistry ?? throw new ArgumentNullException(nameof(toolRegistry));
             _mainThreadQueue = mainThreadQueue ?? throw new ArgumentNullException(nameof(mainThreadQueue));
