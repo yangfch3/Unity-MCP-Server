@@ -79,7 +79,7 @@ namespace UnityMcp.Editor
 
                 foreach (var type in types)
                 {
-                    if (type.IsAbstract || type.IsInterface || !toolType.IsAssignableFrom(type))
+                    if (type.IsAbstract || type.IsInterface || type.IsNested || !toolType.IsAssignableFrom(type))
                         continue;
 
                     try
