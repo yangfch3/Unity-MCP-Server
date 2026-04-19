@@ -45,7 +45,18 @@ namespace UnityMcp.Editor.Tests
             Assert.Contains("editor_selectGameObject", names);
             Assert.Contains("editor_findGameObjects", names);
 
-            Assert.GreaterOrEqual(all.Count, 17);
+            // 9 个新写操作工具
+            Assert.Contains("editor_addGameObject", names);
+            Assert.Contains("editor_addComponent", names);
+            Assert.Contains("editor_deleteGameObject", names);
+            Assert.Contains("editor_removeComponent", names);
+            Assert.Contains("editor_reparentGameObject", names);
+            Assert.Contains("editor_setActive", names);
+            Assert.Contains("editor_setComponentEnabled", names);
+            Assert.Contains("editor_setTransform", names);
+            Assert.Contains("editor_setField", names);
+
+            Assert.GreaterOrEqual(all.Count, 26);
         }
 
         [Test]
@@ -104,6 +115,17 @@ namespace UnityMcp.Editor.Tests
             Assert.Contains("asset_deleteFolder", names);
             Assert.Contains("editor_selectGameObject", names);
             Assert.Contains("editor_findGameObjects", names);
+
+            // 9 个新写操作工具
+            Assert.Contains("editor_addGameObject", names);
+            Assert.Contains("editor_addComponent", names);
+            Assert.Contains("editor_deleteGameObject", names);
+            Assert.Contains("editor_removeComponent", names);
+            Assert.Contains("editor_reparentGameObject", names);
+            Assert.Contains("editor_setActive", names);
+            Assert.Contains("editor_setComponentEnabled", names);
+            Assert.Contains("editor_setTransform", names);
+            Assert.Contains("editor_setField", names);
 
             foreach (var tool in editorTools)
                 Assert.AreEqual("editor", tool.Category);

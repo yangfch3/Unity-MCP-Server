@@ -37,6 +37,15 @@ Agents (e.g., Kiro, Cursor, Claude Desktop) can connect to Unity Editor through 
 | `editor_getProjectStructure` | Get Assets directory structure (depth-limited) | `maxDepth`: int (default 3) |
 | `editor_getInspector` | Get serialized field values of the selected object's Inspector | None |
 | `editor_findGameObjects` | Search GameObjects in scene by name/component type | `namePattern`: string, `componentType`: string, `maxResults`: int (default 50), `activeOnly`: bool (default true) |
+| `editor_addGameObject` | Add a GameObject to Prefab Stage or Active Scene | `name`: string (default "GameObject"), `parentInstanceID`: int, `parentPath`: string |
+| `editor_deleteGameObject` | Delete a GameObject and all its children | `instanceID`: int, `path`: string (either one) |
+| `editor_addComponent` | Add a component to a specified GameObject | `instanceID`/`path`, `componentType`: string (required) |
+| `editor_removeComponent` | Remove a component from a specified GameObject | `instanceID`/`path`, `componentType`: string (required) |
+| `editor_reparentGameObject` | Change a GameObject's parent | `instanceID`/`path`, `newParentInstanceID`: int, `newParentPath`: string, `worldPositionStays`: bool (default true) |
+| `editor_setActive` | Set a GameObject's active state | `instanceID`/`path`, `active`: bool (required) |
+| `editor_setComponentEnabled` | Enable/disable a component | `instanceID`/`path`, `componentType`: string, `enabled`: bool (required) |
+| `editor_setTransform` | Modify Transform / RectTransform properties | `instanceID`/`path`, `localPosition`: [x,y,z], `localRotation`: [x,y,z], `localScale`: [x,y,z], `anchoredPosition`: [x,y], `sizeDelta`: [w,h], `pivot`: [x,y], `anchorMin`: [x,y], `anchorMax`: [x,y] |
+| `editor_setField` | Modify a component's serialized field value | `instanceID`/`path`, `componentType`: string, `fieldName`: string, `value`: any (required) |
 | `asset_deleteFolder` | Delete a specified Assets subdirectory and refresh AssetDatabase | `path`: string (required) |
 
 #### Build Tools

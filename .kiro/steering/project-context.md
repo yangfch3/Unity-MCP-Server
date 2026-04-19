@@ -22,7 +22,7 @@ Editor/
 ├── Core/       # IMcpTool interface, ToolResult, ToolRegistry
 ├── Protocol/   # JsonRpcDispatcher, MiniJson
 ├── Server/     # McpServer, McpServerManager, MainThreadQueue
-├── Tools/      # Built-in tools (17 tools in debug/editor/build categories), GameObjectPathHelper shared utility
+├── Tools/      # Built-in tools (debug/editor/build categories), shared helpers: GameObjectPathHelper, GameObjectResolveHelper, ComponentTypeHelper, VectorParseHelper
 └── UI/         # ConfigPanel EditorWindow
 ```
 
@@ -37,7 +37,7 @@ Editor/
 
 ## Unity MCP Tool Usage Guidelines
 
-- `build_compile` and `build_runTests` will trigger Domain Reload, which aborts the MCP server's HTTP thread and causes the current request to fail. Only call these tools at explicit checkpoint tasks (e.g., "Compile Checkpoint", "Final Test Checkpoint"), NOT after every sub-task.
+- **NEVER** call `build_compile` or `build_runTests` during a multi-task execution or coding session. These tools trigger Domain Reload, which aborts the MCP server's HTTP thread and breaks the current connection. If compilation or test verification is needed, place it as the very last step of the entire session.
 - For incremental code validation during implementation, use `getDiagnostics` (IDE static analysis) instead of `build_compile`. It does not trigger Domain Reload.
 - When `build_compile` or `build_runTests` returns a connection error (e.g., "fetch failed"), it is likely due to Domain Reload. Wait briefly and retry once if needed.
 
@@ -56,3 +56,9 @@ Editor/
 - New Tools must be added to `Tests/Editor/ToolRegistryTests.cs` assertions
 - Property tests (random input, 100+ iterations) recommended for security/filtering logic, tagged `[Category("Slow")]`
 - Shared test helpers go in dedicated helper files under `Tests/Editor/` to avoid duplication
+
+## Spec Task Generation Rules
+
+- When generating `tasks.md`, do NOT blindly mark all test sub-tasks as optional (`*`). Instead, evaluate each test task against the project's Testing Standards and mark accordingly:
+  - **Required** (no `*`): Unit tests that are mandated by Testing Standards (e.g., "All new or modified Tools must include corresponding unit tests"), or tests for shared helpers/utilities that multiple tools depend on.
+  - **Optional** (`*`): Tests that are "recommended" but not required by Testing Standards (e.g., property-based tests tagged `[Category("Slow")]`), or tests for edge cases that go beyond the project's baseline requirements.

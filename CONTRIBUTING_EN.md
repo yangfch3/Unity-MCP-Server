@@ -81,7 +81,7 @@ Editor/
 │   ├── McpServer.cs          # HttpListener server
 │   ├── McpServerManager.cs   # Lifecycle management (static singleton)
 │   └── MainThreadQueue.cs    # Main thread dispatch queue
-├── Tools/          # Built-in tool implementations (debug/editor/build categories)
+├── Tools/          # Built-in tool implementations (debug/editor/build categories), shared helpers: GameObjectPathHelper, GameObjectResolveHelper, ComponentTypeHelper, VectorParseHelper
 │   ├── ...
 └── UI/             # Editor UI
     └── ConfigPanel.cs

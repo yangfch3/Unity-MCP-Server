@@ -2,9 +2,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEditor;
-using UnityEditor.SceneManagement;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 namespace UnityMcp.Editor.Tools
 {
@@ -57,7 +55,7 @@ namespace UnityMcp.Editor.Tools
                 if (string.IsNullOrEmpty(path))
                     return Task.FromResult(ToolResult.Error("path 或 instanceID 参数至少提供一个"));
 
-                go = FindByPath(path);
+                go = GameObjectResolveHelper.FindByPath(path);
                 if (go == null)
                     return Task.FromResult(ToolResult.Error($"未找到: {path}"));
             }
@@ -77,52 +75,6 @@ namespace UnityMcp.Editor.Tools
             sb.Append('}');
 
             return Task.FromResult(ToolResult.Success(sb.ToString()));
-        }
-
-        /// <summary>
-        /// 按路径查找 GameObject。Prefab Stage 优先，回退 Active Scene。
-        /// </summary>
-        private static GameObject FindByPath(string path)
-        {
-            var normalizedPath = path.TrimStart('/');
-
-            // 1. 尝试 Prefab Stage
-            var stage = PrefabStageUtility.GetCurrentPrefabStage();
-            if (stage != null)
-            {
-                var result = SearchInRoot(stage.prefabContentsRoot, normalizedPath);
-                if (result != null) return result;
-            }
-
-            // 2. 回退 Active Scene
-            var roots = SceneManager.GetActiveScene().GetRootGameObjects();
-            foreach (var root in roots)
-            {
-                var result = SearchInRoot(root, normalizedPath);
-                if (result != null) return result;
-            }
-
-            return null;
-        }
-
-        /// <summary>
-        /// 在指定根节点下按路径段逐级查找 GameObject。
-        /// </summary>
-        private static GameObject SearchInRoot(GameObject root, string path)
-        {
-            var segments = path.Split('/');
-            if (segments.Length == 0 || segments[0] != root.name)
-                return null;
-
-            var current = root.transform;
-            for (int i = 1; i < segments.Length; i++)
-            {
-                var child = current.Find(segments[i]);
-                if (child == null) return null;
-                current = child;
-            }
-
-            return current.gameObject;
         }
     }
 }

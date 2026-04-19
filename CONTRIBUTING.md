@@ -81,7 +81,7 @@ Editor/
 │   ├── McpServer.cs          # HttpListener 服务端
 │   ├── McpServerManager.cs   # 生命周期管理（静态单例）
 │   └── MainThreadQueue.cs    # 主线程调度队列
-├── Tools/          # 内置工具实现（分 debug/editor/build 数类）
+├── Tools/          # 内置工具实现（分 debug/editor/build 数类），共享辅助类：GameObjectPathHelper、GameObjectResolveHelper、ComponentTypeHelper、VectorParseHelper
 │   ├── ...
 └── UI/             # Editor 界面
     └── ConfigPanel.cs
