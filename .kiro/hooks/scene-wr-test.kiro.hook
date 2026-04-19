@@ -1,0 +1,13 @@
+{
+  "enabled": true,
+  "name": "Active Scene W/R 序列测试",
+  "description": "串联测试 Active Scene 下所有写/改/读工具：创建 GO 层级 → 添加/移除组件 → 搜索/选中/Inspector → SetField/SetComponentEnabled/SetActive/SetTransform → Reparent → Delete → 验证场景恢复",
+  "version": "1",
+  "when": {
+    "type": "userTriggered"
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "请在 Active Scene 中依次执行以下串联测试序列，每步用上一步返回的 instanceID，每步报告 ✅/❌：\n\n1. editor_getHierarchy (maxDepth=1) → 记录根节点数量 N 作为基线\n2. editor_addGameObject (name=\"TestPanel\") → 记录 instanceID_A\n3. editor_addGameObject (name=\"Button\", parentInstanceID=instanceID_A) → 记录 instanceID_B，验证 path 含 \"/TestPanel/Button\"\n4. editor_addGameObject (name=\"Icon\", parentInstanceID=instanceID_B) → 记录 instanceID_C\n5. editor_getHierarchy (maxDepth=3) → 验证 TestPanel > Button > Icon 三层\n6. editor_addComponent (instanceID=instanceID_A, componentType=\"Canvas\") → 验证 componentType=\"Canvas\"\n7. editor_addComponent (instanceID=instanceID_B, componentType=\"Camera\") → 验证 componentType=\"Camera\"\n8. editor_findGameObjects (namePattern=\"Button\", componentType=\"Camera\") → 验证结果含 instanceID_B\n9. editor_selectGameObject (instanceID=instanceID_B) → 验证选中\n10. editor_getInspector → 验证 components 含 \"Camera\"\n11. editor_addComponent (instanceID=instanceID_B, componentType=\"BoxCollider\")\n12. editor_setField (instanceID=instanceID_B, componentType=\"BoxCollider\", fieldName=\"m_IsTrigger\", value=true) → 验证 newValue=\"True\"\n13. editor_getInspector → 验证 m_IsTrigger=\"True\"\n14. editor_setComponentEnabled (instanceID=instanceID_B, componentType=\"Camera\", enabled=false) → 验证 enabled=false\n15. editor_setActive (instanceID=instanceID_C, active=false) → 验证 activeSelf=false\n16. editor_getHierarchy (maxDepth=3) → 验证 Icon 的 active=false\n17. editor_setActive (instanceID=instanceID_C, active=true) → 恢复\n18. editor_setTransform (instanceID=instanceID_B, localPosition=[100,200,0], localScale=[2,2,1]) → 验证返回值\n19. editor_reparentGameObject (instanceID=instanceID_C, newParentInstanceID=instanceID_A) → 验证 path=\"/TestPanel/Icon\"\n20. editor_getHierarchy (maxDepth=2) → 验证 TestPanel 下有 Button 和 Icon\n21. editor_removeComponent (instanceID=instanceID_B, componentType=\"BoxCollider\") → 验证移除\n22. editor_findGameObjects (namePattern=\"Button\", componentType=\"BoxCollider\") → 验证结果为空\n23. editor_removeComponent (instanceID=instanceID_B, componentType=\"Camera\") → 清理 Camera\n24. editor_deleteGameObject (instanceID=instanceID_C) → 删除 Icon\n25. editor_deleteGameObject (instanceID=instanceID_A) → 删除 TestPanel（连带 Button）\n26. editor_getHierarchy (maxDepth=1) → 验证根节点数恢复为 N\n\n最后汇总：X/26 通过。"
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "enabled": true,
+  "name": "Prefab Stage W/R 序列测试",
+  "description": "串联测试 Prefab Stage 下所有写/改/读工具：验证 Prefab 上下文 → 创建 GO（自动挂到 Prefab 根下）→ 添加组件 → SetTransform → 搜索 → Reparent（无 newParent 时留在 Prefab 根下）→ Delete → 验证 Prefab 恢复",
+  "version": "1",
+  "when": {
+    "type": "userTriggered"
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "前置条件：请先确认当前已在 Prefab Stage 中（双击打开一个 Prefab）。如果不在 Prefab Stage，请提示用户先打开一个 Prefab。\n\n请依次执行以下 Prefab Stage 串联测试序列，每步报告 ✅/❌：\n\n1. editor_getHierarchy → 验证返回的是 Prefab 内容（只有一个根节点），记录 prefabRoot 的 name 和完整结构作为基线\n2. editor_addGameObject (name=\"PrefabChild\") → 未指定父节点，验证 path 以 prefabRoot name 开头（挂在 Prefab 根下而非 Scene 根级），记录 instanceID_P\n3. editor_addComponent (instanceID=instanceID_P, componentType=\"SphereCollider\") → 验证 componentType=\"SphereCollider\"\n4. editor_setTransform (instanceID=instanceID_P, localPosition=[0,1,0]) → 验证 localPosition 包含 [0, 1, 0]\n5. editor_findGameObjects (namePattern=\"PrefabChild\") → 验证在 Prefab Stage 中能找到 instanceID_P\n6. editor_addGameObject (name=\"PrefabGrandChild\", parentInstanceID=instanceID_P) → 记录 instanceID_G，验证 path 含 \"/PrefabChild/PrefabGrandChild\"\n7. editor_setActive (instanceID=instanceID_G, active=false) → 验证 activeSelf=false\n8. editor_setActive (instanceID=instanceID_G, active=true) → 恢复\n9. editor_reparentGameObject (instanceID=instanceID_G) → 不传 newParent，验证 path 以 prefabRoot name 开头（移到 Prefab 根下而非 Scene 根级）\n10. editor_deleteGameObject (instanceID=instanceID_G) → 删除 PrefabGrandChild\n11. editor_reparentGameObject (instanceID=instanceID_P) → 不传 newParent，验证 path 仍以 prefabRoot name 开头\n12. editor_deleteGameObject (instanceID=instanceID_P) → 删除 PrefabChild\n13. editor_getHierarchy → 验证 Prefab 结构与 Step 1 基线完全一致\n\n最后汇总：X/13 通过。"
+  }
+}
