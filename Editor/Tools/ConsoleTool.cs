@@ -149,11 +149,13 @@ namespace UnityMcp.Editor.Tools
 
         private static void OnLogMessage(string message, string stackTrace, LogType type)
         {
+            bool isError = type == LogType.Error || type == LogType.Exception || type == LogType.Assert;
             var entry = new LogEntry
             {
                 Level = ToLevel(type),
                 Timestamp = DateTime.UtcNow.ToString("o", CultureInfo.InvariantCulture),
-                Message = message
+                Message = message,
+                StackTrace = isError && !string.IsNullOrEmpty(stackTrace) ? stackTrace : null
             };
 
             lock (_lock)
@@ -189,6 +191,11 @@ namespace UnityMcp.Editor.Tools
             sb.Append(MiniJson.SerializeString(entry.Timestamp));
             sb.Append(",\"message\":");
             sb.Append(MiniJson.SerializeString(entry.Message));
+            if (entry.StackTrace != null)
+            {
+                sb.Append(",\"stackTrace\":");
+                sb.Append(MiniJson.SerializeString(entry.StackTrace));
+            }
             sb.Append(",\"index\":");
             sb.Append(entry.Index);
             sb.Append('}');
@@ -216,6 +223,7 @@ namespace UnityMcp.Editor.Tools
             public string Level;
             public string Timestamp;
             public string Message;
+            public string StackTrace;
         }
 
         // --- 测试辅助方法 ---
@@ -231,7 +239,7 @@ namespace UnityMcp.Editor.Tools
         }
 
         /// <summary>向缓冲区注入一条日志（仅供测试使用，绕过 Application 事件）。</summary>
-        internal static void InjectLog(string level, string timestamp, string message)
+        internal static void InjectLog(string level, string timestamp, string message, string stackTrace = null)
         {
             lock (_lock)
             {
@@ -242,7 +250,8 @@ namespace UnityMcp.Editor.Tools
                     Index = _nextIndex++,
                     Level = level,
                     Timestamp = timestamp,
-                    Message = message
+                    Message = message,
+                    StackTrace = stackTrace
                 });
             }
         }
