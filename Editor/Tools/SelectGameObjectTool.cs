@@ -65,7 +65,7 @@ namespace UnityMcp.Editor.Tools
             Selection.activeGameObject = go;
 
             // 计算实际路径用于返回
-            string actualPath = path ?? GetGameObjectPath(go);
+            string actualPath = path ?? GameObjectPathHelper.GetGameObjectPath(go);
 
             var sb = new StringBuilder();
             sb.Append("{\"name\":");
@@ -77,21 +77,6 @@ namespace UnityMcp.Editor.Tools
             sb.Append('}');
 
             return Task.FromResult(ToolResult.Success(sb.ToString()));
-        }
-
-        /// <summary>
-        /// 计算 GameObject 的绝对路径。
-        /// </summary>
-        private static string GetGameObjectPath(GameObject go)
-        {
-            var pathStr = go.name;
-            var t = go.transform.parent;
-            while (t != null)
-            {
-                pathStr = t.name + "/" + pathStr;
-                t = t.parent;
-            }
-            return "/" + pathStr;
         }
 
         /// <summary>

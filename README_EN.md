@@ -36,6 +36,7 @@ Agents (e.g., Kiro, Cursor, Claude Desktop) can connect to Unity Editor through 
 | `editor_selectGameObject` | Select a GameObject in the Hierarchy by path or instanceID | `path`: string, `instanceID`: int (either one, instanceID takes priority) |
 | `editor_getProjectStructure` | Get Assets directory structure (depth-limited) | `maxDepth`: int (default 3) |
 | `editor_getInspector` | Get serialized field values of the selected object's Inspector | None |
+| `editor_findGameObjects` | Search GameObjects in scene by name/component type | `namePattern`: string, `componentType`: string, `maxResults`: int (default 50), `activeOnly`: bool (default true) |
 | `asset_deleteFolder` | Delete a specified Assets subdirectory and refresh AssetDatabase | `path`: string (required) |
 
 #### Build Tools

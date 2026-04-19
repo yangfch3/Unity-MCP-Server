@@ -43,8 +43,9 @@ namespace UnityMcp.Editor.Tests
             Assert.Contains("asset_deleteFolder", names);
             Assert.Contains("console_clearLogs", names);
             Assert.Contains("editor_selectGameObject", names);
+            Assert.Contains("editor_findGameObjects", names);
 
-            Assert.GreaterOrEqual(all.Count, 16);
+            Assert.GreaterOrEqual(all.Count, 17);
         }
 
         [Test]
@@ -102,6 +103,7 @@ namespace UnityMcp.Editor.Tests
             Assert.Contains("editor_getInspector", names);
             Assert.Contains("asset_deleteFolder", names);
             Assert.Contains("editor_selectGameObject", names);
+            Assert.Contains("editor_findGameObjects", names);
 
             foreach (var tool in editorTools)
                 Assert.AreEqual("editor", tool.Category);

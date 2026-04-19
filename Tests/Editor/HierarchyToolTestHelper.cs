@@ -30,19 +30,12 @@ namespace UnityMcp.Editor.Tests
 
         /// <summary>
         /// 计算 GameObject 的完整路径（如 "/Root/Child/GrandChild"）。
+        /// 委托给 <see cref="UnityMcp.Editor.Tools.GameObjectPathHelper"/>。
         /// </summary>
         internal static string GetGameObjectPath(GameObject go)
         {
             if (go == null) return string.Empty;
-            var parts = new List<string>();
-            var current = go.transform;
-            while (current != null)
-            {
-                parts.Add(current.name);
-                current = current.parent;
-            }
-            parts.Reverse();
-            return "/" + string.Join("/", parts);
+            return UnityMcp.Editor.Tools.GameObjectPathHelper.GetGameObjectPath(go);
         }
 
         /// <summary>

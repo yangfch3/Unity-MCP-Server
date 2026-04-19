@@ -42,6 +42,10 @@ namespace UnityMcp.Editor.Tools
                     break;
             }
 
+            // PlayMode 下无法运行测试（Test Runner 会挂起等待退出 PlayMode）
+            if (EditorApplication.isPlaying)
+                return ToolResult.Error("当前处于 PlayMode，请先退出 PlayMode 再运行测试（playmode_control exit）");
+
             var tcs = new TaskCompletionSource<bool>();
             var results = new List<ITestResultAdaptor>();
 

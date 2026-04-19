@@ -36,6 +36,7 @@ Agent（如 Kiro、Cursor、Claude Desktop）可通过标准 MCP 协议连接到
 | `editor_selectGameObject` | 通过路径或 instanceID 选中 Hierarchy 中的 GameObject | `path`: string, `instanceID`: int (二选一，instanceID 优先) |
 | `editor_getProjectStructure` | 获取 Assets 目录结构（可限深度） | `maxDepth`: int (默认 3) |
 | `editor_getInspector` | 获取选中对象的 Inspector 序列化字段值 | 无 |
+| `editor_findGameObjects` | 按名称/组件类型搜索场景中的 GameObject | `namePattern`: string, `componentType`: string, `maxResults`: int (默认 50), `activeOnly`: bool (默认 true) |
 | `asset_deleteFolder` | 删除指定 Assets 子目录并刷新 AssetDatabase | `path`: string (必填) |
 
 #### Build 工具

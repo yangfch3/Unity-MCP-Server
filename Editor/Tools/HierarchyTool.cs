@@ -58,7 +58,7 @@ namespace UnityMcp.Editor.Tools
 
                 var sb = new StringBuilder();
                 sb.Append("{\"selectionPath\":");
-                sb.Append(MiniJson.SerializeString(GetGameObjectPath(go)));
+                sb.Append(MiniJson.SerializeString(GameObjectPathHelper.GetGameObjectPath(go)));
                 sb.Append(",\"children\":");
                 BuildTree(sb, new[] { go }, 0, maxDepth);
                 sb.Append('}');
@@ -69,21 +69,6 @@ namespace UnityMcp.Editor.Tools
                 return Task.FromResult(ToolResult.Error(
                     $"不支持的 root 值: \"{root}\"。支持的值: 缺省/空串、\"selection\""));
             }
-        }
-
-        /// <summary>
-        /// 计算 GameObject 的绝对路径（如 "/Root/Child/Target"）。
-        /// </summary>
-        private static string GetGameObjectPath(GameObject go)
-        {
-            var path = go.name;
-            var t = go.transform.parent;
-            while (t != null)
-            {
-                path = t.name + "/" + path;
-                t = t.parent;
-            }
-            return "/" + path;
         }
 
         /// <summary>
