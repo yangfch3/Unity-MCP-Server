@@ -114,7 +114,7 @@ namespace UnityMcp.Editor.Tests
         }
 
         [Test]
-        public void Execute_RootSelection_WithSelection_ReturnsSubtree()
+        public void Execute_RootSelection_WithSelection_ReturnsSubtreeWithPath()
         {
             var parent = new GameObject("SelParent");
             _created.Add(parent);
@@ -132,16 +132,26 @@ namespace UnityMcp.Editor.Tests
 
             Assert.IsFalse(result.IsError);
             var json = result.Content[0].Text;
-            // 返回的树以 child 为根，包含 grandchild，不包含 parent
-            Assert.IsTrue(json.Contains("SelChild"));
-            Assert.IsTrue(json.Contains("SelGrandchild"));
-            // 根数组应只有一个元素（选中的 GO）
-            var parsed = MiniJson.Deserialize(json) as List<object>;
-            Assert.IsNotNull(parsed);
-            Assert.AreEqual(1, parsed.Count);
-            var rootNode = parsed[0] as Dictionary<string, object>;
+
+            // 返回的是包装对象，包含 selectionPath 和 children
+            var parsed = MiniJson.Deserialize(json) as Dictionary<string, object>;
+            Assert.IsNotNull(parsed, "Selection mode should return a JSON object, not an array");
+
+            // 验证 selectionPath
+            Assert.IsTrue(parsed.ContainsKey("selectionPath"), "Should contain 'selectionPath' field");
+            var selPath = parsed["selectionPath"] as string;
+            Assert.AreEqual("/SelParent/SelChild", selPath);
+
+            // 验证 children 包含选中节点的子树
+            var children = parsed["children"] as List<object>;
+            Assert.IsNotNull(children);
+            Assert.AreEqual(1, children.Count);
+            var rootNode = children[0] as Dictionary<string, object>;
             Assert.IsNotNull(rootNode);
             Assert.AreEqual("SelChild", rootNode["name"]);
+
+            // 子树包含 grandchild
+            Assert.IsTrue(json.Contains("SelGrandchild"));
         }
 
         [Test]

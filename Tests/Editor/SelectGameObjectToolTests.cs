@@ -42,7 +42,7 @@ namespace UnityMcp.Editor.Tests
         }
 
         [Test]
-        public void InputSchema_ContainsRequiredPathProperty()
+        public void InputSchema_ContainsPathAndInstanceIDProperties()
         {
             var schema = MiniJson.Deserialize(_tool.InputSchema) as Dictionary<string, object>;
             Assert.IsNotNull(schema);
@@ -50,21 +50,21 @@ namespace UnityMcp.Editor.Tests
             var properties = schema["properties"] as Dictionary<string, object>;
             Assert.IsNotNull(properties);
             Assert.IsTrue(properties.ContainsKey("path"), "InputSchema should contain 'path' property");
+            Assert.IsTrue(properties.ContainsKey("instanceID"), "InputSchema should contain 'instanceID' property");
 
-            var required = schema["required"] as List<object>;
-            Assert.IsNotNull(required, "InputSchema should have a 'required' array");
-            Assert.Contains("path", required, "'path' should be in the required array");
+            // path 和 instanceID 二选一，不再有 required
+            Assert.IsFalse(schema.ContainsKey("required"), "InputSchema should not have 'required' (path and instanceID are alternatives)");
         }
 
         [Test]
-        public void Execute_EmptyPath_ReturnsError()
+        public void Execute_EmptyPath_NoInstanceID_ReturnsError()
         {
             var result = _tool.Execute(new Dictionary<string, object> { { "path", "" } }).Result;
             Assert.IsTrue(result.IsError);
         }
 
         [Test]
-        public void Execute_NullPath_ReturnsError()
+        public void Execute_NullPath_NoInstanceID_ReturnsError()
         {
             var result = _tool.Execute(new Dictionary<string, object>()).Result;
             Assert.IsTrue(result.IsError);
@@ -105,6 +105,59 @@ namespace UnityMcp.Editor.Tests
             }).Result;
 
             Assert.IsTrue(result.IsError);
+        }
+
+        [Test]
+        public void Execute_ValidInstanceID_SelectsTargetGameObject()
+        {
+            var root = new GameObject("IdRoot");
+            _created.Add(root);
+            var child = new GameObject("IdChild");
+            _created.Add(child);
+            child.transform.SetParent(root.transform);
+
+            var result = _tool.Execute(new Dictionary<string, object>
+            {
+                { "instanceID", (long)child.GetInstanceID() }
+            }).Result;
+
+            Assert.IsFalse(result.IsError);
+            Assert.AreEqual(child, Selection.activeGameObject);
+
+            var json = MiniJson.Deserialize(result.Content[0].Text) as Dictionary<string, object>;
+            Assert.IsNotNull(json);
+            Assert.AreEqual("IdChild", json["name"]);
+            Assert.AreEqual((long)child.GetInstanceID(), json["instanceID"]);
+        }
+
+        [Test]
+        public void Execute_InvalidInstanceID_ReturnsError()
+        {
+            var result = _tool.Execute(new Dictionary<string, object>
+            {
+                { "instanceID", (long)999999999 }
+            }).Result;
+
+            Assert.IsTrue(result.IsError);
+        }
+
+        [Test]
+        public void Execute_InstanceID_TakesPriorityOverPath()
+        {
+            var goA = new GameObject("PriorityA");
+            _created.Add(goA);
+            var goB = new GameObject("PriorityB");
+            _created.Add(goB);
+
+            // 传入 goA 的 instanceID 和 goB 的 path，应选中 goA
+            var result = _tool.Execute(new Dictionary<string, object>
+            {
+                { "instanceID", (long)goA.GetInstanceID() },
+                { "path", HierarchyToolTestHelper.GetGameObjectPath(goB) }
+            }).Result;
+
+            Assert.IsFalse(result.IsError);
+            Assert.AreEqual(goA, Selection.activeGameObject);
         }
     }
 }

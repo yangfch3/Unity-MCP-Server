@@ -15,24 +15,36 @@ Agent（如 Kiro、Cursor、Claude Desktop）可通过标准 MCP 协议连接到
 
 ### 内置工具
 
-| 工具 | 分类 | 功能 |
+#### Debug 工具
+
+| 工具 | 功能 | 参数 |
 |------|------|------|
-| `console_getLogs` | debug | 获取 Unity Console 最近 N 条日志（支持 level/keyword 过滤、上下文模式） |
-| `console_clearLogs` | debug | 清空日志缓冲区 |
-| `debug_getStackTrace` | debug | 获取最近一条 Error/Exception 的完整堆栈 |
-| `debug_getPerformanceStats` | debug | 获取 FPS、DrawCall、内存占用等性能指标 |
-| `debug_screenshot` | debug | 截取 Game/Scene 视图截图（base64 PNG） |
-| `menu_execute` | editor | 按路径执行 Unity 菜单项 |
-| `playmode_control` | editor | 进入/退出/查询 PlayMode 状态 |
-| `editor_getSelection` | editor | 获取当前选中的 GameObject 和 Asset 信息 |
-| `editor_getHierarchy` | editor | 获取 GameObject 树结构（支持 Prefab Stage、Selection 子树，可限深度） |
-| `editor_selectGameObject` | editor | 通过路径选中 Hierarchy 中的 GameObject |
-| `editor_getProjectStructure` | editor | 获取 Assets 目录结构（可限深度） |
-| `editor_getInspector` | editor | 获取选中对象的 Inspector 序列化字段值 |
-| `asset_deleteFolder` | editor | 删除指定 Assets 子目录并刷新 AssetDatabase |
-| `build_compile` | build | 触发脚本编译并返回结果 |
-| `build_getCompileErrors` | build | 获取当前编译错误列表 |
-| `build_runTests` | build | 运行 Unity Test Runner 测试并返回结果 |
+| `console_getLogs` | 获取 Unity Console 最近 N 条日志（支持 level/keyword 过滤、上下文模式） | `count`: int (默认 20), `level`: Error\|Warning\|Log, `keyword`: string, `beforeIndex`: int |
+| `console_clearLogs` | 清空日志缓冲区 | 无 |
+| `debug_getStackTrace` | 获取最近一条 Error/Exception 的完整堆栈 | 无 |
+| `debug_getPerformanceStats` | 获取 FPS、DrawCall、内存占用等性能指标 | 无 |
+| `debug_screenshot` | 截取 Game/Scene 视图截图（base64 PNG） | `view`: game\|scene (默认 game) |
+
+#### Editor 工具
+
+| 工具 | 功能 | 参数 |
+|------|------|------|
+| `menu_execute` | 按路径执行 Unity 菜单项 | `path`: string (必填) |
+| `playmode_control` | 进入/退出/查询 PlayMode 状态 | `action`: enter\|exit\|status (必填) |
+| `editor_getSelection` | 获取当前选中的 GameObject 和 Asset 信息 | 无 |
+| `editor_getHierarchy` | 获取 GameObject 树结构（支持 Prefab Stage、Selection 子树，可限深度） | `maxDepth`: int (默认 -1 无限制), `root`: string (默认 ""，可选 "selection") |
+| `editor_selectGameObject` | 通过路径或 instanceID 选中 Hierarchy 中的 GameObject | `path`: string, `instanceID`: int (二选一，instanceID 优先) |
+| `editor_getProjectStructure` | 获取 Assets 目录结构（可限深度） | `maxDepth`: int (默认 3) |
+| `editor_getInspector` | 获取选中对象的 Inspector 序列化字段值 | 无 |
+| `asset_deleteFolder` | 删除指定 Assets 子目录并刷新 AssetDatabase | `path`: string (必填) |
+
+#### Build 工具
+
+| 工具 | 功能 | 参数 |
+|------|------|------|
+| `build_compile` | 触发脚本编译并返回结果 | 无 |
+| `build_getCompileErrors` | 获取当前编译错误列表 | 无 |
+| `build_runTests` | 运行 Unity Test Runner 测试并返回结果 | `mode`: EditMode\|PlayMode (默认 EditMode), `testFilter`: string |
 
 ## 安装
 

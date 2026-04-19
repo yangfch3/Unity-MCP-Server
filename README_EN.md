@@ -15,24 +15,36 @@ Agents (e.g., Kiro, Cursor, Claude Desktop) can connect to Unity Editor through 
 
 ### Built-in Tools
 
-| Tool | Category | Description |
-|------|----------|-------------|
-| `console_getLogs` | debug | Get recent N log entries from Unity Console (supports level/keyword filtering, context mode) |
-| `console_clearLogs` | debug | Clear the log buffer |
-| `debug_getStackTrace` | debug | Get full stack trace of the latest Error/Exception |
-| `debug_getPerformanceStats` | debug | Get FPS, DrawCall, memory usage and other performance metrics |
-| `debug_screenshot` | debug | Capture Game/Scene view screenshot (base64 PNG) |
-| `menu_execute` | editor | Execute a Unity menu item by path |
-| `playmode_control` | editor | Enter/exit/query PlayMode state |
-| `editor_getSelection` | editor | Get currently selected GameObject and Asset info |
-| `editor_getHierarchy` | editor | Get GameObject tree structure (supports Prefab Stage, Selection subtree, depth-limited) |
-| `editor_selectGameObject` | editor | Select a GameObject in the Hierarchy by path |
-| `editor_getProjectStructure` | editor | Get Assets directory structure (depth-limited) |
-| `editor_getInspector` | editor | Get serialized field values of the selected object's Inspector |
-| `asset_deleteFolder` | editor | Delete a specified Assets subdirectory and refresh AssetDatabase |
-| `build_compile` | build | Trigger script compilation and return results |
-| `build_getCompileErrors` | build | Get current compile error list |
-| `build_runTests` | build | Run Unity Test Runner tests and return results |
+#### Debug Tools
+
+| Tool | Description | Parameters |
+|------|-------------|------------|
+| `console_getLogs` | Get recent N log entries from Unity Console (supports level/keyword filtering, context mode) | `count`: int (default 20), `level`: Error\|Warning\|Log, `keyword`: string, `beforeIndex`: int |
+| `console_clearLogs` | Clear the log buffer | None |
+| `debug_getStackTrace` | Get full stack trace of the latest Error/Exception | None |
+| `debug_getPerformanceStats` | Get FPS, DrawCall, memory usage and other performance metrics | None |
+| `debug_screenshot` | Capture Game/Scene view screenshot (base64 PNG) | `view`: game\|scene (default game) |
+
+#### Editor Tools
+
+| Tool | Description | Parameters |
+|------|-------------|------------|
+| `menu_execute` | Execute a Unity menu item by path | `path`: string (required) |
+| `playmode_control` | Enter/exit/query PlayMode state | `action`: enter\|exit\|status (required) |
+| `editor_getSelection` | Get currently selected GameObject and Asset info | None |
+| `editor_getHierarchy` | Get GameObject tree structure (supports Prefab Stage, Selection subtree, depth-limited) | `maxDepth`: int (default -1 unlimited), `root`: string (default "", optional "selection") |
+| `editor_selectGameObject` | Select a GameObject in the Hierarchy by path or instanceID | `path`: string, `instanceID`: int (either one, instanceID takes priority) |
+| `editor_getProjectStructure` | Get Assets directory structure (depth-limited) | `maxDepth`: int (default 3) |
+| `editor_getInspector` | Get serialized field values of the selected object's Inspector | None |
+| `asset_deleteFolder` | Delete a specified Assets subdirectory and refresh AssetDatabase | `path`: string (required) |
+
+#### Build Tools
+
+| Tool | Description | Parameters |
+|------|-------------|------------|
+| `build_compile` | Trigger script compilation and return results | None |
+| `build_getCompileErrors` | Get current compile error list | None |
+| `build_runTests` | Run Unity Test Runner tests and return results | `mode`: EditMode\|PlayMode (default EditMode), `testFilter`: string |
 
 ## Installation
 

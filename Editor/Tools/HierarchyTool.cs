@@ -43,28 +43,47 @@ namespace UnityMcp.Editor.Tools
                 root = rootRaw as string;
             }
 
-            GameObject[] roots;
-
             if (string.IsNullOrEmpty(root))
             {
-                roots = ResolveDefaultRoots();
+                var roots = ResolveDefaultRoots();
+                var sb = new StringBuilder();
+                BuildTree(sb, roots, 0, maxDepth);
+                return Task.FromResult(ToolResult.Success(sb.ToString()));
             }
             else if (root == "selection")
             {
                 var go = Selection.activeGameObject;
                 if (go == null)
                     return Task.FromResult(ToolResult.Error("当前没有选中任何 GameObject"));
-                roots = new[] { go };
+
+                var sb = new StringBuilder();
+                sb.Append("{\"selectionPath\":");
+                sb.Append(MiniJson.SerializeString(GetGameObjectPath(go)));
+                sb.Append(",\"children\":");
+                BuildTree(sb, new[] { go }, 0, maxDepth);
+                sb.Append('}');
+                return Task.FromResult(ToolResult.Success(sb.ToString()));
             }
             else
             {
                 return Task.FromResult(ToolResult.Error(
                     $"不支持的 root 值: \"{root}\"。支持的值: 缺省/空串、\"selection\""));
             }
+        }
 
-            var sb = new StringBuilder();
-            BuildTree(sb, roots, 0, maxDepth);
-            return Task.FromResult(ToolResult.Success(sb.ToString()));
+        /// <summary>
+        /// 计算 GameObject 的绝对路径（如 "/Root/Child/Target"）。
+        /// </summary>
+        private static string GetGameObjectPath(GameObject go)
+        {
+            var path = go.name;
+            var t = go.transform.parent;
+            while (t != null)
+            {
+                path = t.name + "/" + path;
+                t = t.parent;
+            }
+            return "/" + path;
         }
 
         /// <summary>
