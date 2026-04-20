@@ -92,9 +92,9 @@ namespace UnityMcp.Editor
                 "  }\n" +
                 "}";
 
-            EditorGUI.BeginDisabledGroup(true);
+            // EditorGUI.BeginDisabledGroup(true);
             EditorGUILayout.TextArea(configJson, EditorStyles.textArea, GUILayout.Height(100));
-            EditorGUI.EndDisabledGroup();
+            // EditorGUI.EndDisabledGroup();
 
             if (GUILayout.Button("Copy to Clipboard"))
             {
