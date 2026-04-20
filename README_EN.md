@@ -37,25 +37,43 @@ For full parameter details and usage examples, see the [Tools Reference](Docs/TO
 
 #### Editor Tools
 
+##### Query
+
+| Tool | Description |
+|------|-------------|
+| `editor_getHierarchy` | Get GameObject tree structure |
+| `editor_getInspector` | Get Inspector serialized field values |
+| `editor_getSelection` | Get currently selected object info |
+| `editor_findGameObjects` | Search GameObjects by name/component |
+| `editor_getProjectPath` | Get project root directory path |
+| `editor_getProjectStructure` | Get Assets directory structure |
+
+##### Mutation
+
+| Tool | Description |
+|------|-------------|
+| `editor_addGameObject` | Add a GameObject |
+| `editor_deleteGameObject` | Delete a GameObject |
+| `editor_setField` | Modify serialized field values |
+| `editor_setTransform` | Modify Transform properties |
+| `editor_setActive` | Set active state |
+| `editor_reparentGameObject` | Change parent node |
+| `editor_addComponent` | Add a component |
+| `editor_removeComponent` | Remove a component |
+| `editor_setComponentEnabled` | Enable/disable a component |
+| `editor_selectGameObject` | Select a specified GameObject |
+
+##### Project
+
 | Tool | Description |
 |------|-------------|
 | `menu_execute` | Execute a Unity menu item by path |
 | `playmode_control` | Control PlayMode state |
-| `editor_getSelection` | Get currently selected object info |
-| `editor_getHierarchy` | Get GameObject tree structure |
-| `editor_selectGameObject` | Select a specified GameObject |
-| `editor_getProjectStructure` | Get Assets directory structure |
-| `editor_getInspector` | Get Inspector serialized field values |
-| `editor_findGameObjects` | Search GameObjects by name/component |
-| `editor_addGameObject` | Add a GameObject |
-| `editor_deleteGameObject` | Delete a GameObject |
-| `editor_addComponent` | Add a component |
-| `editor_removeComponent` | Remove a component |
-| `editor_reparentGameObject` | Change parent node |
-| `editor_setActive` | Set active state |
-| `editor_setComponentEnabled` | Enable/disable a component |
-| `editor_setTransform` | Modify Transform properties |
-| `editor_setField` | Modify serialized field values |
+
+##### Asset
+
+| Tool | Description |
+|------|-------------|
 | `asset_deleteFolder` | Delete an Assets subdirectory |
 
 #### Build Tools

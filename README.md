@@ -37,25 +37,43 @@ Agent（如 Kiro、Cursor、Claude Code）可通过标准 MCP 协议连接到 Un
 
 #### Editor 工具
 
+##### Query（查询）
+
+| 工具 | 功能 |
+|------|------|
+| `editor_getHierarchy` | 获取 GameObject 树结构 |
+| `editor_getInspector` | 获取 Inspector 序列化字段值 |
+| `editor_getSelection` | 获取当前选中对象信息 |
+| `editor_findGameObjects` | 按名称/组件搜索 GameObject |
+| `editor_getProjectPath` | 获取项目根目录路径 |
+| `editor_getProjectStructure` | 获取 Assets 目录结构 |
+
+##### Mutation（修改）
+
+| 工具 | 功能 |
+|------|------|
+| `editor_addGameObject` | 添加 GameObject |
+| `editor_deleteGameObject` | 删除 GameObject |
+| `editor_setField` | 修改序列化字段值 |
+| `editor_setTransform` | 修改 Transform 属性 |
+| `editor_setActive` | 修改激活状态 |
+| `editor_reparentGameObject` | 修改父节点 |
+| `editor_addComponent` | 添加组件 |
+| `editor_removeComponent` | 移除组件 |
+| `editor_setComponentEnabled` | 启用/禁用组件 |
+| `editor_selectGameObject` | 选中指定 GameObject |
+
+##### Project（项目）
+
 | 工具 | 功能 |
 |------|------|
 | `menu_execute` | 按路径执行 Unity 菜单项 |
 | `playmode_control` | 控制 PlayMode 状态 |
-| `editor_getSelection` | 获取当前选中对象信息 |
-| `editor_getHierarchy` | 获取 GameObject 树结构 |
-| `editor_selectGameObject` | 选中指定 GameObject |
-| `editor_getProjectStructure` | 获取 Assets 目录结构 |
-| `editor_getInspector` | 获取 Inspector 序列化字段值 |
-| `editor_findGameObjects` | 按名称/组件搜索 GameObject |
-| `editor_addGameObject` | 添加 GameObject |
-| `editor_deleteGameObject` | 删除 GameObject |
-| `editor_addComponent` | 添加组件 |
-| `editor_removeComponent` | 移除组件 |
-| `editor_reparentGameObject` | 修改父节点 |
-| `editor_setActive` | 修改激活状态 |
-| `editor_setComponentEnabled` | 启用/禁用组件 |
-| `editor_setTransform` | 修改 Transform 属性 |
-| `editor_setField` | 修改序列化字段值 |
+
+##### Asset（资产）
+
+| 工具 | 功能 |
+|------|------|
 | `asset_deleteFolder` | 删除 Assets 子目录 |
 
 #### Build 工具

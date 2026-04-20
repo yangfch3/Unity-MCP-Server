@@ -43,7 +43,9 @@ Capture Game/Scene view screenshot, returns base64 PNG.
 
 ## Editor Tools
 
-### `menu_execute`
+### Project
+
+#### `menu_execute`
 
 Execute a Unity Editor menu item by path.
 
@@ -51,7 +53,7 @@ Execute a Unity Editor menu item by path.
 |-----------|------|----------|---------|-------------|
 | `path` | string | ✅ | - | Unity menu path |
 
-### `playmode_control`
+#### `playmode_control`
 
 Enter/exit/pause/resume/query PlayMode state.
 
@@ -59,11 +61,13 @@ Enter/exit/pause/resume/query PlayMode state.
 |-----------|------|----------|---------|-------------|
 | `action` | string | ✅ | - | Action: `enter`, `exit`, `pause`, `resume`, `status` |
 
-### `editor_getSelection`
+### Query
+
+#### `editor_getSelection`
 
 Get currently selected object info from Hierarchy/Project. No parameters.
 
-### `editor_getHierarchy`
+#### `editor_getHierarchy`
 
 Get GameObject tree structure, supports Prefab Stage and Selection subtree.
 
@@ -72,7 +76,7 @@ Get GameObject tree structure, supports Prefab Stage and Selection subtree.
 | `maxDepth` | int | ❌ | -1 | Max traversal depth, -1 for unlimited |
 | `root` | string | ❌ | `""` | Root source: empty=Prefab Stage first, fallback Active Scene; `"selection"`=current selection as root |
 
-### `editor_selectGameObject`
+#### `editor_selectGameObject`
 
 Select a GameObject in the Hierarchy by path or instanceID.
 
@@ -81,7 +85,7 @@ Select a GameObject in the Hierarchy by path or instanceID.
 | `path` | string | ❌ | - | GameObject path (e.g., `/Root/Child/Target`) |
 | `instanceID` | int | ❌ | - | GameObject instanceID (either one, instanceID takes priority) |
 
-### `editor_getProjectPath`
+#### `editor_getProjectPath`
 
 Get the current Unity project root directory path. No parameters.
 
@@ -94,7 +98,7 @@ Get the current Unity project root directory path. No parameters.
 }
 ```
 
-### `editor_getProjectStructure`
+#### `editor_getProjectStructure`
 
 Get Assets directory structure.
 
@@ -102,11 +106,11 @@ Get Assets directory structure.
 |-----------|------|----------|---------|-------------|
 | `maxDepth` | int | ❌ | 3 | Max traversal depth |
 
-### `editor_getInspector`
+#### `editor_getInspector`
 
 Get serialized field values of the selected object's Inspector. No parameters.
 
-### `editor_findGameObjects`
+#### `editor_findGameObjects`
 
 Search GameObjects in scene by name/component type.
 
@@ -117,7 +121,9 @@ Search GameObjects in scene by name/component type.
 | `maxResults` | int | ❌ | 50 | Max results to return |
 | `activeOnly` | bool | ❌ | true | Search active GameObjects only |
 
-### `editor_addGameObject`
+### Mutation
+
+#### `editor_addGameObject`
 
 Add a GameObject to Prefab Stage or Active Scene.
 
@@ -127,7 +133,7 @@ Add a GameObject to Prefab Stage or Active Scene.
 | `parentInstanceID` | int | ❌ | - | Parent node instanceID |
 | `parentPath` | string | ❌ | - | Parent node path |
 
-### `editor_deleteGameObject`
+#### `editor_deleteGameObject`
 
 Delete a GameObject and all its children.
 
@@ -136,7 +142,7 @@ Delete a GameObject and all its children.
 | `instanceID` | int | ❌ | - | instanceID of the GameObject to delete |
 | `path` | string | ❌ | - | Path of the GameObject to delete (either one) |
 
-### `editor_addComponent`
+#### `editor_addComponent`
 
 Add a component to a specified GameObject.
 
@@ -146,7 +152,7 @@ Add a component to a specified GameObject.
 | `path` | string | ❌ | - | Target GameObject path |
 | `componentType` | string | ✅ | - | Component type name (e.g., `"BoxCollider"`) |
 
-### `editor_removeComponent`
+#### `editor_removeComponent`
 
 Remove a component from a specified GameObject.
 
@@ -156,7 +162,7 @@ Remove a component from a specified GameObject.
 | `path` | string | ❌ | - | Target GameObject path |
 | `componentType` | string | ✅ | - | Component type name to remove |
 
-### `editor_reparentGameObject`
+#### `editor_reparentGameObject`
 
 Change a GameObject's parent.
 
@@ -168,7 +174,7 @@ Change a GameObject's parent.
 | `newParentPath` | string | ❌ | - | New parent path |
 | `worldPositionStays` | bool | ❌ | true | Whether to maintain world position |
 
-### `editor_setActive`
+#### `editor_setActive`
 
 Set a GameObject's active state.
 
@@ -178,7 +184,7 @@ Set a GameObject's active state.
 | `path` | string | ❌ | - | Target GameObject path |
 | `active` | bool | ✅ | - | Active state |
 
-### `editor_setComponentEnabled`
+#### `editor_setComponentEnabled`
 
 Enable/disable a component on a GameObject.
 
@@ -189,7 +195,7 @@ Enable/disable a component on a GameObject.
 | `componentType` | string | ✅ | - | Component type name |
 | `enabled` | bool | ✅ | - | Enable/disable state |
 
-### `editor_setTransform`
+#### `editor_setTransform`
 
 Modify Transform / RectTransform properties.
 
@@ -206,7 +212,7 @@ Modify Transform / RectTransform properties.
 | `anchorMin` | [x,y] | ❌ | - | Anchor min (RectTransform only) |
 | `anchorMax` | [x,y] | ❌ | - | Anchor max (RectTransform only) |
 
-### `editor_setField`
+#### `editor_setField`
 
 Modify a component's serialized field value.
 
@@ -218,7 +224,9 @@ Modify a component's serialized field value.
 | `fieldName` | string | ✅ | - | Serialized field name |
 | `value` | any | ✅ | - | New value (type must match field) |
 
-### `asset_deleteFolder`
+### Asset
+
+#### `asset_deleteFolder`
 
 Delete a specified Assets subdirectory and refresh AssetDatabase.
 

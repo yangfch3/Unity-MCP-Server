@@ -43,7 +43,9 @@
 
 ## Editor 工具
 
-### `menu_execute`
+### Project（项目）
+
+#### `menu_execute`
 
 按路径执行 Unity Editor 菜单项。
 
@@ -51,7 +53,7 @@
 |------|------|------|--------|------|
 | `path` | string | ✅ | - | Unity 菜单路径 |
 
-### `playmode_control`
+#### `playmode_control`
 
 进入/退出/暂停/恢复/查询 PlayMode 状态。
 
@@ -59,11 +61,13 @@
 |------|------|------|--------|------|
 | `action` | string | ✅ | - | 操作：`enter`、`exit`、`pause`、`resume`、`status` |
 
-### `editor_getSelection`
+### Query（查询）
+
+#### `editor_getSelection`
 
 获取当前 Hierarchy/Project 中选中的对象信息。无参数。
 
-### `editor_getHierarchy`
+#### `editor_getHierarchy`
 
 获取当前场景的 GameObject 树结构，支持 Prefab Stage 和 Selection 子树。
 
@@ -72,7 +76,7 @@
 | `maxDepth` | int | ❌ | -1 | 最大遍历深度，-1 表示无限制 |
 | `root` | string | ❌ | `""` | 根节点来源：空=Prefab Stage 优先回退 Active Scene；`"selection"`=以当前选中 GameObject 为根 |
 
-### `editor_selectGameObject`
+#### `editor_selectGameObject`
 
 通过路径或 instanceID 选中 Hierarchy 中的 GameObject。
 
@@ -81,7 +85,7 @@
 | `path` | string | ❌ | - | GameObject 路径（如 `/Root/Child/Target`） |
 | `instanceID` | int | ❌ | - | GameObject 的 instanceID（与 path 二选一，优先使用） |
 
-### `editor_getProjectPath`
+#### `editor_getProjectPath`
 
 获取当前 Unity 项目的根目录路径。无参数。
 
@@ -94,7 +98,7 @@
 }
 ```
 
-### `editor_getProjectStructure`
+#### `editor_getProjectStructure`
 
 获取 Assets 目录结构。
 
@@ -102,11 +106,11 @@
 |------|------|------|--------|------|
 | `maxDepth` | int | ❌ | 3 | 最大遍历深度 |
 
-### `editor_getInspector`
+#### `editor_getInspector`
 
 获取选中对象的 Inspector 序列化字段值。无参数。
 
-### `editor_findGameObjects`
+#### `editor_findGameObjects`
 
 按名称/组件类型搜索场景中的 GameObject。
 
@@ -117,7 +121,9 @@
 | `maxResults` | int | ❌ | 50 | 最大返回数量 |
 | `activeOnly` | bool | ❌ | true | 是否仅搜索激活状态的 GameObject |
 
-### `editor_addGameObject`
+### Mutation（修改）
+
+#### `editor_addGameObject`
 
 在 Prefab Stage 或 Active Scene 中添加 GameObject。
 
@@ -127,7 +133,7 @@
 | `parentInstanceID` | int | ❌ | - | 父节点的 instanceID |
 | `parentPath` | string | ❌ | - | 父节点的路径 |
 
-### `editor_deleteGameObject`
+#### `editor_deleteGameObject`
 
 删除指定的 GameObject 及其所有子对象。
 
@@ -136,7 +142,7 @@
 | `instanceID` | int | ❌ | - | 要删除的 GameObject 的 instanceID |
 | `path` | string | ❌ | - | 要删除的 GameObject 的路径（与 instanceID 二选一） |
 
-### `editor_addComponent`
+#### `editor_addComponent`
 
 给指定 GameObject 添加组件。
 
@@ -146,7 +152,7 @@
 | `path` | string | ❌ | - | 目标 GameObject 的路径 |
 | `componentType` | string | ✅ | - | 要添加的组件类型名（如 `"BoxCollider"`） |
 
-### `editor_removeComponent`
+#### `editor_removeComponent`
 
 移除指定 GameObject 上的组件。
 
@@ -156,7 +162,7 @@
 | `path` | string | ❌ | - | 目标 GameObject 的路径 |
 | `componentType` | string | ✅ | - | 要移除的组件类型名 |
 
-### `editor_reparentGameObject`
+#### `editor_reparentGameObject`
 
 修改 GameObject 的父节点。
 
@@ -168,7 +174,7 @@
 | `newParentPath` | string | ❌ | - | 新父节点的路径 |
 | `worldPositionStays` | bool | ❌ | true | 是否保持世界坐标不变 |
 
-### `editor_setActive`
+#### `editor_setActive`
 
 修改 GameObject 的激活状态。
 
@@ -178,7 +184,7 @@
 | `path` | string | ❌ | - | 目标 GameObject 的路径 |
 | `active` | bool | ✅ | - | 激活状态 |
 
-### `editor_setComponentEnabled`
+#### `editor_setComponentEnabled`
 
 修改 GameObject 上指定组件的启用/禁用状态。
 
@@ -189,7 +195,7 @@
 | `componentType` | string | ✅ | - | 组件类型名 |
 | `enabled` | bool | ✅ | - | 启用/禁用状态 |
 
-### `editor_setTransform`
+#### `editor_setTransform`
 
 修改 Transform / RectTransform 属性。
 
@@ -206,7 +212,7 @@
 | `anchorMin` | [x,y] | ❌ | - | 最小锚点（仅 RectTransform） |
 | `anchorMax` | [x,y] | ❌ | - | 最大锚点（仅 RectTransform） |
 
-### `editor_setField`
+#### `editor_setField`
 
 修改 GameObject 上指定组件的序列化字段值。
 
@@ -218,7 +224,9 @@
 | `fieldName` | string | ✅ | - | 序列化字段名 |
 | `value` | any | ✅ | - | 新值（类型需与字段匹配） |
 
-### `asset_deleteFolder`
+### Asset（资产）
+
+#### `asset_deleteFolder`
 
 删除指定 Assets 子目录并刷新 AssetDatabase。
 
