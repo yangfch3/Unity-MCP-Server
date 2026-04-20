@@ -4,7 +4,15 @@
 
 Unity Editor plugin that exposes Unity Editor capabilities to external AI Agents via [MCP (Model Context Protocol)](https://modelcontextprotocol.io/).
 
-Agents (e.g., Kiro, Cursor, Claude Desktop) can connect to Unity Editor through the standard MCP protocol and invoke editor functions.
+Agents (e.g., Kiro, Cursor, Claude Code) can connect to Unity Editor through the standard MCP protocol and invoke editor functions.
+
+## Philosophy
+
+This plugin is positioned as an AI Agent's **Unity perception layer + diagnostic toolchain**:
+
+- **Perception first** — Prioritizes reading scene state, gathering context, and assisting diagnostics, enabling the Agent to fully understand the current project state and support development decisions.
+- **Structured writes** — Provides safe, auditable write operations (e.g., modifying properties, adding/removing nodes), but does not aim to cover every Unity Editor GUI interaction.
+- **Not a replacement for the Editor** — The goal is to enhance collaboration efficiency between engineers and Agents, not to replicate the entire Editor inside a chat window.
 
 ## Features
 

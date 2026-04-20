@@ -4,7 +4,15 @@
 
 Unity Editor 插件，通过 [MCP (Model Context Protocol)](https://modelcontextprotocol.io/) 将 Unity Editor 能力暴露给外部 AI Agent。
 
-Agent（如 Kiro、Cursor、Claude Desktop）可通过标准 MCP 协议连接到 Unity Editor，调用编辑器功能。
+Agent（如 Kiro、Cursor、Claude Code）可通过标准 MCP 协议连接到 Unity Editor，调用编辑器功能。
+
+## 理念
+
+本插件定位为 AI Agent 的 **Unity 感知层 + 诊断工具链**：
+
+- **感知优先** — 优先覆盖"读取场景状态、获取上下文、辅助诊断"等高频场景，让 Agent 能充分理解当前工程状态并辅助开发决策。
+- **结构化写入** — 提供安全、可审计的写操作能力（如修改属性、增删节点），但不追求覆盖 Unity Editor GUI 的所有交互。
+- **不替代编辑器** — 目标是增强工程师与 Agent 协作的效率，而非将 Editor 的全部操作搬到对话框里。
 
 ## 特性
 
