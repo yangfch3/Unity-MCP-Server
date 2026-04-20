@@ -1,0 +1,18 @@
+{
+  "enabled": true,
+  "name": "Wait After Domain Reload (Windows)",
+  "description": "在 build_compile 或 build_runTests 调用后等待 8 秒，让 Unity Domain Reload 完成后再继续操作（Windows 版）",
+  "version": "1",
+  "when": {
+    "type": "postToolUse",
+    "toolTypes": [
+      ".*build_compile.*"
+    ]
+  },
+  "then": {
+    "type": "runCommand",
+    "command": "powershell -Command Start-Sleep -Seconds 8"
+  },
+  "workspaceFolderName": "UnityMCP",
+  "shortName": "wait-after-reload-win"
+}

@@ -38,7 +38,7 @@ This plugin is positioned as an AI Agent's **Unity perception layer + diagnostic
 | Tool | Description | Parameters |
 |------|-------------|------------|
 | `menu_execute` | Execute a Unity menu item by path | `path`: string (required) |
-| `playmode_control` | Enter/exit/query PlayMode state | `action`: enter\|exit\|status (required) |
+| `playmode_control` | Enter/exit/pause/resume/query PlayMode state | `action`: enter\|exit\|pause\|resume\|status (required) |
 | `editor_getSelection` | Get currently selected GameObject and Asset info | None |
 | `editor_getHierarchy` | Get GameObject tree structure (supports Prefab Stage, Selection subtree, depth-limited) | `maxDepth`: int (default -1 unlimited), `root`: string (default "", optional "selection") |
 | `editor_selectGameObject` | Select a GameObject in the Hierarchy by path or instanceID | `path`: string, `instanceID`: int (either one, instanceID takes priority) |
@@ -63,6 +63,14 @@ This plugin is positioned as an AI Agent's **Unity perception layer + diagnostic
 | `build_compile` | Trigger script compilation and return results | None |
 | `build_getCompileErrors` | Get current compile error list | None |
 | `build_runTests` | Run Unity Test Runner tests and return results | `mode`: EditMode\|PlayMode (default EditMode), `testFilter`: string |
+
+#### Code Tools (Experimental, Unity 2022 Mono only)
+
+| Tool | Description | Parameters |
+|------|-------------|------------|
+| `code_executeImmediate` | Compile and execute C# code snippets at runtime | `code`: string (required) |
+
+> Must be manually enabled in the Experimental section of Window → MCP Server panel. Only available on Unity 2022 (Mono); not visible on Unity 6+.
 
 ## Installation
 

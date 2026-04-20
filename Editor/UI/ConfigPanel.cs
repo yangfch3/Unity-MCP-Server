@@ -10,9 +10,13 @@ namespace UnityMcp.Editor
     public class ConfigPanel : EditorWindow
     {
         private const string PortPrefKey = "McpServer_Port";
+        private const string CodeExecuteImmediatePrefKey = "McpServer_CodeExecuteImmediate";
         private const int DefaultPort = 8090;
 
         private int _port;
+#if !UNITY_6000_OR_NEWER
+        private bool _codeExecuteImmediate;
+#endif
 
         [MenuItem("Window/MCP Server")]
         public static void ShowWindow()
@@ -23,6 +27,9 @@ namespace UnityMcp.Editor
         private void OnEnable()
         {
             _port = EditorPrefs.GetInt(PortPrefKey, DefaultPort);
+#if !UNITY_6000_OR_NEWER
+            _codeExecuteImmediate = EditorPrefs.GetBool(CodeExecuteImmediatePrefKey, false);
+#endif
         }
 
         private void OnGUI()
@@ -94,6 +101,21 @@ namespace UnityMcp.Editor
             {
                 EditorGUIUtility.systemCopyBuffer = configJson;
             }
+
+#if !UNITY_6000_OR_NEWER
+            // Experimental features section
+            GUILayout.Space(12);
+            GUILayout.Label("Experimental", EditorStyles.boldLabel);
+            var newCodeExec = EditorGUILayout.ToggleLeft(
+                new GUIContent("Code Execute Immediate",
+                    "实验性功能：允许 AI Agent 动态编译并执行 C# 代码。仅限 Mono 环境，存在安全风险，请仅在受信任的环境中开启。"),
+                _codeExecuteImmediate);
+            if (newCodeExec != _codeExecuteImmediate)
+            {
+                _codeExecuteImmediate = newCodeExec;
+                EditorPrefs.SetBool(CodeExecuteImmediatePrefKey, _codeExecuteImmediate);
+            }
+#endif
 
             // Repaint while running to keep status fresh
             if (running)

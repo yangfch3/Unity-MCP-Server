@@ -38,7 +38,7 @@ Agent（如 Kiro、Cursor、Claude Code）可通过标准 MCP 协议连接到 Un
 | 工具 | 功能 | 参数 |
 |------|------|------|
 | `menu_execute` | 按路径执行 Unity 菜单项 | `path`: string (必填) |
-| `playmode_control` | 进入/退出/查询 PlayMode 状态 | `action`: enter\|exit\|status (必填) |
+| `playmode_control` | 进入/退出/暂停/恢复/查询 PlayMode 状态 | `action`: enter\|exit\|pause\|resume\|status (必填) |
 | `editor_getSelection` | 获取当前选中的 GameObject 和 Asset 信息 | 无 |
 | `editor_getHierarchy` | 获取 GameObject 树结构（支持 Prefab Stage、Selection 子树，可限深度） | `maxDepth`: int (默认 -1 无限制), `root`: string (默认 ""，可选 "selection") |
 | `editor_selectGameObject` | 通过路径或 instanceID 选中 Hierarchy 中的 GameObject | `path`: string, `instanceID`: int (二选一，instanceID 优先) |
@@ -63,6 +63,14 @@ Agent（如 Kiro、Cursor、Claude Code）可通过标准 MCP 协议连接到 Un
 | `build_compile` | 触发脚本编译并返回结果 | 无 |
 | `build_getCompileErrors` | 获取当前编译错误列表 | 无 |
 | `build_runTests` | 运行 Unity Test Runner 测试并返回结果 | `mode`: EditMode\|PlayMode (默认 EditMode), `testFilter`: string |
+
+#### Code 工具（实验性，仅 Unity 2022 Mono）
+
+| 工具 | 功能 | 参数 |
+|------|------|------|
+| `code_executeImmediate` | 动态编译并执行 C# 代码片段 | `code`: string (必填) |
+
+> 需在 Window → MCP Server 面板的 Experimental 区域手动开启。仅在 Unity 2022 (Mono) 下可用，Unity 6+ 不可见。
 
 ## 安装
 

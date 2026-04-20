@@ -56,7 +56,12 @@ namespace UnityMcp.Editor.Tests
             Assert.Contains("editor_setTransform", names);
             Assert.Contains("editor_setField", names);
 
+#if !UNITY_6000_OR_NEWER
+            Assert.IsNotNull(_registry.Resolve("code_executeImmediate"), "code_executeImmediate");
+            Assert.GreaterOrEqual(all.Count, 27);
+#else
             Assert.GreaterOrEqual(all.Count, 26);
+#endif
         }
 
         [Test]

@@ -73,7 +73,7 @@ namespace UnityMcp.Editor.Tools
         {
             string projectRoot = Path.GetDirectoryName(Application.dataPath);
             string fullPath = Path.GetFullPath(Path.Combine(projectRoot, path));
-            string assetsDir = Application.dataPath;
+            string assetsDir = Path.GetFullPath(Application.dataPath);
 
             // Must be exactly Assets dir or a child of it (prevent matching "AssetsExtra" etc.)
             if (fullPath == assetsDir ||

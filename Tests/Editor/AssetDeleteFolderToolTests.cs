@@ -72,5 +72,15 @@ namespace UnityMcp.Editor.Tests
             Assert.IsNotNull(tool);
             Assert.AreEqual("asset_deleteFolder", tool.Name);
         }
+
+        [Test]
+        public void ValidatePath_AssetsSubdir_ReturnsNormalizedPath()
+        {
+            // Regression: ValidatePath must normalize both fullPath and assetsDir
+            // via Path.GetFullPath to ensure consistent path separators on all platforms.
+            var result = AssetDeleteFolderTool.ValidatePath("Assets/SomeTestDir");
+            Assert.IsNotNull(result, "Assets subdirectory should pass validation");
+            Assert.IsTrue(result.Contains("Assets"), "Result should contain Assets");
+        }
     }
 }

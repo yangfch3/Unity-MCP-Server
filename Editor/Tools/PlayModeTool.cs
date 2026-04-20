@@ -11,8 +11,8 @@ namespace UnityMcp.Editor.Tools
     {
         public string Name => "playmode_control";
         public string Category => "editor";
-        public string Description => "进入/退出/查询 PlayMode 状态";
-        public string InputSchema => "{\"type\":\"object\",\"properties\":{\"action\":{\"type\":\"string\",\"enum\":[\"enter\",\"exit\",\"status\"],\"description\":\"PlayMode 操作\"}},\"required\":[\"action\"]}";
+        public string Description => "进入/退出/暂停/恢复/查询 PlayMode 状态";
+        public string InputSchema => "{\"type\":\"object\",\"properties\":{\"action\":{\"type\":\"string\",\"enum\":[\"enter\",\"exit\",\"pause\",\"resume\",\"status\"],\"description\":\"PlayMode 操作\"}},\"required\":[\"action\"]}";
 
         public Task<ToolResult> Execute(Dictionary<string, object> parameters)
         {
@@ -35,8 +35,30 @@ namespace UnityMcp.Editor.Tools
                     EditorApplication.isPlaying = false;
                     return Task.FromResult(ToolResult.Success("已退出 PlayMode"));
 
+                case "pause":
+                    if (!EditorApplication.isPlaying)
+                        return Task.FromResult(ToolResult.Error("未处于 PlayMode，无法暂停"));
+                    if (EditorApplication.isPaused)
+                        return Task.FromResult(ToolResult.Success("已处于暂停状态"));
+                    EditorApplication.isPaused = true;
+                    return Task.FromResult(ToolResult.Success("已暂停 PlayMode"));
+
+                case "resume":
+                    if (!EditorApplication.isPlaying)
+                        return Task.FromResult(ToolResult.Error("未处于 PlayMode，无法恢复"));
+                    if (!EditorApplication.isPaused)
+                        return Task.FromResult(ToolResult.Success("当前未暂停，无需恢复"));
+                    EditorApplication.isPaused = false;
+                    return Task.FromResult(ToolResult.Success("已恢复 PlayMode"));
+
                 case "status":
-                    string status = EditorApplication.isPlaying ? "Playing" : "Stopped";
+                    string status;
+                    if (!EditorApplication.isPlaying)
+                        status = "Stopped";
+                    else if (EditorApplication.isPaused)
+                        status = "Paused";
+                    else
+                        status = "Playing";
                     return Task.FromResult(ToolResult.Success("{\"status\":\"" + status + "\"}"));
 
                 default:
