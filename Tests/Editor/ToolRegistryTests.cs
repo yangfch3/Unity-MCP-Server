@@ -36,6 +36,7 @@ namespace UnityMcp.Editor.Tests
             Assert.Contains("editor_getSelection", names);
             Assert.Contains("editor_getHierarchy", names);
             Assert.Contains("editor_getProjectStructure", names);
+            Assert.Contains("editor_getProjectPath", names);
             Assert.Contains("editor_getInspector", names);
             Assert.Contains("build_compile", names);
             Assert.Contains("build_getCompileErrors", names);
@@ -116,6 +117,7 @@ namespace UnityMcp.Editor.Tests
             Assert.Contains("editor_getSelection", names);
             Assert.Contains("editor_getHierarchy", names);
             Assert.Contains("editor_getProjectStructure", names);
+            Assert.Contains("editor_getProjectPath", names);
             Assert.Contains("editor_getInspector", names);
             Assert.Contains("asset_deleteFolder", names);
             Assert.Contains("editor_selectGameObject", names);

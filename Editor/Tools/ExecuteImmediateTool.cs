@@ -29,11 +29,11 @@ namespace UnityMcp.Editor.Tools
 
         /// <summary>JSON Schema 描述参数。</summary>
         public string InputSchema =>
-            "{\"type\":\"object\",\"properties\":{\"code\":{\"type\":\"string\",\"description\":\"C# source code to compile and execute\"}},\"required\":[\"code\"]}";
+            "{\"type\":\"object\",\"properties\":{\"code\":{\"type\":\"string\",\"description\":\"C# source code to compile and execute\"},\"mainThread\":{\"type\":\"boolean\",\"description\":\"指定是否在主线程执行。true（默认）可调用 Unity API 但无超时保护；false 在后台线程执行，有超时保护但不可调用 Unity API\"},\"timeout\":{\"type\":\"integer\",\"description\":\"后台模式超时时间（毫秒），仅 mainThread:false 时生效，默认 5000\"}},\"required\":[\"code\"]}";
 
         private static readonly object _executionLock = new object();
         private const string PrefKey = "McpServer_CodeExecuteImmediate";
-        private const int TimeoutMs = 10000;
+        private const int DefaultTimeoutMs = 5000;
 
         /// <summary>执行工具逻辑。</summary>
         public Task<ToolResult> Execute(Dictionary<string, object> parameters)
@@ -74,9 +74,40 @@ namespace UnityMcp.Editor.Tools
                 if (entryPoint == null)
                     return Task.FromResult(ToolResult.Success(BuildResponse("", "No entry point found. Define a public static void Run() method.")));
 
-                // Execute with timeout
-                var (output, error) = RunWithTimeout(entryPoint, TimeoutMs);
-                return Task.FromResult(ToolResult.Success(BuildResponse(output, error)));
+                // Parse mainThread parameter (default: true)
+                bool useMainThread = true;
+                if (parameters != null && parameters.ContainsKey("mainThread"))
+                {
+                    var raw = parameters["mainThread"];
+                    if (raw is bool b) useMainThread = b;
+                }
+
+                // Branch execution
+                string warning;
+                string output, error;
+                if (useMainThread)
+                {
+                    (output, error) = RunOnMainThread(entryPoint);
+                    warning = "[WARNING: mainThread mode] No timeout protection. Infinite loops will freeze the Editor. Use mainThread:false for timeout safety.";
+                }
+                else
+                {
+                    // Parse timeout parameter (default: DefaultTimeoutMs)
+                    int timeoutMs = DefaultTimeoutMs;
+                    if (parameters != null && parameters.ContainsKey("timeout"))
+                    {
+                        var raw = parameters["timeout"];
+                        if (raw is long l) timeoutMs = (int)l;
+                        else if (raw is double d) timeoutMs = (int)d;
+                    }
+                    if (timeoutMs < 1000) timeoutMs = 1000;   // floor: 1s
+                    if (timeoutMs > 30000) timeoutMs = 30000; // cap: 30s
+
+                    (output, error) = RunWithTimeout(entryPoint, timeoutMs);
+                    warning = "";
+                }
+
+                return Task.FromResult(ToolResult.Success(BuildResponse(output, error, warning)));
             }
         }
 
@@ -135,6 +166,32 @@ namespace UnityMcp.Editor.Tools
             return null;
         }
 
+        /// <summary>在主线程直接执行方法，无超时保护。</summary>
+        private static (string output, string error) RunOnMainThread(MethodInfo method)
+        {
+            var originalOut = Console.Out;
+            var writer = new StringWriter();
+            try
+            {
+                Console.SetOut(writer);
+                method.Invoke(null, null);
+                return (writer.ToString(), "");
+            }
+            catch (TargetInvocationException ex)
+            {
+                var inner = ex.InnerException ?? ex;
+                return (writer.ToString(), inner.Message + "\n" + inner.StackTrace);
+            }
+            catch (Exception ex)
+            {
+                return (writer.ToString(), ex.Message + "\n" + ex.StackTrace);
+            }
+            finally
+            {
+                Console.SetOut(originalOut);
+            }
+        }
+
         /// <summary>在后台线程执行方法，超时后中止。</summary>
         private static (string output, string error) RunWithTimeout(MethodInfo method, int timeoutMs)
         {
@@ -185,7 +242,7 @@ namespace UnityMcp.Editor.Tools
         }
 
         /// <summary>构建结构化 JSON 响应。</summary>
-        private static string BuildResponse(string output, string error)
+        private static string BuildResponse(string output, string error, string warning = "")
         {
             bool success = string.IsNullOrEmpty(error);
             var sb = new StringBuilder();
@@ -195,6 +252,8 @@ namespace UnityMcp.Editor.Tools
             sb.Append(MiniJson.SerializeString(output ?? ""));
             sb.Append(",\"error\":");
             sb.Append(MiniJson.SerializeString(error ?? ""));
+            sb.Append(",\"warning\":");
+            sb.Append(MiniJson.SerializeString(warning ?? ""));
             sb.Append('}');
             return sb.ToString();
         }
