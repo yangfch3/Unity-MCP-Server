@@ -66,15 +66,12 @@ namespace UnityMcp.Editor
             GUILayout.Space(8);
 
             // Status
-            EditorGUILayout.LabelField("Status", running ? "Running" : "Stopped");
-
-            var server = McpServerManager.Server;
-            if (running && server != null)
-            {
-                EditorGUILayout.LabelField("Connected Agents", server.ConnectedAgents.ToString());
-            }
+            var statusStyle = new GUIStyle(EditorStyles.label);
+            statusStyle.normal.textColor = running ? new Color(0.2f, 0.8f, 0.2f) : new Color(0.9f, 0.2f, 0.2f);
+            EditorGUILayout.LabelField("Status", running ? "Running" : "Stopped", statusStyle);
 
             // Error
+            var server = McpServerManager.Server;
             string error = server != null ? server.LastError : null;
             if (!string.IsNullOrEmpty(error))
             {
@@ -84,7 +81,7 @@ namespace UnityMcp.Editor
             // MCP Config JSON
             GUILayout.Space(12);
             GUILayout.Label("Agent Configuration", EditorStyles.boldLabel);
-            EditorGUILayout.HelpBox("将以下 JSON 复制到 Agent 的 MCP 配置中（如 mcp.json）", MessageType.Info);
+            EditorGUILayout.HelpBox("Copy the following JSON to the Agent's MCP configuration (e.g., mcp.json)", MessageType.Info);
 
             string configJson =
                 "{\n" +
@@ -95,7 +92,9 @@ namespace UnityMcp.Editor
                 "  }\n" +
                 "}";
 
+            EditorGUI.BeginDisabledGroup(true);
             EditorGUILayout.TextArea(configJson, EditorStyles.textArea, GUILayout.Height(100));
+            EditorGUI.EndDisabledGroup();
 
             if (GUILayout.Button("Copy to Clipboard"))
             {

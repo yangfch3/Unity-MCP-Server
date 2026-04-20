@@ -20,13 +20,11 @@ namespace UnityMcp.Editor
         private JsonRpcDispatcher _dispatcher;
 
         private volatile bool _isRunning;
-        private volatile int _connectedAgents;
         private int _port;
         private string _lastError;
 
         public bool IsRunning => _isRunning;
         public int Port => _port;
-        public int ConnectedAgents => _connectedAgents;
         public string LastError => _lastError;
 
         public McpServer(ToolRegistry toolRegistry, IMainThreadQueue mainThreadQueue)
@@ -60,7 +58,6 @@ namespace UnityMcp.Editor
             }
 
             _isRunning = true;
-            _connectedAgents = 0;
 
             _listenerThread = new Thread(ListenLoop)
             {
@@ -91,7 +88,6 @@ namespace UnityMcp.Editor
             }
 
             _httpListener = null;
-            _connectedAgents = 0;
             _lastError = null;
 
             Debug.Log("[McpServer] Stopped.");
@@ -157,7 +153,6 @@ namespace UnityMcp.Editor
             }
 
             // POST: read body, dispatch, write response
-            Interlocked.Increment(ref _connectedAgents);
             try
             {
                 string requestBody;
@@ -196,7 +191,6 @@ namespace UnityMcp.Editor
             }
             finally
             {
-                Interlocked.Decrement(ref _connectedAgents);
                 response.Close();
             }
         }
