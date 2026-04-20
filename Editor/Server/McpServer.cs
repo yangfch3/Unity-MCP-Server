@@ -156,7 +156,7 @@ namespace UnityMcp.Editor
             try
             {
                 string requestBody;
-                using (var reader = new StreamReader(ctx.Request.InputStream, ctx.Request.ContentEncoding))
+                using (var reader = new StreamReader(ctx.Request.InputStream, Encoding.UTF8))
                 {
                     requestBody = reader.ReadToEnd();
                 }
@@ -167,7 +167,7 @@ namespace UnityMcp.Editor
                 var responseJson = resultTask.Result;
 
                 response.StatusCode = 200;
-                response.ContentType = "application/json";
+                response.ContentType = "application/json; charset=utf-8";
                 var responseBytes = Encoding.UTF8.GetBytes(responseJson);
                 response.ContentLength64 = responseBytes.Length;
                 response.OutputStream.Write(responseBytes, 0, responseBytes.Length);

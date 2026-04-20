@@ -309,3 +309,16 @@ public class Example
     }
 }
 ```
+
+```json
+{
+  "code": "using System;using System.Linq;public class Example{public static void Run(){var assemblies = AppDomain.CurrentDomain.GetAssemblies();var unityAsm = assemblies.Where(a => a.GetName().Name.StartsWith(\"UnityEngine\"));Console.WriteLine($\"已加载 {assemblies.Length} 个程序集，其中 Unity 引擎: {unityAsm.Count()}\");}}",
+  "mainThread": false
+}
+{
+  "success": true,
+  "output": "已加载 164 个程序集，其中 Unity 引擎: 70\n",
+  "error": "",
+  "warning": ""
+}
+```
