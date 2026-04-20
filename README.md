@@ -23,54 +23,56 @@ Agent（如 Kiro、Cursor、Claude Code）可通过标准 MCP 协议连接到 Un
 
 ### 内置工具
 
+完整的参数说明和使用示例见 [工具详细文档](Docs/TOOLS.md)。
+
 #### Debug 工具
 
-| 工具 | 功能 | 参数 |
-|------|------|------|
-| `console_getLogs` | 获取 Unity Console 最近 N 条日志（支持 level/keyword 过滤、上下文模式） | `count`: int (默认 20), `level`: Error\|Warning\|Log, `keyword`: string, `beforeIndex`: int |
-| `console_clearLogs` | 清空日志缓冲区 | 无 |
-| `debug_getStackTrace` | 获取最近一条 Error/Exception 的完整堆栈 | 无 |
-| `debug_getPerformanceStats` | 获取 FPS、DrawCall、内存占用等性能指标 | 无 |
-| `debug_screenshot` | 截取 Game/Scene 视图截图（base64 PNG） | `view`: game\|scene (默认 game) |
+| 工具 | 功能 |
+|------|------|
+| `console_getLogs` | 获取 Unity Console 日志（支持过滤） |
+| `console_clearLogs` | 清空日志缓冲区 |
+| `debug_getStackTrace` | 获取最近 Error/Exception 的完整堆栈 |
+| `debug_getPerformanceStats` | 获取 FPS、DrawCall、内存等性能指标 |
+| `debug_screenshot` | 截取 Game/Scene 视图截图 |
 
 #### Editor 工具
 
-| 工具 | 功能 | 参数 |
-|------|------|------|
-| `menu_execute` | 按路径执行 Unity 菜单项 | `path`: string (必填) |
-| `playmode_control` | 进入/退出/暂停/恢复/查询 PlayMode 状态 | `action`: enter\|exit\|pause\|resume\|status (必填) |
-| `editor_getSelection` | 获取当前选中的 GameObject 和 Asset 信息 | 无 |
-| `editor_getHierarchy` | 获取 GameObject 树结构（支持 Prefab Stage、Selection 子树，可限深度） | `maxDepth`: int (默认 -1 无限制), `root`: string (默认 ""，可选 "selection") |
-| `editor_selectGameObject` | 通过路径或 instanceID 选中 Hierarchy 中的 GameObject | `path`: string, `instanceID`: int (二选一，instanceID 优先) |
-| `editor_getProjectStructure` | 获取 Assets 目录结构（可限深度） | `maxDepth`: int (默认 3) |
-| `editor_getInspector` | 获取选中对象的 Inspector 序列化字段值 | 无 |
-| `editor_findGameObjects` | 按名称/组件类型搜索场景中的 GameObject | `namePattern`: string, `componentType`: string, `maxResults`: int (默认 50), `activeOnly`: bool (默认 true) |
-| `editor_addGameObject` | 在 Prefab Stage 或 Active Scene 中添加 GameObject | `name`: string (默认 "GameObject"), `parentInstanceID`: int, `parentPath`: string |
-| `editor_deleteGameObject` | 删除指定的 GameObject 及其所有子对象 | `instanceID`: int, `path`: string (二选一) |
-| `editor_addComponent` | 给指定 GameObject 添加组件 | `instanceID`/`path`, `componentType`: string (必填) |
-| `editor_removeComponent` | 移除指定 GameObject 上的组件 | `instanceID`/`path`, `componentType`: string (必填) |
-| `editor_reparentGameObject` | 修改 GameObject 的父节点 | `instanceID`/`path`, `newParentInstanceID`: int, `newParentPath`: string, `worldPositionStays`: bool (默认 true) |
-| `editor_setActive` | 修改 GameObject 的激活状态 | `instanceID`/`path`, `active`: bool (必填) |
-| `editor_setComponentEnabled` | 修改组件的启用/禁用状态 | `instanceID`/`path`, `componentType`: string, `enabled`: bool (必填) |
-| `editor_setTransform` | 修改 Transform / RectTransform 属性 | `instanceID`/`path`, `localPosition`: [x,y,z], `localRotation`: [x,y,z], `localScale`: [x,y,z], `anchoredPosition`: [x,y], `sizeDelta`: [w,h], `pivot`: [x,y], `anchorMin`: [x,y], `anchorMax`: [x,y] |
-| `editor_setField` | 修改组件的序列化字段值 | `instanceID`/`path`, `componentType`: string, `fieldName`: string, `value`: any (必填) |
-| `asset_deleteFolder` | 删除指定 Assets 子目录并刷新 AssetDatabase | `path`: string (必填) |
+| 工具 | 功能 |
+|------|------|
+| `menu_execute` | 按路径执行 Unity 菜单项 |
+| `playmode_control` | 控制 PlayMode 状态 |
+| `editor_getSelection` | 获取当前选中对象信息 |
+| `editor_getHierarchy` | 获取 GameObject 树结构 |
+| `editor_selectGameObject` | 选中指定 GameObject |
+| `editor_getProjectStructure` | 获取 Assets 目录结构 |
+| `editor_getInspector` | 获取 Inspector 序列化字段值 |
+| `editor_findGameObjects` | 按名称/组件搜索 GameObject |
+| `editor_addGameObject` | 添加 GameObject |
+| `editor_deleteGameObject` | 删除 GameObject |
+| `editor_addComponent` | 添加组件 |
+| `editor_removeComponent` | 移除组件 |
+| `editor_reparentGameObject` | 修改父节点 |
+| `editor_setActive` | 修改激活状态 |
+| `editor_setComponentEnabled` | 启用/禁用组件 |
+| `editor_setTransform` | 修改 Transform 属性 |
+| `editor_setField` | 修改序列化字段值 |
+| `asset_deleteFolder` | 删除 Assets 子目录 |
 
 #### Build 工具
 
-| 工具 | 功能 | 参数 |
-|------|------|------|
-| `build_compile` | 触发脚本编译并返回结果 | 无 |
-| `build_getCompileErrors` | 获取当前编译错误列表 | 无 |
-| `build_runTests` | 运行 Unity Test Runner 测试并返回结果 | `mode`: EditMode\|PlayMode (默认 EditMode), `testFilter`: string |
+| 工具 | 功能 |
+|------|------|
+| `build_compile` | 触发脚本编译 |
+| `build_getCompileErrors` | 获取编译错误列表 |
+| `build_runTests` | 运行 Test Runner 测试 |
 
 #### Code 工具（实验性，仅 Unity 2022 Mono）
 
-| 工具 | 功能 | 参数 |
-|------|------|------|
-| `code_executeImmediate` | 动态编译并执行 C# 代码片段 | `code`: string (必填) |
+| 工具 | 功能 |
+|------|------|
+| `code_executeImmediate` | 动态编译并执行 C# 代码（支持主线程/后台双模式） |
 
-> 需在 Window → MCP Server 面板的 Experimental 区域手动开启。仅在 Unity 2022 (Mono) 下可用，Unity 6+ 不可见。
+> 需在 Window → MCP Server 面板手动开启。详见 [工具详细文档](Docs/TOOLS.md)。
 
 ## 安装
 

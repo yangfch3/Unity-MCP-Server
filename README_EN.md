@@ -23,54 +23,56 @@ This plugin is positioned as an AI Agent's **Unity perception layer + diagnostic
 
 ### Built-in Tools
 
+For full parameter details and usage examples, see the [Tools Reference](Docs/TOOLS_EN.md).
+
 #### Debug Tools
 
-| Tool | Description | Parameters |
-|------|-------------|------------|
-| `console_getLogs` | Get recent N log entries from Unity Console (supports level/keyword filtering, context mode) | `count`: int (default 20), `level`: Error\|Warning\|Log, `keyword`: string, `beforeIndex`: int |
-| `console_clearLogs` | Clear the log buffer | None |
-| `debug_getStackTrace` | Get full stack trace of the latest Error/Exception | None |
-| `debug_getPerformanceStats` | Get FPS, DrawCall, memory usage and other performance metrics | None |
-| `debug_screenshot` | Capture Game/Scene view screenshot (base64 PNG) | `view`: game\|scene (default game) |
+| Tool | Description |
+|------|-------------|
+| `console_getLogs` | Get Unity Console logs (with filtering) |
+| `console_clearLogs` | Clear the log buffer |
+| `debug_getStackTrace` | Get full stack trace of latest Error/Exception |
+| `debug_getPerformanceStats` | Get FPS, DrawCall, memory metrics |
+| `debug_screenshot` | Capture Game/Scene view screenshot |
 
 #### Editor Tools
 
-| Tool | Description | Parameters |
-|------|-------------|------------|
-| `menu_execute` | Execute a Unity menu item by path | `path`: string (required) |
-| `playmode_control` | Enter/exit/pause/resume/query PlayMode state | `action`: enter\|exit\|pause\|resume\|status (required) |
-| `editor_getSelection` | Get currently selected GameObject and Asset info | None |
-| `editor_getHierarchy` | Get GameObject tree structure (supports Prefab Stage, Selection subtree, depth-limited) | `maxDepth`: int (default -1 unlimited), `root`: string (default "", optional "selection") |
-| `editor_selectGameObject` | Select a GameObject in the Hierarchy by path or instanceID | `path`: string, `instanceID`: int (either one, instanceID takes priority) |
-| `editor_getProjectStructure` | Get Assets directory structure (depth-limited) | `maxDepth`: int (default 3) |
-| `editor_getInspector` | Get serialized field values of the selected object's Inspector | None |
-| `editor_findGameObjects` | Search GameObjects in scene by name/component type | `namePattern`: string, `componentType`: string, `maxResults`: int (default 50), `activeOnly`: bool (default true) |
-| `editor_addGameObject` | Add a GameObject to Prefab Stage or Active Scene | `name`: string (default "GameObject"), `parentInstanceID`: int, `parentPath`: string |
-| `editor_deleteGameObject` | Delete a GameObject and all its children | `instanceID`: int, `path`: string (either one) |
-| `editor_addComponent` | Add a component to a specified GameObject | `instanceID`/`path`, `componentType`: string (required) |
-| `editor_removeComponent` | Remove a component from a specified GameObject | `instanceID`/`path`, `componentType`: string (required) |
-| `editor_reparentGameObject` | Change a GameObject's parent | `instanceID`/`path`, `newParentInstanceID`: int, `newParentPath`: string, `worldPositionStays`: bool (default true) |
-| `editor_setActive` | Set a GameObject's active state | `instanceID`/`path`, `active`: bool (required) |
-| `editor_setComponentEnabled` | Enable/disable a component | `instanceID`/`path`, `componentType`: string, `enabled`: bool (required) |
-| `editor_setTransform` | Modify Transform / RectTransform properties | `instanceID`/`path`, `localPosition`: [x,y,z], `localRotation`: [x,y,z], `localScale`: [x,y,z], `anchoredPosition`: [x,y], `sizeDelta`: [w,h], `pivot`: [x,y], `anchorMin`: [x,y], `anchorMax`: [x,y] |
-| `editor_setField` | Modify a component's serialized field value | `instanceID`/`path`, `componentType`: string, `fieldName`: string, `value`: any (required) |
-| `asset_deleteFolder` | Delete a specified Assets subdirectory and refresh AssetDatabase | `path`: string (required) |
+| Tool | Description |
+|------|-------------|
+| `menu_execute` | Execute a Unity menu item by path |
+| `playmode_control` | Control PlayMode state |
+| `editor_getSelection` | Get currently selected object info |
+| `editor_getHierarchy` | Get GameObject tree structure |
+| `editor_selectGameObject` | Select a specified GameObject |
+| `editor_getProjectStructure` | Get Assets directory structure |
+| `editor_getInspector` | Get Inspector serialized field values |
+| `editor_findGameObjects` | Search GameObjects by name/component |
+| `editor_addGameObject` | Add a GameObject |
+| `editor_deleteGameObject` | Delete a GameObject |
+| `editor_addComponent` | Add a component |
+| `editor_removeComponent` | Remove a component |
+| `editor_reparentGameObject` | Change parent node |
+| `editor_setActive` | Set active state |
+| `editor_setComponentEnabled` | Enable/disable a component |
+| `editor_setTransform` | Modify Transform properties |
+| `editor_setField` | Modify serialized field values |
+| `asset_deleteFolder` | Delete an Assets subdirectory |
 
 #### Build Tools
 
-| Tool | Description | Parameters |
-|------|-------------|------------|
-| `build_compile` | Trigger script compilation and return results | None |
-| `build_getCompileErrors` | Get current compile error list | None |
-| `build_runTests` | Run Unity Test Runner tests and return results | `mode`: EditMode\|PlayMode (default EditMode), `testFilter`: string |
+| Tool | Description |
+|------|-------------|
+| `build_compile` | Trigger script compilation |
+| `build_getCompileErrors` | Get compile error list |
+| `build_runTests` | Run Test Runner tests |
 
 #### Code Tools (Experimental, Unity 2022 Mono only)
 
-| Tool | Description | Parameters |
-|------|-------------|------------|
-| `code_executeImmediate` | Compile and execute C# code snippets at runtime | `code`: string (required) |
+| Tool | Description |
+|------|-------------|
+| `code_executeImmediate` | Compile and execute C# code (dual main-thread/background mode) |
 
-> Must be manually enabled in the Experimental section of Window → MCP Server panel. Only available on Unity 2022 (Mono); not visible on Unity 6+.
+> Must be manually enabled in Window → MCP Server panel. See [Tools Reference](Docs/TOOLS_EN.md) for details.
 
 ## Installation
 
