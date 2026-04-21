@@ -24,13 +24,36 @@ namespace UnityMcp.Editor
 
         static McpServerManager()
         {
-            // Domain Reload 后检查是否需要自动重启
-            if (EditorPrefs.GetBool(ActivePrefKey, false))
+            if (!EditorPrefs.GetBool(ActivePrefKey, false))
+                return;
+
+            int port = EditorPrefs.GetInt(PortPrefKey, DefaultPort);
+
+            // 直接在静态构造函数中尝试恢复，不依赖 delayCall/update，
+            // 这样即使 Unity 处于后台（主循环暂停）也能立即重启服务。
+            try
             {
-                int port = EditorPrefs.GetInt(PortPrefKey, DefaultPort);
-                // 延迟一帧启动，确保 Editor 初始化完成
+                StartServer(port);
+            }
+            catch (System.Exception ex)
+            {
+                Debug.LogWarning($"[McpServer] Immediate recovery failed ({ex.Message}), will retry via delayCall.");
                 EditorApplication.delayCall += () => StartServer(port);
             }
+
+            // 兜底：如果上面两条路径都没成功（极端时序），焦点恢复时再补一次。
+            EditorApplication.focusChanged += OnFocusChanged;
+        }
+
+        private static void OnFocusChanged(bool focused)
+        {
+            if (!focused) return;
+            if (IsRunning) return;
+            if (!EditorPrefs.GetBool(ActivePrefKey, false)) return;
+
+            int port = EditorPrefs.GetInt(PortPrefKey, DefaultPort);
+            Debug.Log("[McpServer] Recovering after focus regained.");
+            StartServer(port);
         }
 
         public static void StartServer(int port)
