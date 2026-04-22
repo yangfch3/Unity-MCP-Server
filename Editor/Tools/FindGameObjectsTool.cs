@@ -64,13 +64,28 @@ namespace UnityMcp.Editor.Tools
             if (maxResults < 1)
                 return Task.FromResult(ToolResult.Error("maxResults 必须为正整数"));
 
-            // 3. 解析根节点（Prefab Stage 优先，回退 Active Scene）
+            // 3. 解析根节点（Prefab Stage 优先，回退 Active Scene + DontDestroyOnLoad）
             var stage = PrefabStageUtility.GetCurrentPrefabStage();
             GameObject[] roots;
             if (stage != null)
+            {
                 roots = new[] { stage.prefabContentsRoot };
+            }
             else
-                roots = SceneManager.GetActiveScene().GetRootGameObjects();
+            {
+                var sceneRoots = SceneManager.GetActiveScene().GetRootGameObjects();
+                var ddolRoots = DdolSceneHelper.GetRootGameObjects();
+                if (ddolRoots.Length == 0)
+                {
+                    roots = sceneRoots;
+                }
+                else
+                {
+                    roots = new GameObject[sceneRoots.Length + ddolRoots.Length];
+                    sceneRoots.CopyTo(roots, 0);
+                    ddolRoots.CopyTo(roots, sceneRoots.Length);
+                }
+            }
 
             // 4. 递归搜索
             var results = new List<GameObject>();

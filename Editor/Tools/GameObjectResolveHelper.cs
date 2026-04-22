@@ -74,7 +74,7 @@ namespace UnityMcp.Editor.Tools
         }
 
         /// <summary>
-        /// 按路径查找 GameObject。Prefab Stage 优先，回退 Active Scene。
+        /// 按路径查找 GameObject。Prefab Stage 优先，回退 Active Scene，再回退 DontDestroyOnLoad。
         /// </summary>
         internal static GameObject FindByPath(string path)
         {
@@ -91,6 +91,14 @@ namespace UnityMcp.Editor.Tools
             // 2. 回退 Active Scene
             var roots = SceneManager.GetActiveScene().GetRootGameObjects();
             foreach (var root in roots)
+            {
+                var result = SearchInRoot(root, normalizedPath);
+                if (result != null) return result;
+            }
+
+            // 3. 回退 DontDestroyOnLoad
+            var ddolRoots = DdolSceneHelper.GetRootGameObjects();
+            foreach (var root in ddolRoots)
             {
                 var result = SearchInRoot(root, normalizedPath);
                 if (result != null) return result;

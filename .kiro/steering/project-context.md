@@ -22,7 +22,7 @@ Editor/
 ├── Core/       # IMcpTool interface, ToolResult, ToolRegistry
 ├── Protocol/   # JsonRpcDispatcher, MiniJson
 ├── Server/     # McpServer, McpServerManager, MainThreadQueue
-├── Tools/      # Built-in tools (debug/editor/build categories), shared helpers: GameObjectPathHelper, GameObjectResolveHelper, ComponentTypeHelper, VectorParseHelper
+├── Tools/      # Built-in tools (debug/editor/build categories), includes shared helpers (*Helper.cs)
 └── UI/         # ConfigPanel EditorWindow
 ```
 

@@ -29,7 +29,7 @@ namespace UnityMcp.Editor.Tools
 
         /// <summary>JSON Schema 描述参数。</summary>
         public string InputSchema =>
-            "{\"type\":\"object\",\"properties\":{\"code\":{\"type\":\"string\",\"description\":\"C# source code to compile and execute\"},\"mainThread\":{\"type\":\"boolean\",\"description\":\"指定是否在主线程执行。true（默认）可调用 Unity API 但无超时保护；false 在后台线程执行，有超时保护但不可调用 Unity API\"},\"timeout\":{\"type\":\"integer\",\"description\":\"后台模式超时时间（毫秒），仅 mainThread:false 时生效，默认 5000\"}},\"required\":[\"code\"]}";
+            "{\"type\":\"object\",\"properties\":{\"code\":{\"type\":\"string\",\"description\":\"C# source code to compile and execute. MUST be a complete compilation unit with using directives and a class containing a public static void Run() method as entry point. Use Debug.Log() for output.\"},\"mainThread\":{\"type\":\"boolean\",\"description\":\"指定是否在主线程执行。true（默认）可调用 Unity API 但无超时保护；false 在后台线程执行，有超时保护但不可调用 Unity API\"},\"timeout\":{\"type\":\"integer\",\"description\":\"后台模式超时时间（毫秒），仅 mainThread:false 时生效，默认 5000\"}},\"required\":[\"code\"]}";
 
         private static readonly object _executionLock = new object();
         private const string PrefKey = "McpServer_CodeExecuteImmediate";

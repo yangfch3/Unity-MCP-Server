@@ -72,7 +72,7 @@ namespace UnityMcp.Editor.Tools
         }
 
         /// <summary>
-        /// 解析缺省根节点：Prefab Stage 优先，回退 Active Scene。
+        /// 解析缺省根节点：Prefab Stage 优先，回退 Active Scene + DontDestroyOnLoad。
         /// </summary>
         private static GameObject[] ResolveDefaultRoots()
         {
@@ -80,7 +80,15 @@ namespace UnityMcp.Editor.Tools
             if (stage != null)
                 return new[] { stage.prefabContentsRoot };
 
-            return SceneManager.GetActiveScene().GetRootGameObjects();
+            var sceneRoots = SceneManager.GetActiveScene().GetRootGameObjects();
+            var ddolRoots = DdolSceneHelper.GetRootGameObjects();
+            if (ddolRoots.Length == 0)
+                return sceneRoots;
+
+            var combined = new GameObject[sceneRoots.Length + ddolRoots.Length];
+            sceneRoots.CopyTo(combined, 0);
+            ddolRoots.CopyTo(combined, sceneRoots.Length);
+            return combined;
         }
 
         private static void BuildTree(StringBuilder sb, GameObject[] gameObjects, int depth, int maxDepth)

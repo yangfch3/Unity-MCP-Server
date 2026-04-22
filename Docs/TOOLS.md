@@ -69,12 +69,12 @@
 
 #### `editor_getHierarchy`
 
-获取当前场景的 GameObject 树结构，支持 Prefab Stage 和 Selection 子树。
+获取当前场景的 GameObject 树结构，支持 Prefab Stage 和 Selection 子树。PlayMode 下默认输出自动包含 DontDestroyOnLoad 场景中的对象。
 
 | 参数 | 类型 | 必填 | 默认值 | 说明 |
 |------|------|------|--------|------|
 | `maxDepth` | int | ❌ | -1 | 最大遍历深度，-1 表示无限制 |
-| `root` | string | ❌ | `""` | 根节点来源：空=Prefab Stage 优先回退 Active Scene；`"selection"`=以当前选中 GameObject 为根 |
+| `root` | string | ❌ | `""` | 根节点来源：空=Prefab Stage 优先回退 Active Scene（PlayMode 下自动包含 DontDestroyOnLoad）；`"selection"`=以当前选中 GameObject 为根 |
 
 #### `editor_selectGameObject`
 
@@ -112,7 +112,7 @@
 
 #### `editor_findGameObjects`
 
-按名称/组件类型搜索场景中的 GameObject。
+按名称/组件类型搜索场景中的 GameObject。PlayMode 下搜索范围自动包含 DontDestroyOnLoad 场景。
 
 | 参数 | 类型 | 必填 | 默认值 | 说明 |
 |------|------|------|--------|------|

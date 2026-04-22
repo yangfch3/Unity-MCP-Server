@@ -69,12 +69,12 @@ Get currently selected object info from Hierarchy/Project. No parameters.
 
 #### `editor_getHierarchy`
 
-Get GameObject tree structure, supports Prefab Stage and Selection subtree.
+Get GameObject tree structure, supports Prefab Stage and Selection subtree. In PlayMode, the default output automatically includes objects from the DontDestroyOnLoad scene.
 
 | Parameter | Type | Required | Default | Description |
 |-----------|------|----------|---------|-------------|
 | `maxDepth` | int | ❌ | -1 | Max traversal depth, -1 for unlimited |
-| `root` | string | ❌ | `""` | Root source: empty=Prefab Stage first, fallback Active Scene; `"selection"`=current selection as root |
+| `root` | string | ❌ | `""` | Root source: empty=Prefab Stage first, fallback Active Scene (automatically includes DontDestroyOnLoad in PlayMode); `"selection"`=current selection as root |
 
 #### `editor_selectGameObject`
 
@@ -112,7 +112,7 @@ Get serialized field values of the selected object's Inspector. No parameters.
 
 #### `editor_findGameObjects`
 
-Search GameObjects in scene by name/component type.
+Search GameObjects in scene by name/component type. In PlayMode, the search scope automatically includes the DontDestroyOnLoad scene.
 
 | Parameter | Type | Required | Default | Description |
 |-----------|------|----------|---------|-------------|
