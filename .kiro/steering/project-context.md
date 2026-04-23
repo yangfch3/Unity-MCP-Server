@@ -57,6 +57,13 @@ Editor/
 - Property tests (random input, 100+ iterations) recommended for security/filtering logic, tagged `[Category("Slow")]`
 - Shared test helpers go in dedicated helper files under `Tests/Editor/` to avoid duplication
 
+## Release Checklist
+
+When bumping the version or tagging a new release (e.g., `v0.x.y`):
+
+1. Update `version` in `package.json`
+2. Update the example Git Tag version in both `README.md` and `README_EN.md` — the `## 版本更新` / `## Version Update` section contains sample URLs with `#v0.x.y`; replace all occurrences with the new tag
+
 ## Spec Task Generation Rules
 
 - When generating `tasks.md`, do NOT blindly mark all test sub-tasks as optional (`*`). Instead, evaluate each test task against the project's Testing Standards and mark accordingly:
