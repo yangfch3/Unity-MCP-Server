@@ -22,7 +22,7 @@ namespace UnityMcp.Editor.Tools
         public string Description => "修改 GameObject 上指定组件的启用/禁用状态";
 
         /// <inheritdoc />
-        public string InputSchema => "{\"type\":\"object\",\"properties\":{\"instanceID\":{\"type\":\"integer\",\"description\":\"目标 GameObject 的 instanceID\"},\"path\":{\"type\":\"string\",\"description\":\"目标 GameObject 的路径（如 \\\"/Root/Child\\\"）\"},\"componentType\":{\"type\":\"string\",\"description\":\"组件类型名（如 \\\"BoxCollider\\\"）\"},\"enabled\":{\"type\":\"boolean\",\"description\":\"启用/禁用状态\"}},\"required\":[\"componentType\",\"enabled\"]}";
+        public string InputSchema => "{\"type\":\"object\",\"properties\":{\"instanceID\":{\"type\":\"integer\",\"description\":\"目标 GameObject 的 instanceID（instanceID/path 二选一，同传则 ID 优先）\"},\"path\":{\"type\":\"string\",\"description\":\"目标 GameObject 的路径（如 \\\"/Root/Child\\\"）\"},\"componentType\":{\"type\":\"string\",\"description\":\"组件类型名（如 \\\"BoxCollider\\\"）\"},\"enabled\":{\"type\":\"boolean\",\"description\":\"启用/禁用状态\"}},\"required\":[\"componentType\",\"enabled\"]}";
 
         /// <inheritdoc />
         public Task<ToolResult> Execute(Dictionary<string, object> parameters)

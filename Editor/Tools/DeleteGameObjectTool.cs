@@ -21,7 +21,7 @@ namespace UnityMcp.Editor.Tools
         public string Description => "删除指定的 GameObject 及其所有子对象";
 
         /// <inheritdoc />
-        public string InputSchema => "{\"type\":\"object\",\"properties\":{\"instanceID\":{\"type\":\"integer\",\"description\":\"要删除的 GameObject 的 instanceID\"},\"path\":{\"type\":\"string\",\"description\":\"要删除的 GameObject 的路径（如 \\\"/Root/Child\\\"）\"}}}";
+        public string InputSchema => "{\"type\":\"object\",\"properties\":{\"instanceID\":{\"type\":\"integer\",\"description\":\"要删除的 GameObject 的 instanceID（instanceID/path 二选一，同传则 ID 优先）\"},\"path\":{\"type\":\"string\",\"description\":\"要删除的 GameObject 的路径（如 \\\"/Root/Child\\\"）\"}}}";
 
         /// <inheritdoc />
         public Task<ToolResult> Execute(Dictionary<string, object> parameters)

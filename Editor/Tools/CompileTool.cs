@@ -15,7 +15,7 @@ namespace UnityMcp.Editor.Tools
     {
         public string Name => "build_compile";
         public string Category => "build";
-        public string Description => "触发脚本编译并返回编译结果";
+        public string Description => "触发C#脚本编译并返回编译结果";
         public string InputSchema => "{\"type\":\"object\",\"properties\":{}}";
 
         private static readonly TimeSpan CompileTimeout = TimeSpan.FromSeconds(60);

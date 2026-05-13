@@ -25,11 +25,11 @@ namespace UnityMcp.Editor.Tools
         public string Category => "code";
 
         /// <summary>工具描述。</summary>
-        public string Description => "Compile and execute C# code at runtime (experimental, Mono only)";
+        public string Description => "运行时编译执行 C#（实验，仅 Mono）";
 
         /// <summary>JSON Schema 描述参数。</summary>
         public string InputSchema =>
-            "{\"type\":\"object\",\"properties\":{\"code\":{\"type\":\"string\",\"description\":\"C# source code to compile and execute. MUST be a complete compilation unit with using directives and a class containing a public static void Run() method as entry point. Use Debug.Log() for output.\"},\"mainThread\":{\"type\":\"boolean\",\"description\":\"指定是否在主线程执行。true（默认）可调用 Unity API 但无超时保护；false 在后台线程执行，有超时保护但不可调用 Unity API\"},\"timeout\":{\"type\":\"integer\",\"description\":\"后台模式超时时间（毫秒），仅 mainThread:false 时生效，默认 5000\"}},\"required\":[\"code\"]}";
+            "{\"type\":\"object\",\"properties\":{\"code\":{\"type\":\"string\",\"description\":\"C# source code. MUST contain a public static void Run() entry point. Use Console.WriteLine() for output (captured to response output field). Debug.Log() will NOT appear in output.\"},\"mainThread\":{\"type\":\"boolean\",\"description\":\"指定是否在主线程执行。true（默认）可调用 Unity API 但无超时保护；false 在后台线程执行，有超时保护但不可调用 Unity API\"},\"timeout\":{\"type\":\"integer\",\"description\":\"后台模式超时时间（毫秒），仅 mainThread:false 时生效，默认 5000\"}},\"required\":[\"code\"]}";
 
         private static readonly object _executionLock = new object();
         private const string PrefKey = "McpServer_CodeExecuteImmediate";

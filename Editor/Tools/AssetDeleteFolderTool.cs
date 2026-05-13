@@ -20,10 +20,10 @@ namespace UnityMcp.Editor.Tools
         public string Category => "editor";
 
         /// <summary>工具描述。</summary>
-        public string Description => "删除指定 Assets 子目录并刷新 AssetDatabase";
+        public string Description => "[危险·不可撤销] 删除指定 Assets 子目录并刷新 AssetDatabase";
 
         /// <summary>JSON Schema 描述参数。</summary>
-        public string InputSchema => "{\"type\":\"object\",\"properties\":{\"path\":{\"type\":\"string\",\"description\":\"要删除的目录路径（相对于项目根目录，如 Assets/XLua/Gen）\"}},\"required\":[\"path\"]}";
+        public string InputSchema => "{\"type\":\"object\",\"properties\":{\"path\":{\"type\":\"string\",\"description\":\"要删除的目录路径（相对于项目根目录，如 Assets/XLua/Gen）\",\"pattern\":\"^Assets/\"}},\"required\":[\"path\"]}";
 
         /// <summary>执行删除目录逻辑。</summary>
         public Task<ToolResult> Execute(Dictionary<string, object> parameters)

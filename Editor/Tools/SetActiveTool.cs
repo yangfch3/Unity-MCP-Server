@@ -21,7 +21,7 @@ namespace UnityMcp.Editor.Tools
         public string Description => "修改 GameObject 的激活状态";
 
         /// <inheritdoc />
-        public string InputSchema => "{\"type\":\"object\",\"properties\":{\"instanceID\":{\"type\":\"integer\",\"description\":\"目标 GameObject 的 instanceID\"},\"path\":{\"type\":\"string\",\"description\":\"目标 GameObject 的路径（如 \\\"/Root/Child\\\"）\"},\"active\":{\"type\":\"boolean\",\"description\":\"激活状态\"}},\"required\":[\"active\"]}";
+        public string InputSchema => "{\"type\":\"object\",\"properties\":{\"instanceID\":{\"type\":\"integer\",\"description\":\"目标 GameObject 的 instanceID（instanceID/path 二选一，同传则 ID 优先）\"},\"path\":{\"type\":\"string\",\"description\":\"目标 GameObject 的路径（如 \\\"/Root/Child\\\"）\"},\"active\":{\"type\":\"boolean\",\"description\":\"激活状态\"}},\"required\":[\"active\"]}";
 
         /// <inheritdoc />
         public Task<ToolResult> Execute(Dictionary<string, object> parameters)

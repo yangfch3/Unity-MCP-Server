@@ -23,7 +23,7 @@ namespace UnityMcp.Editor.Tools
         public string Description => "在 Prefab Stage 或 Active Scene 中添加 GameObject";
 
         /// <inheritdoc />
-        public string InputSchema => "{\"type\":\"object\",\"properties\":{\"name\":{\"type\":\"string\",\"description\":\"新 GameObject 的名称（默认 \\\"GameObject\\\"）\"},\"parentInstanceID\":{\"type\":\"integer\",\"description\":\"父节点的 instanceID\"},\"parentPath\":{\"type\":\"string\",\"description\":\"父节点的路径（如 \\\"/Root/Child\\\"）\"}}}";
+        public string InputSchema => "{\"type\":\"object\",\"properties\":{\"name\":{\"type\":\"string\",\"description\":\"新 GameObject 的名称（默认 \\\"GameObject\\\"）\"},\"parentInstanceID\":{\"type\":\"integer\",\"description\":\"父节点的 instanceID（parentInstanceID/parentPath 二选一，同传则 ID 优先）\"},\"parentPath\":{\"type\":\"string\",\"description\":\"父节点的路径（如 \\\"/Root/Child\\\"）\"}}}";
 
         /// <inheritdoc />
         public Task<ToolResult> Execute(Dictionary<string, object> parameters)

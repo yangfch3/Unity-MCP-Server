@@ -53,11 +53,17 @@ namespace UnityMcp.Editor.Tests
             Assert.IsTrue(properties.ContainsKey("localPosition"), "InputSchema should contain 'localPosition'");
             Assert.IsTrue(properties.ContainsKey("localRotation"), "InputSchema should contain 'localRotation'");
             Assert.IsTrue(properties.ContainsKey("localScale"), "InputSchema should contain 'localScale'");
-            Assert.IsTrue(properties.ContainsKey("anchoredPosition"), "InputSchema should contain 'anchoredPosition'");
-            Assert.IsTrue(properties.ContainsKey("sizeDelta"), "InputSchema should contain 'sizeDelta'");
-            Assert.IsTrue(properties.ContainsKey("pivot"), "InputSchema should contain 'pivot'");
-            Assert.IsTrue(properties.ContainsKey("anchorMin"), "InputSchema should contain 'anchorMin'");
-            Assert.IsTrue(properties.ContainsKey("anchorMax"), "InputSchema should contain 'anchorMax'");
+            Assert.IsTrue(properties.ContainsKey("rect"), "InputSchema should contain 'rect'");
+
+            var rectSchema = properties["rect"] as Dictionary<string, object>;
+            Assert.IsNotNull(rectSchema, "'rect' should be an object");
+            var rectProps = rectSchema["properties"] as Dictionary<string, object>;
+            Assert.IsNotNull(rectProps, "'rect' should have 'properties'");
+            Assert.IsTrue(rectProps.ContainsKey("anchoredPosition"), "rect should contain 'anchoredPosition'");
+            Assert.IsTrue(rectProps.ContainsKey("sizeDelta"), "rect should contain 'sizeDelta'");
+            Assert.IsTrue(rectProps.ContainsKey("pivot"), "rect should contain 'pivot'");
+            Assert.IsTrue(rectProps.ContainsKey("anchorMin"), "rect should contain 'anchorMin'");
+            Assert.IsTrue(rectProps.ContainsKey("anchorMax"), "rect should contain 'anchorMax'");
         }
 
         [Test]
@@ -165,7 +171,11 @@ namespace UnityMcp.Editor.Tests
             var result = _tool.Execute(new Dictionary<string, object>
             {
                 { "path", path },
-                { "anchoredPosition", new List<object> { 10.0, 20.0 } }
+                { "rect", new Dictionary<string, object>
+                    {
+                        { "anchoredPosition", new List<object> { 10.0, 20.0 } }
+                    }
+                }
             }).Result;
 
             Assert.IsTrue(result.IsError, "Should return error when passing RT params to non-RectTransform GO");

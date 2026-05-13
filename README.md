@@ -144,7 +144,7 @@ https://github.com/yangfch3/Unity-MCP-Server.git#v0.3.0
 ```json
 {
   "dependencies": {
-    "com.yangfch3.unity-mcp": "https://github.com/yangfch3/Unity-MCP-Server.git#v0.3.0"
+    "com.yangfch3.unity-mcp": "https://github.com/yangfch3/Unity-MCP-Server.git#v0.3.1"
   }
 }
 ```

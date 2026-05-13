@@ -19,13 +19,10 @@ namespace UnityMcp.Editor.Tools
         public string Category => "editor";
 
         /// <inheritdoc />
-        public string Description => "修改 GameObject 的 Transform / RectTransform 属性";
+        public string Description => "修改 Transform / RectTransform 属性";
 
         /// <inheritdoc />
-        public string InputSchema => "{\"type\":\"object\",\"properties\":{\"instanceID\":{\"type\":\"integer\",\"description\":\"目标 GameObject 的 instanceID\"},\"path\":{\"type\":\"string\",\"description\":\"目标 GameObject 的路径（如 \\\"/Root/Child\\\"）\"},\"localPosition\":{\"type\":\"array\",\"items\":{\"type\":\"number\"},\"minItems\":3,\"maxItems\":3,\"description\":\"本地位置 [x, y, z]\"},\"localRotation\":{\"type\":\"array\",\"items\":{\"type\":\"number\"},\"minItems\":3,\"maxItems\":3,\"description\":\"本地旋转欧拉角 [x, y, z]\"},\"localScale\":{\"type\":\"array\",\"items\":{\"type\":\"number\"},\"minItems\":3,\"maxItems\":3,\"description\":\"本地缩放 [x, y, z]\"},\"anchoredPosition\":{\"type\":\"array\",\"items\":{\"type\":\"number\"},\"minItems\":2,\"maxItems\":2,\"description\":\"锚点位置 [x, y]（仅 RectTransform）\"},\"sizeDelta\":{\"type\":\"array\",\"items\":{\"type\":\"number\"},\"minItems\":2,\"maxItems\":2,\"description\":\"尺寸偏移 [w, h]（仅 RectTransform）\"},\"pivot\":{\"type\":\"array\",\"items\":{\"type\":\"number\"},\"minItems\":2,\"maxItems\":2,\"description\":\"轴心 [x, y]（仅 RectTransform）\"},\"anchorMin\":{\"type\":\"array\",\"items\":{\"type\":\"number\"},\"minItems\":2,\"maxItems\":2,\"description\":\"最小锚点 [x, y]（仅 RectTransform）\"},\"anchorMax\":{\"type\":\"array\",\"items\":{\"type\":\"number\"},\"minItems\":2,\"maxItems\":2,\"description\":\"最大锚点 [x, y]（仅 RectTransform）\"}}}";
-
-        private static readonly string[] RtParamNames =
-            { "anchoredPosition", "sizeDelta", "pivot", "anchorMin", "anchorMax" };
+        public string InputSchema => "{\"type\":\"object\",\"description\":\"修改 Transform/RectTransform。instanceID/path 二选一，按需传属性\",\"properties\":{\"instanceID\":{\"type\":\"integer\"},\"path\":{\"type\":\"string\"},\"localPosition\":{\"type\":\"array\",\"items\":{\"type\":\"number\"},\"description\":\"[x,y,z]\"},\"localRotation\":{\"type\":\"array\",\"items\":{\"type\":\"number\"},\"description\":\"欧拉角 [x,y,z]\"},\"localScale\":{\"type\":\"array\",\"items\":{\"type\":\"number\"},\"description\":\"[x,y,z]\"},\"rect\":{\"type\":\"object\",\"description\":\"RectTransform 专用，仅 UI 节点生效，按需传\",\"properties\":{\"anchoredPosition\":{\"type\":\"array\",\"description\":\"[x,y]\"},\"sizeDelta\":{\"type\":\"array\",\"description\":\"[w,h]\"},\"pivot\":{\"type\":\"array\",\"description\":\"[x,y]\"},\"anchorMin\":{\"type\":\"array\",\"description\":\"[x,y]\"},\"anchorMax\":{\"type\":\"array\",\"description\":\"[x,y]\"}}}}}";
 
         /// <inheritdoc />
         public Task<ToolResult> Execute(Dictionary<string, object> parameters)
@@ -59,49 +56,40 @@ namespace UnityMcp.Editor.Tools
                     hasAnyProp = true;
                 }
 
-                // 3. Check if any RectTransform-only params are provided
-                bool hasRtParam = false;
-                if (parameters != null)
-                {
-                    foreach (var name in RtParamNames)
-                    {
-                        if (parameters.TryGetValue(name, out var v) && v != null)
-                        {
-                            hasRtParam = true;
-                            break;
-                        }
-                    }
-                }
+                // 3. Extract rect sub-object for RectTransform params
+                Dictionary<string, object> rtParams = null;
+                if (parameters != null && parameters.TryGetValue("rect", out var rawRect) && rawRect is Dictionary<string, object> rectDict)
+                    rtParams = rectDict;
 
-                // 4. Handle RectTransform-only params
-                if (hasRtParam)
+                // 4. Handle RectTransform-only params from rect sub-object
+                if (rtParams != null && rtParams.Count > 0)
                 {
                     var rt = transform as RectTransform;
                     if (rt == null)
                         return Task.FromResult(ToolResult.Error(
-                            "目标 GO 不含 RectTransform 组件，无法设置 anchoredPosition/sizeDelta 等属性"));
+                            "目标 GO 不含 RectTransform 组件，无法设置 rect 属性"));
 
-                    if (parameters.TryGetValue("anchoredPosition", out var rawAP) && rawAP != null)
+                    if (rtParams.TryGetValue("anchoredPosition", out var rawAP) && rawAP != null)
                     {
                         rt.anchoredPosition = VectorParseHelper.ParseVector2(rawAP);
                         hasAnyProp = true;
                     }
-                    if (parameters.TryGetValue("sizeDelta", out var rawSD) && rawSD != null)
+                    if (rtParams.TryGetValue("sizeDelta", out var rawSD) && rawSD != null)
                     {
                         rt.sizeDelta = VectorParseHelper.ParseVector2(rawSD);
                         hasAnyProp = true;
                     }
-                    if (parameters.TryGetValue("pivot", out var rawPivot) && rawPivot != null)
+                    if (rtParams.TryGetValue("pivot", out var rawPivot) && rawPivot != null)
                     {
                         rt.pivot = VectorParseHelper.ParseVector2(rawPivot);
                         hasAnyProp = true;
                     }
-                    if (parameters.TryGetValue("anchorMin", out var rawAMin) && rawAMin != null)
+                    if (rtParams.TryGetValue("anchorMin", out var rawAMin) && rawAMin != null)
                     {
                         rt.anchorMin = VectorParseHelper.ParseVector2(rawAMin);
                         hasAnyProp = true;
                     }
-                    if (parameters.TryGetValue("anchorMax", out var rawAMax) && rawAMax != null)
+                    if (rtParams.TryGetValue("anchorMax", out var rawAMax) && rawAMax != null)
                     {
                         rt.anchorMax = VectorParseHelper.ParseVector2(rawAMax);
                         hasAnyProp = true;

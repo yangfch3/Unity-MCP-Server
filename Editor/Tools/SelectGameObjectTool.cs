@@ -22,7 +22,7 @@ namespace UnityMcp.Editor.Tools
         public string Description => "通过路径选中 Hierarchy 中的 GameObject";
 
         /// <inheritdoc />
-        public string InputSchema => "{\"type\":\"object\",\"properties\":{\"path\":{\"type\":\"string\",\"description\":\"要选中的 GameObject 路径（如 \\\"/Root/Child/Target\\\"）\"},\"instanceID\":{\"type\":\"integer\",\"description\":\"要选中的 GameObject 的 instanceID（与 path 二选一，优先使用）\"}}}";
+        public string InputSchema => "{\"type\":\"object\",\"properties\":{\"path\":{\"type\":\"string\",\"description\":\"要选中的 GameObject 路径（如 \\\"/Root/Child/Target\\\"）\"},\"instanceID\":{\"type\":\"integer\",\"description\":\"要选中的 GameObject 的 instanceID（instanceID/path 二选一，同传则 ID 优先）\"}}}";
 
         /// <inheritdoc />
         public Task<ToolResult> Execute(Dictionary<string, object> parameters)

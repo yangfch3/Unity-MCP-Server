@@ -197,7 +197,7 @@
 
 #### `editor_setTransform`
 
-修改 Transform / RectTransform 属性。
+修改 Transform / RectTransform 属性。instanceID/path 二选一，按需传属性。
 
 | 参数 | 类型 | 必填 | 默认值 | 说明 |
 |------|------|------|--------|------|
@@ -206,11 +206,12 @@
 | `localPosition` | [x,y,z] | ❌ | - | 本地位置 |
 | `localRotation` | [x,y,z] | ❌ | - | 本地旋转欧拉角 |
 | `localScale` | [x,y,z] | ❌ | - | 本地缩放 |
-| `anchoredPosition` | [x,y] | ❌ | - | 锚点位置（仅 RectTransform） |
-| `sizeDelta` | [w,h] | ❌ | - | 尺寸偏移（仅 RectTransform） |
-| `pivot` | [x,y] | ❌ | - | 轴心（仅 RectTransform） |
-| `anchorMin` | [x,y] | ❌ | - | 最小锚点（仅 RectTransform） |
-| `anchorMax` | [x,y] | ❌ | - | 最大锚点（仅 RectTransform） |
+| `rect` | object | ❌ | - | RectTransform 专用，仅 UI 节点生效 |
+| `rect.anchoredPosition` | [x,y] | ❌ | - | 锚点位置 |
+| `rect.sizeDelta` | [w,h] | ❌ | - | 尺寸偏移 |
+| `rect.pivot` | [x,y] | ❌ | - | 轴心 |
+| `rect.anchorMin` | [x,y] | ❌ | - | 最小锚点 |
+| `rect.anchorMax` | [x,y] | ❌ | - | 最大锚点 |
 
 #### `editor_setField`
 

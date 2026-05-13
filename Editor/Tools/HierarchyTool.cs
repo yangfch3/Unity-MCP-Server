@@ -24,7 +24,7 @@ namespace UnityMcp.Editor.Tools
         public string Description => "获取当前场景的 GameObject 树结构，支持 root 参数指定根节点来源";
 
         /// <inheritdoc />
-        public string InputSchema => "{\"type\":\"object\",\"properties\":{\"maxDepth\":{\"type\":\"integer\",\"description\":\"最大遍历深度，-1 表示无限制\",\"default\":-1},\"root\":{\"type\":\"string\",\"description\":\"根节点来源：缺省或空串=Prefab Stage 优先，回退 Active Scene；\\\"selection\\\"=以当前选中 GameObject 为根\",\"default\":\"\"}}}";
+        public string InputSchema => "{\"type\":\"object\",\"properties\":{\"maxDepth\":{\"type\":\"integer\",\"description\":\"最大遍历深度，-1 表示无限制\",\"default\":-1},\"root\":{\"type\":\"string\",\"enum\":[\"\",\"selection\"],\"description\":\"根节点来源：空串=自动（Prefab Stage 优先，回退 Active Scene）；selection=当前选中 GameObject\",\"default\":\"\"}}}";
 
         /// <inheritdoc />
         public Task<ToolResult> Execute(Dictionary<string, object> parameters)

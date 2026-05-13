@@ -197,7 +197,7 @@ Enable/disable a component on a GameObject.
 
 #### `editor_setTransform`
 
-Modify Transform / RectTransform properties.
+Modify Transform / RectTransform properties. Use instanceID or path (not both; ID takes priority).
 
 | Parameter | Type | Required | Default | Description |
 |-----------|------|----------|---------|-------------|
@@ -206,11 +206,12 @@ Modify Transform / RectTransform properties.
 | `localPosition` | [x,y,z] | ❌ | - | Local position |
 | `localRotation` | [x,y,z] | ❌ | - | Local rotation (Euler angles) |
 | `localScale` | [x,y,z] | ❌ | - | Local scale |
-| `anchoredPosition` | [x,y] | ❌ | - | Anchored position (RectTransform only) |
-| `sizeDelta` | [w,h] | ❌ | - | Size delta (RectTransform only) |
-| `pivot` | [x,y] | ❌ | - | Pivot (RectTransform only) |
-| `anchorMin` | [x,y] | ❌ | - | Anchor min (RectTransform only) |
-| `anchorMax` | [x,y] | ❌ | - | Anchor max (RectTransform only) |
+| `rect` | object | ❌ | - | RectTransform only, applies to UI nodes |
+| `rect.anchoredPosition` | [x,y] | ❌ | - | Anchored position |
+| `rect.sizeDelta` | [w,h] | ❌ | - | Size delta |
+| `rect.pivot` | [x,y] | ❌ | - | Pivot |
+| `rect.anchorMin` | [x,y] | ❌ | - | Anchor min |
+| `rect.anchorMax` | [x,y] | ❌ | - | Anchor max |
 
 #### `editor_setField`
 

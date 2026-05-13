@@ -23,7 +23,7 @@ namespace UnityMcp.Editor.Tools
         public string Description => "修改 GameObject 的父节点";
 
         /// <inheritdoc />
-        public string InputSchema => "{\"type\":\"object\",\"properties\":{\"instanceID\":{\"type\":\"integer\",\"description\":\"目标 GameObject 的 instanceID\"},\"path\":{\"type\":\"string\",\"description\":\"目标 GameObject 的路径（如 \\\"/Root/Child\\\"）\"},\"newParentInstanceID\":{\"type\":\"integer\",\"description\":\"新父节点的 instanceID\"},\"newParentPath\":{\"type\":\"string\",\"description\":\"新父节点的路径\"},\"worldPositionStays\":{\"type\":\"boolean\",\"description\":\"是否保持世界坐标不变（默认 true）\"}}}";
+        public string InputSchema => "{\"type\":\"object\",\"properties\":{\"instanceID\":{\"type\":\"integer\",\"description\":\"目标 GameObject 的 instanceID（instanceID/path 二选一，同传则 ID 优先）\"},\"path\":{\"type\":\"string\",\"description\":\"目标 GameObject 的路径（如 \\\"/Root/Child\\\"）\"},\"newParentInstanceID\":{\"type\":\"integer\",\"description\":\"新父节点的 instanceID\"},\"newParentPath\":{\"type\":\"string\",\"description\":\"新父节点的路径\"},\"worldPositionStays\":{\"type\":\"boolean\",\"description\":\"是否保持世界坐标不变（默认 true）\"}}}";
 
         /// <inheritdoc />
         public Task<ToolResult> Execute(Dictionary<string, object> parameters)

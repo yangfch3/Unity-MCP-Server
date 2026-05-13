@@ -22,7 +22,7 @@ namespace UnityMcp.Editor.Tools
         public string Description => "修改 GameObject 上指定组件的序列化字段值";
 
         /// <inheritdoc />
-        public string InputSchema => "{\"type\":\"object\",\"properties\":{\"instanceID\":{\"type\":\"integer\",\"description\":\"目标 GameObject 的 instanceID\"},\"path\":{\"type\":\"string\",\"description\":\"目标 GameObject 的路径（如 \\\"/Root/Child\\\"）\"},\"componentType\":{\"type\":\"string\",\"description\":\"组件类型名（如 \\\"BoxCollider\\\"）\"},\"fieldName\":{\"type\":\"string\",\"description\":\"序列化字段名\"},\"value\":{\"description\":\"新值（类型需与字段匹配）\"}},\"required\":[\"componentType\",\"fieldName\",\"value\"]}";
+        public string InputSchema => "{\"type\":\"object\",\"properties\":{\"instanceID\":{\"type\":\"integer\",\"description\":\"目标 GameObject 的 instanceID（instanceID/path 二选一，同传则 ID 优先）\"},\"path\":{\"type\":\"string\",\"description\":\"目标 GameObject 的路径（如 \\\"/Root/Child\\\"）\"},\"componentType\":{\"type\":\"string\",\"description\":\"组件类型名（如 \\\"BoxCollider\\\"）\"},\"fieldName\":{\"type\":\"string\",\"description\":\"序列化字段名\"},\"value\":{\"description\":\"新值。Vector传[x,y,z]; Color传[r,g,b,a](0-1); ObjectReference传instanceID(int); Enum传显示名或索引\"}},\"required\":[\"componentType\",\"fieldName\",\"value\"]}";
 
         /// <inheritdoc />
         public Task<ToolResult> Execute(Dictionary<string, object> parameters)

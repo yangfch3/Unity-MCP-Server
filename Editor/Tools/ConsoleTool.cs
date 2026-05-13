@@ -21,7 +21,7 @@ namespace UnityMcp.Editor.Tools
             + "\"count\":{\"type\":\"integer\",\"description\":\"日志条数\",\"default\":20},"
             + "\"level\":{\"type\":\"string\",\"description\":\"日志级别过滤\",\"enum\":[\"Error\",\"Warning\",\"Log\"]},"
             + "\"keyword\":{\"type\":\"string\",\"description\":\"关键字过滤（大小写不敏感）\"},"
-            + "\"beforeIndex\":{\"type\":\"integer\",\"description\":\"上下文模式：锚点索引（稳定全局 ID）\"}"
+            + "\"beforeIndex\":{\"type\":\"integer\",\"description\":\"分页锚点，传上次返回日志的 index 拉取更早记录（传入后忽略 level/keyword）\"}"
             + "}}";
 
         private const int MaxBufferSize = 2500;
