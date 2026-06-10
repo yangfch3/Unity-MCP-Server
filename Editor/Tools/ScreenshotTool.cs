@@ -1,3 +1,6 @@
+// 截屏工具暂时禁用：整个文件已注释，ToolRegistry 反射时不会发现该类型，
+// 因此 debug_screenshot 工具不会注册。如需恢复，移除下方注释包裹即可。
+/*
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -103,3 +106,4 @@ namespace UnityMcp.Editor.Tools
         }
     }
 }
+*/

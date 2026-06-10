@@ -31,7 +31,9 @@ Get full stack trace of the latest Error/Exception. No parameters.
 
 Get FPS, DrawCall, memory usage and other key performance metrics. No parameters.
 
-### `debug_screenshot`
+### `debug_screenshot` (temporarily disabled)
+
+> ⚠️ This tool is currently disabled (`ScreenshotTool.cs` is fully commented out) and will not be registered. To restore it, remove the comment wrapper in the source file.
 
 Capture Game/Scene view screenshot, returns base64 PNG.
 

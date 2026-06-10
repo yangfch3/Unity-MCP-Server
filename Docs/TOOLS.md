@@ -31,7 +31,9 @@
 
 获取 FPS、DrawCall、内存占用等关键性能指标。无参数。
 
-### `debug_screenshot`
+### `debug_screenshot`（暂时禁用）
+
+> ⚠️ 该工具当前已禁用（`ScreenshotTool.cs` 整体注释），不会被注册。如需恢复，移除源文件中的注释包裹即可。
 
 截取 Game/Scene 视图截图，返回 base64 PNG。
 

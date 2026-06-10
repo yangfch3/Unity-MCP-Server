@@ -32,7 +32,8 @@ namespace UnityMcp.Editor.Tests
             // 新增 10 个工具
             Assert.Contains("debug_getStackTrace", names);
             Assert.Contains("debug_getPerformanceStats", names);
-            Assert.Contains("debug_screenshot", names);
+            // debug_screenshot 工具已暂时禁用（ScreenshotTool.cs 整体注释）
+            // Assert.Contains("debug_screenshot", names);
             Assert.Contains("editor_getSelection", names);
             Assert.Contains("editor_getHierarchy", names);
             Assert.Contains("editor_getProjectStructure", names);
@@ -59,9 +60,9 @@ namespace UnityMcp.Editor.Tests
 
 #if !UNITY_6000_OR_NEWER
             Assert.IsNotNull(_registry.Resolve("code_executeImmediate"), "code_executeImmediate");
-            Assert.GreaterOrEqual(all.Count, 27);
-#else
             Assert.GreaterOrEqual(all.Count, 26);
+#else
+            Assert.GreaterOrEqual(all.Count, 25);
 #endif
         }
 
@@ -99,7 +100,8 @@ namespace UnityMcp.Editor.Tests
             Assert.Contains("console_getLogs", names);
             Assert.Contains("debug_getStackTrace", names);
             Assert.Contains("debug_getPerformanceStats", names);
-            Assert.Contains("debug_screenshot", names);
+            // debug_screenshot 工具已暂时禁用（ScreenshotTool.cs 整体注释）
+            // Assert.Contains("debug_screenshot", names);
             Assert.Contains("console_clearLogs", names);
 
             foreach (var tool in debugTools)
