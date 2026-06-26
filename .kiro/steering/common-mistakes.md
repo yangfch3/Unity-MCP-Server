@@ -1,16 +1,7 @@
----
-inclusion: always
----
+# 常见错误与陷阱
 
-# Common Mistakes & Pitfalls
+AI agent 在本工作区反复犯过的错误，执行命令或写代码前先过一遍。
 
-A living document of recurring mistakes the AI agent makes in this workspace. Check this before executing commands or writing code.
+## PowerShell
 
-## Shell Commands
-
-- **Do NOT use `&&` to chain commands in PowerShell.** This workspace runs on Windows with PowerShell, where `&&` is not a valid statement separator. Use `;` instead, or run commands separately.
-  - Bad: `git add -A && git commit -m "msg"`
-  - Good: `git add -A; git commit -m "msg"` or run as two separate commands
-
-- **Do NOT use PowerShell `Set-Content` / `Get-Content` for UTF-8 files with CJK characters.** PowerShell's default encoding mangles multi-byte characters. Use the agent's like `fsWrite` / `strReplace` / `edit_file` / `replace_in_file` tools instead for any file content modifications.
-
+- 禁止用 Win PowerShell 的 `Set-Content` 编辑含中文的 UTF-8 文件，请使用 agent 内置工具或编码安全工具操作文件内容

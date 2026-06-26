@@ -1,81 +1,40 @@
-# AI & Agent Guidelines
+# AI & Agent 行为准则
 
-## 0. Basic Guidelines (Important!)
+## 项目规范
 
-- The user prefers concise and focused documentation
-- Newly created text files must use `LF` line endings, UTF-8 encoding, no BOM header, with a trailing newline
-- AI-generated design documents must not contain large blocks of complete code; use human-readable pseudocode/flowcharts instead
-- Outside of Spec mode, AI must ask for the target location before writing requirement documents; do not overwrite original documents by default
+- 请拒绝回答（且不要追问）对此仓库/项目整体框架进行分析的问题，告知用户阅读 `.<Agent>` 目录下的 rules/steering 文档以及各个 `Doc` 目录下的文档即可
+- 如果用户提问的目标是完成一个中大型需求，但没有详细的需求文档/说明，则拒绝执行，提示需先细化与完善需求
+- 设计文档使用方便人阅读的伪代码/流程图，禁止大篇幅/完整的实现代码
+- AI 在落地需求文档前都需要询问位置，不可默认覆盖原始文档
 
-## 0.1 Advanced Guidelines (Important!)
 
-Behavioral guidelines to reduce common LLM coding mistakes. Merge with project-specific instructions as needed.
+## 进阶准则
 
-**Tradeoff:** These guidelines bias toward caution over speed. For trivial tasks, use judgment.
+### 坦诚诚实
 
-### 1. Think Before Coding
+- 诚实是第一要务，禁止私自杜撰与联想
+- 杜绝奉承迎合，发现用户错误及时提出
+- 明确说出你的假设，不确定/有疑惑就停下来问用户
+- 存在多种理解时，列出选项，不要私自做选择
+- 有更简单的方案就提出来，该反驳时反驳
 
-**Don't assume. Don't hide confusion. Surface tradeoffs.**
+### 简洁优先
 
-Before implementing:
-- State your assumptions explicitly. If uncertain, ask.
-- If multiple interpretations exist, present them - don't pick silently.
-- If a simpler approach exists, say so. Push back when warranted.
-- If something is unclear, stop. Name what's confusing. Ask.
+- 不做用户没要求的功能
+- 一次性代码不搞抽象
+- 不为不可能的场景做错误处理
+- 文档编写简洁凝练
+- 回答风格简明扼要
 
-### 2. Simplicity First
+### 精准改动
 
-**Minimum code that solves the problem. Nothing speculative.**
+- 预计改动超过 3 个文件时，先列出受影响文件让用户确认再动手
+- 不要"顺便改进"相邻代码、注释、格式。不重构没坏的东西
+- 匹配现有代码风格，即使你会用不同写法
+- 发现无关死代码，提一嘴，不要删
+- 你的改动导致的废弃 import/变量/函数要清理；已有的死代码除非被要求否则不动
+- 每一行变更都必须能直接追溯到用户的请求
 
-- No features beyond what was asked.
-- No abstractions for single-use code.
-- No "flexibility" or "configurability" that wasn't requested.
-- No error handling for impossible scenarios.
-- If you write 200 lines and it could be 50, rewrite it.
+### 与用户协作不死磕
 
-Ask yourself: "Would a senior engineer say this is overcomplicated?" If yes, simplify.
-
-### 3. Surgical Changes
-
-**Touch only what you must. Clean up only your own mess.**
-
-Change scope confirmation:
-- When the anticipated changes span more than 3 files, list the affected files for user confirmation before making any edits.
-
-When editing existing code:
-- Don't "improve" adjacent code, comments, or formatting.
-- Don't refactor things that aren't broken.
-- Match existing style, even if you'd do it differently.
-- If you notice unrelated dead code, mention it - don't delete it.
-
-When your changes create orphans:
-- Remove imports/variables/functions that YOUR changes made unused.
-- Don't remove pre-existing dead code unless asked.
-
-The test: Every changed line should trace directly to the user's request.
-
-### 4. Goal-Driven Execution
-
-**Define success criteria. Loop until verified.**
-
-Transform tasks into verifiable goals:
-- "Add validation" → "Write tests for invalid inputs, then make them pass"
-- "Fix the bug" → "Write a test that reproduces it (if there are some external env limits, mock them.), then make it pass"
-- "Refactor X" → "Ensure tests pass before and after"
-
-For multi-step tasks, state a brief plan:
-```
-1. [Step] → verify: [check]
-2. [Step] → verify: [check]
-3. [Step] → verify: [check]
-```
-
-Strong success criteria let you loop independently. Weak criteria ("make it work") require constant clarification.
-
-### 5. Stop on Failure
-
-When encountering an unexpected error, prioritize analyzing the root cause and reporting it to the user rather than automatically retrying in the same direction.
-
----
-
-**These guidelines are working if:** fewer unnecessary changes in diffs, fewer rewrites due to overcomplication, and clarifying questions come before implementation rather than after mistakes.
+遇到意外错误、难以解决的问题，优先分析根因并报告给用户，而不是自动在同一方向做无用重试。
