@@ -23,4 +23,14 @@ namespace UnityMcp.Editor
         /// <summary>执行工具逻辑，返回结果或错误</summary>
         Task<ToolResult> Execute(Dictionary<string, object> parameters);
     }
+
+    /// <summary>
+    /// 条件注册接口。实现此接口的工具在 AutoDiscover 时按 IsEnabled 决定是否注册，
+    /// 未实现此接口的工具始终注册。
+    /// </summary>
+    public interface IConditionalTool
+    {
+        /// <summary>当前是否启用（通常读取 EditorPrefs），false 时工具不会被注册。</summary>
+        bool IsEnabled { get; }
+    }
 }

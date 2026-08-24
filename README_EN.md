@@ -33,7 +33,7 @@ For full parameter details and usage examples, see the [Tools Reference](Docs/TO
 | `console_clearLogs` | Clear the log buffer |
 | `debug_getStackTrace` | Get full stack trace of latest Error/Exception |
 | `debug_getPerformanceStats` | Get FPS, DrawCall, memory metrics |
-| ~~`debug_screenshot`~~ | Capture Game/Scene view screenshot (temporarily disabled) |
+| `debug_screenshot` | Capture Game/Scene view screenshot (base64 image, occlusion-proof; game requires Play mode; disabled by default, enable it in the panel's Experimental section) |
 
 #### Editor Tools
 

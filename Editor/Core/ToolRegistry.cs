@@ -27,6 +27,12 @@ namespace UnityMcp.Editor
             _tools[tool.Name] = tool;
         }
 
+        /// <summary>按名称注销工具，返回是否成功移除。</summary>
+        public bool Unregister(string name)
+        {
+            return name != null && _tools.Remove(name);
+        }
+
         /// <summary>按名称查找工具，未找到返回 null。</summary>
         public IMcpTool Resolve(string name)
         {
@@ -60,10 +66,12 @@ namespace UnityMcp.Editor
         /// <summary>
         /// 反射扫描当前 AppDomain 中所有实现 IMcpTool 的非抽象类，
         /// 实例化并注册。新工具只需实现接口即可被自动发现。
+        /// 同时实现 IConditionalTool 且 IsEnabled 为 false 的工具会被跳过。
         /// </summary>
         public void AutoDiscover()
         {
             var toolType = typeof(IMcpTool);
+            var conditionalType = typeof(IConditionalTool);
 
             foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
             {
@@ -85,6 +93,10 @@ namespace UnityMcp.Editor
                     try
                     {
                         var instance = (IMcpTool)Activator.CreateInstance(type);
+
+                        if (conditionalType.IsAssignableFrom(type) && !((IConditionalTool)instance).IsEnabled)
+                            continue;
+
                         Register(instance);
                     }
                     catch (Exception ex)

@@ -22,6 +22,9 @@ namespace UnityMcp.Editor
         public static McpServer Server => _server;
         public static bool IsRunning => _server != null && _server.IsRunning;
 
+        /// <summary>当前工具注册表，服务未运行时为 null。供运行中热切换工具注册（如 ConfigPanel 开关）。</summary>
+        public static ToolRegistry Registry => _toolRegistry;
+
         static McpServerManager()
         {
             if (!EditorPrefs.GetBool(ActivePrefKey, false))

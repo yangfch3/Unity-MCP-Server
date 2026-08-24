@@ -1,6 +1,8 @@
 using System.Linq;
 using NUnit.Framework;
 using UnityMcp.Editor;
+using UnityMcp.Editor.Tools;
+using UnityEditor;
 
 namespace UnityMcp.Editor.Tests
 {
@@ -10,12 +12,28 @@ namespace UnityMcp.Editor.Tests
     public class ToolRegistryTests
     {
         private ToolRegistry _registry;
+        private bool _prevScreenshotEnabled;
+        private bool _hadScreenshotPref;
 
         [SetUp]
         public void SetUp()
         {
+            // debug_screenshot 为条件注册（默认关），测试期间临时开启并在 TearDown 还原
+            _hadScreenshotPref = EditorPrefs.HasKey(ScreenshotTool.PrefKey);
+            _prevScreenshotEnabled = EditorPrefs.GetBool(ScreenshotTool.PrefKey, false);
+            EditorPrefs.SetBool(ScreenshotTool.PrefKey, true);
+
             _registry = new ToolRegistry();
             _registry.AutoDiscover();
+        }
+
+        [TearDown]
+        public void TearDown()
+        {
+            if (_hadScreenshotPref)
+                EditorPrefs.SetBool(ScreenshotTool.PrefKey, _prevScreenshotEnabled);
+            else
+                EditorPrefs.DeleteKey(ScreenshotTool.PrefKey);
         }
 
         [Test]
@@ -32,8 +50,7 @@ namespace UnityMcp.Editor.Tests
             // 新增 10 个工具
             Assert.Contains("debug_getStackTrace", names);
             Assert.Contains("debug_getPerformanceStats", names);
-            // debug_screenshot 工具已暂时禁用（ScreenshotTool.cs 整体注释）
-            // Assert.Contains("debug_screenshot", names);
+            Assert.Contains("debug_screenshot", names);
             Assert.Contains("editor_getSelection", names);
             Assert.Contains("editor_getHierarchy", names);
             Assert.Contains("editor_getProjectStructure", names);
@@ -60,9 +77,9 @@ namespace UnityMcp.Editor.Tests
 
 #if !UNITY_6000_OR_NEWER
             Assert.IsNotNull(_registry.Resolve("code_executeImmediate"), "code_executeImmediate");
-            Assert.GreaterOrEqual(all.Count, 26);
+            Assert.GreaterOrEqual(all.Count, 27);
 #else
-            Assert.GreaterOrEqual(all.Count, 25);
+            Assert.GreaterOrEqual(all.Count, 26);
 #endif
         }
 
@@ -100,8 +117,7 @@ namespace UnityMcp.Editor.Tests
             Assert.Contains("console_getLogs", names);
             Assert.Contains("debug_getStackTrace", names);
             Assert.Contains("debug_getPerformanceStats", names);
-            // debug_screenshot 工具已暂时禁用（ScreenshotTool.cs 整体注释）
-            // Assert.Contains("debug_screenshot", names);
+            Assert.Contains("debug_screenshot", names);
             Assert.Contains("console_clearLogs", names);
 
             foreach (var tool in debugTools)
@@ -167,6 +183,34 @@ namespace UnityMcp.Editor.Tests
         {
             var tool = _registry.Resolve("nonexistent_tool");
             Assert.IsNull(tool);
+        }
+
+        [Test]
+        public void AutoDiscover_ScreenshotDisabled_SkipsRegistration()
+        {
+            EditorPrefs.SetBool(ScreenshotTool.PrefKey, false);
+            try
+            {
+                var registry = new ToolRegistry();
+                registry.AutoDiscover();
+
+                Assert.IsNull(registry.Resolve(ScreenshotTool.ToolName),
+                    "debug_screenshot should not be registered when disabled");
+            }
+            finally
+            {
+                EditorPrefs.SetBool(ScreenshotTool.PrefKey, true);
+            }
+        }
+
+        [Test]
+        public void Unregister_ExistingTool_RemovesIt()
+        {
+            Assert.IsNotNull(_registry.Resolve(ScreenshotTool.ToolName));
+
+            Assert.IsTrue(_registry.Unregister(ScreenshotTool.ToolName));
+            Assert.IsNull(_registry.Resolve(ScreenshotTool.ToolName));
+            Assert.IsFalse(_registry.Unregister(ScreenshotTool.ToolName));
         }
     }
 }
