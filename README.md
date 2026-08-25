@@ -33,7 +33,7 @@ Agent（如 Kiro、Cursor、Claude Code）可通过标准 MCP 协议连接到 Un
 | `console_clearLogs` | 清空日志缓冲区 |
 | `debug_getStackTrace` | 获取最近 Error/Exception 的完整堆栈 |
 | `debug_getPerformanceStats` | 获取 FPS、DrawCall、内存等性能指标 |
-| `debug_screenshot` | 截取 Game/Scene 视图截图（base64 图片，防遮挡；game 仅 Play 模式；默认关闭，需在面板 Experimental 区开启） |
+| `debug_screenshot` | 截取 Game/Scene 视图截图（base64 图片；默认关闭，需在面板 Experimental 区开启） |
 
 #### Editor 工具
 
