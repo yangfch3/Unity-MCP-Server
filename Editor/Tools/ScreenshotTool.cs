@@ -211,13 +211,15 @@ namespace UnityMcp.Editor.Tools
                 camera.targetTexture = prevTarget;
                 camera.aspect = prevAspect;
                 RenderTexture.ReleaseTemporary(rt);
+                // 强制所有 SceneView 按还原后的状态重绘，避免停留在离屏渲染期间的临时投影
+                SceneView.RepaintAll();
             }
         }
 
         /// <summary>
         /// 将场景中激活的 Screen Space Overlay / Screen Space Camera 根 Canvas
         /// 临时切换为挂到指定相机的 ScreenSpaceCamera 模式并渲染（仅清深度，叠加在已有画面上），
-        /// 复现 SceneView 对 UI Canvas 的编辑器可视化，完成后按原值精确还原。
+        /// 复现 SceneView 对 UI Canvas 的编辑器可视化，完成后按原值精确还原并强制画布重建。
         /// </summary>
         private static void RenderUiCanvases(Camera camera)
         {
@@ -252,6 +254,9 @@ namespace UnityMcp.Editor.Tools
                 for (int i = switched.Count - 1; i >= 0; i--)
                     switched[i].Restore();
                 camera.clearFlags = prevClear;
+                // 编辑模式下 renderMode 还原不会自动重跑画布更新，
+                // 需强制一轮更新让 Overlay 重新驱动 RectTransform，否则画布停留在临时尺寸
+                Canvas.ForceUpdateCanvases();
             }
         }
 
