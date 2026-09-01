@@ -33,7 +33,8 @@ Agent（如 Kiro、Cursor、Claude Code）可通过标准 MCP 协议连接到 Un
 | `console_clearLogs` | 清空日志缓冲区 |
 | `debug_getStackTrace` | 获取最近 Error/Exception 的完整堆栈 |
 | `debug_getPerformanceStats` | 获取 FPS、DrawCall、内存等性能指标 |
-| `debug_screenshot` | 截取 Game/Scene 视图截图（base64 图片；默认关闭，需在面板 Experimental 区开启） |
+| `debug_screenshotGame` | Game 截图（仅 PlayMode；由 Enable Game Screen Shot 控制） |
+| `debug_screenshotScene` | Scene 截图（默认不合成 UI，支持 `includeUI`；由 Enable Scene Screen Shot 控制） |
 
 #### Editor 工具
 
@@ -136,7 +137,7 @@ UPM 通过 Git URL 安装后，会在宿主项目的 `packages-lock.json` 中锁
 如需锁定特定版本，可在 URL 末尾追加 Git Tag：
 
 ```
-https://github.com/yangfch3/Unity-MCP-Server.git#v0.3.3
+https://github.com/yangfch3/Unity-MCP-Server.git#v0.4.0
 ```
 
 对应 `Packages/manifest.json` 配置：
@@ -144,7 +145,7 @@ https://github.com/yangfch3/Unity-MCP-Server.git#v0.3.3
 ```json
 {
   "dependencies": {
-    "com.yangfch3.unity-mcp": "https://github.com/yangfch3/Unity-MCP-Server.git#v0.3.3"
+    "com.yangfch3.unity-mcp": "https://github.com/yangfch3/Unity-MCP-Server.git#v0.4.0"
   }
 }
 ```

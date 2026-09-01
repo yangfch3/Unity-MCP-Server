@@ -31,26 +31,32 @@
 
 获取 FPS、DrawCall、内存占用等关键性能指标。无参数。
 
-### `debug_screenshot`
+### `debug_screenshotGame`
 
-截取 Game/Scene 视图截图，返回 base64 图片。离屏渲染实现，不受其他应用窗口或 Unity 标签页遮挡影响。
+截取 Game 视图并返回图片。仅 PlayMode 可用，默认输出 `JPG`，最大高度 `1024`。
 
-> **默认关闭**：需在 Window → MCP Server 面板的 Experimental 区域勾选 **Enable Screen Shot** 后才会注册。关闭时工具在 `tools/list` 中不可见（调用返回 tool not found）。服务运行中切换立即生效，但 Agent 侧可能需重连刷新工具列表。
+> **默认关闭**：在 Window → MCP Server → Experimental 中开启 **Enable Game Screen Shot** 后注册。切换后 Agent 可能需要重连刷新工具列表。
 
-| 参数 | 类型 | 必填 | 默认值 | 说明 |
-|------|------|------|--------|------|
-| `view` | string | ❌ | `game` | 视图类型：`game` 或 `scene` |
-| `maxWidth` | integer | ❌ | `0` | 最大宽度，超出则等比缩小，`0`=不限制 |
-| `maxHeight` | integer | ❌ | `0` | 最大高度，超出则等比缩小，`0`=不限制 |
-| `format` | string | ❌ | `png` | 图片格式：`png` 或 `jpg`（jpg 体积更小，推荐用于 Token 优化） |
-| `quality` | integer | ❌ | `75` | jpg 质量 1-100 |
+| 参数 | 类型 | 默认值 | 说明 |
+|------|------|--------|------|
+| `maxWidth` | integer | `0` | 最大宽度，`0`=不限制 |
+| `maxHeight` | integer | `1024` | 最大高度，等比缩放 |
+| `format` | string | `jpg` | `png` 或 `jpg` |
+| `quality` | integer | `75` | JPG 质量 1-100 |
 
-行为说明：
+### `debug_screenshotScene`
 
-- **game**：仅 Play 模式可用（编辑模式下 Game 视图无持续渲染，会返回错误）。返回 Game 视图目标分辨率的全帧画面（含 Overlay UI），带黑帧检测与重试。画面接近纯黑时不视为失败，而是返回图片并附加警告文本（可能是渲染未完成，也可能是游戏本身黑屏）
-- **scene**：SceneView 相机画面 + UI Canvas 合成，不含 gizmo/网格线等编辑器覆盖层。Canvas 合成语义：
-  - `Overlay` / `ScreenSpaceCamera` Canvas：满屏合成到画面上（与 SceneView 对 Overlay 的展示一致；SSC 为刻意的近似，便于 UI 检查）
-  - `WorldSpace` Canvas：按真实世界位置自然渲染（在相机视锥内才可见）
+截取 Scene 视图并返回图片。默认不合成 UI，使用临时 Camera 渲染。
+
+> **默认关闭**：在 Window → MCP Server → Experimental 中开启 **Enable Scene Screen Shot** 后注册。切换后 Agent 可能需要重连刷新工具列表。
+
+| 参数 | 类型 | 默认值 | 说明 |
+|------|------|--------|------|
+| `maxWidth` | integer | `0` | 最大宽度，`0`=不限制 |
+| `maxHeight` | integer | `1024` | 最大高度，等比缩放 |
+| `format` | string | `jpg` | `png` 或 `jpg` |
+| `quality` | integer | `75` | JPG 质量 1-100 |
+| `includeUI` | boolean | `false` | 是否通过临时 Canvas 合成 UI |
 
 ---
 

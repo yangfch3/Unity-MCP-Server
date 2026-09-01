@@ -12,16 +12,20 @@ namespace UnityMcp.Editor.Tests
     public class ToolRegistryTests
     {
         private ToolRegistry _registry;
-        private bool _prevScreenshotEnabled;
-        private bool _hadScreenshotPref;
+        private bool _prevGameScreenshotEnabled;
+        private bool _hadGameScreenshotPref;
+        private bool _prevSceneScreenshotEnabled;
+        private bool _hadSceneScreenshotPref;
 
         [SetUp]
         public void SetUp()
         {
-            // debug_screenshot 为条件注册（默认关），测试期间临时开启并在 TearDown 还原
-            _hadScreenshotPref = EditorPrefs.HasKey(ScreenshotTool.PrefKey);
-            _prevScreenshotEnabled = EditorPrefs.GetBool(ScreenshotTool.PrefKey, false);
-            EditorPrefs.SetBool(ScreenshotTool.PrefKey, true);
+            _hadGameScreenshotPref = EditorPrefs.HasKey(GameScreenshotTool.PrefKey);
+            _prevGameScreenshotEnabled = EditorPrefs.GetBool(GameScreenshotTool.PrefKey, false);
+            _hadSceneScreenshotPref = EditorPrefs.HasKey(SceneScreenshotTool.PrefKey);
+            _prevSceneScreenshotEnabled = EditorPrefs.GetBool(SceneScreenshotTool.PrefKey, false);
+            EditorPrefs.SetBool(GameScreenshotTool.PrefKey, true);
+            EditorPrefs.SetBool(SceneScreenshotTool.PrefKey, true);
 
             _registry = new ToolRegistry();
             _registry.AutoDiscover();
@@ -30,10 +34,8 @@ namespace UnityMcp.Editor.Tests
         [TearDown]
         public void TearDown()
         {
-            if (_hadScreenshotPref)
-                EditorPrefs.SetBool(ScreenshotTool.PrefKey, _prevScreenshotEnabled);
-            else
-                EditorPrefs.DeleteKey(ScreenshotTool.PrefKey);
+            RestorePref(GameScreenshotTool.PrefKey, _hadGameScreenshotPref, _prevGameScreenshotEnabled);
+            RestorePref(SceneScreenshotTool.PrefKey, _hadSceneScreenshotPref, _prevSceneScreenshotEnabled);
         }
 
         [Test]
@@ -42,15 +44,13 @@ namespace UnityMcp.Editor.Tests
             var all = _registry.ListAll();
             var names = all.Select(t => t.Name).ToList();
 
-            // 原有 3 个工具
             Assert.Contains("console_getLogs", names);
             Assert.Contains("menu_execute", names);
             Assert.Contains("playmode_control", names);
-
-            // 新增 10 个工具
             Assert.Contains("debug_getStackTrace", names);
             Assert.Contains("debug_getPerformanceStats", names);
-            Assert.Contains("debug_screenshot", names);
+            Assert.Contains("debug_screenshotGame", names);
+            Assert.Contains("debug_screenshotScene", names);
             Assert.Contains("editor_getSelection", names);
             Assert.Contains("editor_getHierarchy", names);
             Assert.Contains("editor_getProjectStructure", names);
@@ -63,8 +63,6 @@ namespace UnityMcp.Editor.Tests
             Assert.Contains("console_clearLogs", names);
             Assert.Contains("editor_selectGameObject", names);
             Assert.Contains("editor_findGameObjects", names);
-
-            // 9 个新写操作工具
             Assert.Contains("editor_addGameObject", names);
             Assert.Contains("editor_addComponent", names);
             Assert.Contains("editor_deleteGameObject", names);
@@ -77,9 +75,9 @@ namespace UnityMcp.Editor.Tests
 
 #if !UNITY_6000_OR_NEWER
             Assert.IsNotNull(_registry.Resolve("code_executeImmediate"), "code_executeImmediate");
-            Assert.GreaterOrEqual(all.Count, 27);
+            Assert.GreaterOrEqual(all.Count, 28);
 #else
-            Assert.GreaterOrEqual(all.Count, 26);
+            Assert.GreaterOrEqual(all.Count, 27);
 #endif
         }
 
@@ -89,7 +87,6 @@ namespace UnityMcp.Editor.Tests
             var all = _registry.ListAll();
             foreach (var tool in all)
             {
-                // 名称应包含下划线: {category}_{action}
                 Assert.IsTrue(tool.Name.Contains("_"),
                     $"Tool '{tool.Name}' does not follow category_action naming convention");
             }
@@ -117,7 +114,8 @@ namespace UnityMcp.Editor.Tests
             Assert.Contains("console_getLogs", names);
             Assert.Contains("debug_getStackTrace", names);
             Assert.Contains("debug_getPerformanceStats", names);
-            Assert.Contains("debug_screenshot", names);
+            Assert.Contains("debug_screenshotGame", names);
+            Assert.Contains("debug_screenshotScene", names);
             Assert.Contains("console_clearLogs", names);
 
             foreach (var tool in debugTools)
@@ -140,8 +138,6 @@ namespace UnityMcp.Editor.Tests
             Assert.Contains("asset_deleteFolder", names);
             Assert.Contains("editor_selectGameObject", names);
             Assert.Contains("editor_findGameObjects", names);
-
-            // 9 个新写操作工具
             Assert.Contains("editor_addGameObject", names);
             Assert.Contains("editor_addComponent", names);
             Assert.Contains("editor_deleteGameObject", names);
@@ -173,9 +169,9 @@ namespace UnityMcp.Editor.Tests
         [Test]
         public void Resolve_ExistingTool_ReturnsTool()
         {
-            var tool = _registry.Resolve("debug_getStackTrace");
+            var tool = _registry.Resolve(GameScreenshotTool.ToolName);
             Assert.IsNotNull(tool);
-            Assert.AreEqual("debug_getStackTrace", tool.Name);
+            Assert.AreEqual(GameScreenshotTool.ToolName, tool.Name);
         }
 
         [Test]
@@ -186,31 +182,45 @@ namespace UnityMcp.Editor.Tests
         }
 
         [Test]
-        public void AutoDiscover_ScreenshotDisabled_SkipsRegistration()
+        public void AutoDiscover_ScreenshotDisabled_SkipsBothRegistrations()
         {
-            EditorPrefs.SetBool(ScreenshotTool.PrefKey, false);
+            EditorPrefs.SetBool(GameScreenshotTool.PrefKey, false);
+            EditorPrefs.SetBool(SceneScreenshotTool.PrefKey, false);
             try
             {
                 var registry = new ToolRegistry();
                 registry.AutoDiscover();
 
-                Assert.IsNull(registry.Resolve(ScreenshotTool.ToolName),
-                    "debug_screenshot should not be registered when disabled");
+                Assert.IsNull(registry.Resolve(GameScreenshotTool.ToolName));
+                Assert.IsNull(registry.Resolve(SceneScreenshotTool.ToolName));
             }
             finally
             {
-                EditorPrefs.SetBool(ScreenshotTool.PrefKey, true);
+                EditorPrefs.SetBool(GameScreenshotTool.PrefKey, true);
+                EditorPrefs.SetBool(SceneScreenshotTool.PrefKey, true);
             }
         }
 
         [Test]
-        public void Unregister_ExistingTool_RemovesIt()
+        public void Unregister_ExistingTools_RemovesBoth()
         {
-            Assert.IsNotNull(_registry.Resolve(ScreenshotTool.ToolName));
+            Assert.IsNotNull(_registry.Resolve(GameScreenshotTool.ToolName));
+            Assert.IsNotNull(_registry.Resolve(SceneScreenshotTool.ToolName));
 
-            Assert.IsTrue(_registry.Unregister(ScreenshotTool.ToolName));
-            Assert.IsNull(_registry.Resolve(ScreenshotTool.ToolName));
-            Assert.IsFalse(_registry.Unregister(ScreenshotTool.ToolName));
+            Assert.IsTrue(_registry.Unregister(GameScreenshotTool.ToolName));
+            Assert.IsTrue(_registry.Unregister(SceneScreenshotTool.ToolName));
+            Assert.IsNull(_registry.Resolve(GameScreenshotTool.ToolName));
+            Assert.IsNull(_registry.Resolve(SceneScreenshotTool.ToolName));
+            Assert.IsFalse(_registry.Unregister(GameScreenshotTool.ToolName));
+            Assert.IsFalse(_registry.Unregister(SceneScreenshotTool.ToolName));
+        }
+
+        private static void RestorePref(string key, bool hadKey, bool previousValue)
+        {
+            if (hadKey)
+                EditorPrefs.SetBool(key, previousValue);
+            else
+                EditorPrefs.DeleteKey(key);
         }
     }
 }

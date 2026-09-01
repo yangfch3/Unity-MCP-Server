@@ -33,7 +33,8 @@ For full parameter details and usage examples, see the [Tools Reference](Docs/TO
 | `console_clearLogs` | Clear the log buffer |
 | `debug_getStackTrace` | Get full stack trace of latest Error/Exception |
 | `debug_getPerformanceStats` | Get FPS, DrawCall, memory metrics |
-| `debug_screenshot` | Capture Game/Scene view screenshot (base64 image, disabled by default, enable it in the panel's Experimental section) |
+| `debug_screenshotGame` | Capture the Game view (PlayMode only; controlled by Enable Game Screen Shot) |
+| `debug_screenshotScene` | Capture the Scene view (UI excluded by default; supports `includeUI`; controlled by Enable Scene Screen Shot) |
 
 #### Editor Tools
 
@@ -136,7 +137,7 @@ After installing via Git URL, UPM locks the current commit hash in the host proj
 To lock a specific version, append a Git Tag to the URL:
 
 ```
-https://github.com/yangfch3/Unity-MCP-Server.git#v0.3.3
+https://github.com/yangfch3/Unity-MCP-Server.git#v0.4.0
 ```
 
 Corresponding `Packages/manifest.json` configuration:
@@ -144,7 +145,7 @@ Corresponding `Packages/manifest.json` configuration:
 ```json
 {
   "dependencies": {
-    "com.yangfch3.unity-mcp": "https://github.com/yangfch3/Unity-MCP-Server.git#v0.3.3"
+    "com.yangfch3.unity-mcp": "https://github.com/yangfch3/Unity-MCP-Server.git#v0.4.0"
   }
 }
 ```

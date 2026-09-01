@@ -11,11 +11,13 @@ namespace UnityMcp.Editor
     {
         private const string PortPrefKey = "McpServer_Port";
         private const string CodeExecuteImmediatePrefKey = "McpServer_CodeExecuteImmediate";
-        private const string ScreenshotPrefKey = UnityMcp.Editor.Tools.ScreenshotTool.PrefKey;
+        private const string GameScreenshotPrefKey = UnityMcp.Editor.Tools.GameScreenshotTool.PrefKey;
+        private const string SceneScreenshotPrefKey = UnityMcp.Editor.Tools.SceneScreenshotTool.PrefKey;
         private const int DefaultPort = 8090;
 
         private int _port;
-        private bool _enableScreenshot;
+        private bool _enableGameScreenshot;
+        private bool _enableSceneScreenshot;
 #if !UNITY_6000_OR_NEWER
         private bool _codeExecuteImmediate;
 #endif
@@ -29,7 +31,8 @@ namespace UnityMcp.Editor
         private void OnEnable()
         {
             _port = EditorPrefs.GetInt(PortPrefKey, DefaultPort);
-            _enableScreenshot = EditorPrefs.GetBool(ScreenshotPrefKey, false);
+            _enableGameScreenshot = EditorPrefs.GetBool(GameScreenshotPrefKey, false);
+            _enableSceneScreenshot = EditorPrefs.GetBool(SceneScreenshotPrefKey, false);
 #if !UNITY_6000_OR_NEWER
             _codeExecuteImmediate = EditorPrefs.GetBool(CodeExecuteImmediatePrefKey, false);
 #endif
@@ -42,7 +45,6 @@ namespace UnityMcp.Editor
 
             bool running = McpServerManager.IsRunning;
 
-            // Port
             EditorGUI.BeginDisabledGroup(running);
             var newPort = EditorGUILayout.IntField("Port", _port);
             if (newPort != _port)
@@ -54,7 +56,6 @@ namespace UnityMcp.Editor
 
             GUILayout.Space(4);
 
-            // Start / Stop
             if (!running)
             {
                 if (GUILayout.Button("Start"))
@@ -68,20 +69,15 @@ namespace UnityMcp.Editor
 
             GUILayout.Space(8);
 
-            // Status
             var statusStyle = new GUIStyle(EditorStyles.label);
             statusStyle.normal.textColor = running ? new Color(0.2f, 0.8f, 0.2f) : new Color(0.9f, 0.2f, 0.2f);
             EditorGUILayout.LabelField("Status", running ? "Running" : "Stopped", statusStyle);
 
-            // Error
             var server = McpServerManager.Server;
             string error = server != null ? server.LastError : null;
             if (!string.IsNullOrEmpty(error))
-            {
                 EditorGUILayout.HelpBox(error, MessageType.Error);
-            }
 
-            // MCP Config JSON
             GUILayout.Space(12);
             GUILayout.Label("Agent Configuration", EditorStyles.boldLabel);
             EditorGUILayout.HelpBox("Copy the following JSON to the Agent's MCP configuration (e.g., mcp.json)", MessageType.Info);
@@ -95,27 +91,33 @@ namespace UnityMcp.Editor
                 "  }\n" +
                 "}";
 
-            // EditorGUI.BeginDisabledGroup(true);
             EditorGUILayout.TextArea(configJson, EditorStyles.textArea, GUILayout.Height(100));
-            // EditorGUI.EndDisabledGroup();
 
             if (GUILayout.Button("Copy to Clipboard"))
-            {
                 EditorGUIUtility.systemCopyBuffer = configJson;
-            }
 
-            // Experimental features section
             GUILayout.Space(12);
             GUILayout.Label("Experimental", EditorStyles.boldLabel);
 
-            var newScreenshot = EditorGUILayout.ToggleLeft(
-                new GUIContent("Enable Screen Shot",
-                    "开启后 debug_screenshot 工具才会注册到 MCP 服务（默认关闭）。截图返回 base64 图片，会占用较多 Agent 上下文。服务运行中切换立即生效（Agent 侧可能需重连刷新工具列表）。"),
-                _enableScreenshot);
-            if (newScreenshot != _enableScreenshot)
+            var newGameScreenshot = EditorGUILayout.ToggleLeft(
+                new GUIContent("Enable Game Screen Shot",
+                    "开启后 debug_screenshotGame 工具才会注册到 MCP 服务（默认关闭）。服务运行中切换立即生效。"),
+                _enableGameScreenshot);
+            if (newGameScreenshot != _enableGameScreenshot)
             {
-                _enableScreenshot = newScreenshot;
-                EditorPrefs.SetBool(ScreenshotPrefKey, _enableScreenshot);
+                _enableGameScreenshot = newGameScreenshot;
+                EditorPrefs.SetBool(GameScreenshotPrefKey, _enableGameScreenshot);
+                ApplyScreenshotRegistration();
+            }
+
+            var newSceneScreenshot = EditorGUILayout.ToggleLeft(
+                new GUIContent("Enable Scene Screen Shot",
+                    "开启后 debug_screenshotScene 工具才会注册到 MCP 服务（默认关闭）。服务运行中切换立即生效。"),
+                _enableSceneScreenshot);
+            if (newSceneScreenshot != _enableSceneScreenshot)
+            {
+                _enableSceneScreenshot = newSceneScreenshot;
+                EditorPrefs.SetBool(SceneScreenshotPrefKey, _enableSceneScreenshot);
                 ApplyScreenshotRegistration();
             }
 
@@ -131,26 +133,28 @@ namespace UnityMcp.Editor
             }
 #endif
 
-            // Repaint while running to keep status fresh
             if (running)
                 Repaint();
         }
 
-        /// <summary>
-        /// 服务运行中时按开关状态热切换 debug_screenshot 的注册；
-        /// 服务未运行时无需处理，下次 StartServer 的 AutoDiscover 会按开关注册。
-        /// </summary>
+        /// <summary>服务运行中时按两个开关状态热切换截图工具注册。</summary>
         private static void ApplyScreenshotRegistration()
         {
             var registry = McpServerManager.Registry;
             if (registry == null)
                 return;
 
-            bool enabled = EditorPrefs.GetBool(ScreenshotPrefKey, false);
-            if (enabled)
-                registry.Register(new UnityMcp.Editor.Tools.ScreenshotTool());
+            bool gameEnabled = EditorPrefs.GetBool(GameScreenshotPrefKey, false);
+            if (gameEnabled)
+                registry.Register(new UnityMcp.Editor.Tools.GameScreenshotTool());
             else
-                registry.Unregister(UnityMcp.Editor.Tools.ScreenshotTool.ToolName);
+                registry.Unregister(UnityMcp.Editor.Tools.GameScreenshotTool.ToolName);
+
+            bool sceneEnabled = EditorPrefs.GetBool(SceneScreenshotPrefKey, false);
+            if (sceneEnabled)
+                registry.Register(new UnityMcp.Editor.Tools.SceneScreenshotTool());
+            else
+                registry.Unregister(UnityMcp.Editor.Tools.SceneScreenshotTool.ToolName);
         }
     }
 }

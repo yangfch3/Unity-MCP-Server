@@ -31,26 +31,32 @@ Get full stack trace of the latest Error/Exception. No parameters.
 
 Get FPS, DrawCall, memory usage and other key performance metrics. No parameters.
 
-### `debug_screenshot`
+### `debug_screenshotGame`
 
-Capture Game/Scene view screenshot, returns base64 image. Off-screen rendering, immune to occlusion by other apps or Unity tabs.
+Capture the Game view and return an image. PlayMode only; defaults to `JPG` with a maximum height of `1024`.
 
-> **Disabled by default**: only registered after enabling **Enable Screen Shot** in the Experimental section of Window → MCP Server panel. When off, the tool is invisible in `tools/list` (calls return tool not found). Toggling takes effect immediately while the server is running, but the Agent side may need to reconnect to refresh its tool list.
+> **Disabled by default**: enable **Enable Game Screen Shot** under Window → MCP Server → Experimental to register it. The Agent may need to reconnect after toggling.
 
-| Parameter | Type | Required | Default | Description |
-|-----------|------|----------|---------|-------------|
-| `view` | string | ❌ | `game` | View type: `game` or `scene` |
-| `maxWidth` | integer | ❌ | `0` | Max width, uniformly downscaled if exceeded, `0`=unlimited |
-| `maxHeight` | integer | ❌ | `0` | Max height, uniformly downscaled if exceeded, `0`=unlimited |
-| `format` | string | ❌ | `png` | Image format: `png` or `jpg` (jpg is smaller, recommended for token saving) |
-| `quality` | integer | ❌ | `75` | jpg quality 1-100 |
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `maxWidth` | integer | `0` | Max width, `0`=unlimited |
+| `maxHeight` | integer | `1024` | Max height, uniformly downscaled |
+| `format` | string | `jpg` | `png` or `jpg` |
+| `quality` | integer | `75` | JPG quality 1-100 |
 
-Behavior notes:
+### `debug_screenshotScene`
 
-- **game**: Play mode only (Game view has no continuous rendering in edit mode, returns an error). Returns the full frame at the Game view target resolution (including Overlay UI), with black-frame detection and retry. A near-black frame is not treated as failure: the image is returned with a warning text (either rendering did not complete, or the game itself is on a black screen)
-- **scene**: SceneView camera rendering + UI Canvas compositing, without gizmos/grid lines or other editor overlays. Canvas compositing semantics:
-  - `Overlay` / `ScreenSpaceCamera` canvases: composited fullscreen (consistent with how SceneView displays Overlay; SSC is a deliberate approximation for UI inspection)
-  - `WorldSpace` canvases: rendered naturally at their world position (visible only within the camera frustum)
+Capture the Scene view and return an image. UI is excluded by default and rendering uses a temporary Camera.
+
+> **Disabled by default**: enable **Enable Scene Screen Shot** under Window → MCP Server → Experimental to register it. The Agent may need to reconnect after toggling.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `maxWidth` | integer | `0` | Max width, `0`=unlimited |
+| `maxHeight` | integer | `1024` | Max height, uniformly downscaled |
+| `format` | string | `jpg` | `png` or `jpg` |
+| `quality` | integer | `75` | JPG quality 1-100 |
+| `includeUI` | boolean | `false` | Composite UI through a temporary Canvas |
 
 ---
 
