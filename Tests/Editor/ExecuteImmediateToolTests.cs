@@ -1,7 +1,10 @@
 #if !UNITY_6000_OR_NEWER
+using System.Collections;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using NUnit.Framework;
 using UnityEditor;
+using UnityEngine.TestTools;
 using UnityMcp.Editor;
 using UnityMcp.Editor.Tools;
 
@@ -322,6 +325,230 @@ public class Test
             Assert.AreEqual(false, jsonBg["success"]);
             Assert.AreEqual((string)jsonMain["error"], (string)jsonBg["error"],
                 "Both modes should produce the same compilation error");
+        }
+
+        // --- 跨帧模式（IEnumerator Run）---
+
+        /// <summary>等待跨帧 Task 完成的最大帧数，防止断言前死等。</summary>
+        private const int GuardFrames = 3000;
+
+        /// <summary>驱动跨帧 Task 直到完成，返回解析后的响应 JSON。</summary>
+        private static IEnumerator DriveUntilComplete(Task<ToolResult> task)
+        {
+            int guard = 0;
+            while (!task.IsCompleted && guard++ < GuardFrames)
+                yield return null;
+        }
+
+        private static Dictionary<string, object> ParseResult(Task<ToolResult> task)
+        {
+            Assert.IsTrue(task.IsCompleted, "cross-frame execution should complete");
+            return MiniJson.Deserialize(task.Result.Content[0].Text) as Dictionary<string, object>;
+        }
+
+        [Test]
+        public void InputSchema_MentionsIEnumeratorEntryPoint()
+        {
+            var schema = MiniJson.Deserialize(_tool.InputSchema) as Dictionary<string, object>;
+            var props = schema["properties"] as Dictionary<string, object>;
+            var codeProp = props["code"] as Dictionary<string, object>;
+            Assert.IsTrue(((string)codeProp["description"]).Contains("IEnumerator Run()"),
+                "code description should document the IEnumerator entry point");
+        }
+
+        [Test]
+        public void Execute_NoRunMethod_ErrorMentionsBothSignatures()
+        {
+            EditorPrefs.SetBool(PrefKey, true);
+            var result = _tool.Execute(new Dictionary<string, object>
+            {
+                { "code", "class Foo { }" }
+            }).Result;
+            var json = MiniJson.Deserialize(result.Content[0].Text) as Dictionary<string, object>;
+            var error = (string)json["error"];
+            Assert.IsTrue(error.Contains("void Run()"), "error should mention void Run()");
+            Assert.IsTrue(error.Contains("IEnumerator Run()"), "error should mention IEnumerator Run()");
+        }
+
+        [Test]
+        public void Execute_IEnumeratorWithBackgroundMode_IsRejected()
+        {
+            EditorPrefs.SetBool(PrefKey, true);
+            var code = @"
+using System.Collections;
+public class Test
+{
+    public static IEnumerator Run() { yield return null; }
+}";
+            var result = _tool.Execute(new Dictionary<string, object>
+            {
+                { "code", code },
+                { "mainThread", false }
+            }).Result;
+            var json = MiniJson.Deserialize(result.Content[0].Text) as Dictionary<string, object>;
+            Assert.AreEqual(false, json["success"]);
+            Assert.IsTrue(((string)json["error"]).Contains("mainThread:true"),
+                "IEnumerator entry with mainThread:false should be rejected");
+        }
+
+        [UnityTest]
+        public IEnumerator Execute_CrossFrame_CapturesOutputAndReportsFrames()
+        {
+            EditorPrefs.SetBool(PrefKey, true);
+            var code = @"
+using System;
+using System.Collections;
+public class Test
+{
+    public static IEnumerator Run()
+    {
+        Console.WriteLine(""first"");
+        for (int i = 0; i < 5; i++) yield return null;
+        Console.WriteLine(""last"");
+    }
+}";
+            var task = _tool.Execute(new Dictionary<string, object> { { "code", code } });
+            yield return DriveUntilComplete(task);
+
+            var json = ParseResult(task);
+            Assert.AreEqual(true, json["success"], "Error: " + json["error"]);
+            var output = (string)json["output"];
+            Assert.IsTrue(output.Contains("first") && output.Contains("last"),
+                "output should be captured across frames, got: " + output);
+            Assert.GreaterOrEqual(System.Convert.ToInt32(json["frames"]), 5,
+                "should report at least the 5 yielded frames");
+            Assert.IsTrue(json.ContainsKey("elapsedMs"));
+            Assert.IsNotEmpty((string)json["warning"], "cross-frame mode should report its driver");
+        }
+
+        [UnityTest]
+        public IEnumerator Execute_CrossFrame_NestedCoroutineRuns()
+        {
+            EditorPrefs.SetBool(PrefKey, true);
+            var code = @"
+using System;
+using System.Collections;
+public class Test
+{
+    private static int _inner;
+
+    public static IEnumerator Run()
+    {
+        yield return Inner();
+        Console.WriteLine(""outer resumed, innerTicks="" + _inner);
+    }
+
+    private static IEnumerator Inner()
+    {
+        for (int i = 0; i < 4; i++) { _inner++; yield return null; }
+        Console.WriteLine(""inner done"");
+    }
+}";
+            var task = _tool.Execute(new Dictionary<string, object> { { "code", code } });
+            yield return DriveUntilComplete(task);
+
+            var json = ParseResult(task);
+            Assert.AreEqual(true, json["success"], "Error: " + json["error"]);
+            var output = (string)json["output"];
+            Assert.IsTrue(output.Contains("inner done"), "nested coroutine must actually run");
+            Assert.IsTrue(output.Contains("innerTicks=4"),
+                "nested coroutine must run to completion before parent resumes, got: " + output);
+            Assert.Less(output.IndexOf("inner done"), output.IndexOf("outer resumed"),
+                "inner should finish before outer resumes");
+        }
+
+        [UnityTest]
+        public IEnumerator Execute_CrossFrame_Timeout_KeepsPartialOutput()
+        {
+            EditorPrefs.SetBool(PrefKey, true);
+            var code = @"
+using System;
+using System.Collections;
+public class Test
+{
+    public static IEnumerator Run()
+    {
+        Console.WriteLine(""before hang"");
+        while (true) yield return null;
+    }
+}";
+            var task = _tool.Execute(new Dictionary<string, object>
+            {
+                { "code", code },
+                { "timeout", 1000L }
+            });
+            yield return DriveUntilComplete(task);
+
+            var json = ParseResult(task);
+            Assert.AreEqual(false, json["success"]);
+            Assert.IsTrue(((string)json["error"]).Contains("timed out"),
+                "should report a timeout, got: " + json["error"]);
+            Assert.IsTrue(((string)json["output"]).Contains("before hang"),
+                "partial output before the hang should be preserved");
+        }
+
+        [UnityTest]
+        public IEnumerator Execute_CrossFrame_ExceptionReportsStackTrace()
+        {
+            EditorPrefs.SetBool(PrefKey, true);
+            var code = @"
+using System;
+using System.Collections;
+public class Test
+{
+    public static IEnumerator Run()
+    {
+        Console.WriteLine(""before boom"");
+        yield return null;
+        throw new InvalidOperationException(""cross_frame_boom"");
+    }
+}";
+            var task = _tool.Execute(new Dictionary<string, object> { { "code", code } });
+            yield return DriveUntilComplete(task);
+
+            var json = ParseResult(task);
+            Assert.AreEqual(false, json["success"]);
+            Assert.IsTrue(((string)json["error"]).Contains("cross_frame_boom"));
+            Assert.IsTrue(((string)json["output"]).Contains("before boom"),
+                "output before the exception should be preserved");
+        }
+
+        [UnityTest]
+        public IEnumerator Execute_WhileCrossFrameRunning_SecondCallIsRejected()
+        {
+            EditorPrefs.SetBool(PrefKey, true);
+            var longRunning = @"
+using System.Collections;
+public class Test
+{
+    public static IEnumerator Run()
+    {
+        for (int i = 0; i < 20; i++) yield return null;
+    }
+}";
+            var first = _tool.Execute(new Dictionary<string, object> { { "code", longRunning } });
+
+            // 第一个尚未完成时插入第二个调用，应被占用标记拒绝
+            var second = _tool.Execute(new Dictionary<string, object>
+            {
+                { "code", "public class Other { public static void Run() {} }" }
+            });
+
+            var secondJson = MiniJson.Deserialize(second.Result.Content[0].Text) as Dictionary<string, object>;
+            Assert.AreEqual(false, secondJson["success"]);
+            Assert.IsTrue(((string)secondJson["error"]).Contains("cross-frame execution"),
+                "second call during a cross-frame run should be rejected, got: " + secondJson["error"]);
+
+            yield return DriveUntilComplete(first);
+            Assert.AreEqual(true, ParseResult(first)["success"]);
+
+            // 占用释放后应恢复正常
+            var third = _tool.Execute(new Dictionary<string, object>
+            {
+                { "code", "using System; public class Other { public static void Run() { Console.WriteLine(\"ok\"); } }" }
+            });
+            var thirdJson = MiniJson.Deserialize(third.Result.Content[0].Text) as Dictionary<string, object>;
+            Assert.AreEqual(true, thirdJson["success"], "should recover after the cross-frame run finishes");
         }
 
         [Test, Timeout(20000)]

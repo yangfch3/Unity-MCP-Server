@@ -4,6 +4,8 @@
 
 本文档详细描述 Unity MCP Server 的所有内置工具，包括参数说明和使用示例。
 
+> **Server 单线程串行处理请求。** 任何耗时工具（`build_compile`、`build_runTests`、`util_delay`、`code_executeImmediate` 跨帧模式）执行期间，后续请求一律排队等待，无法并发。给这类工具设超时/时长参数时按需给最小值。
+
 ---
 
 ## Debug 工具
@@ -262,6 +264,8 @@
 
 触发脚本编译并返回编译结果。无参数。
 
+内部先 `AssetDatabase.Refresh()`，再等 2 秒探测编译是否启动；未启动则返回「无需编译，代码已是最新」。**资源导入慢于 2 秒时这一判定会误报**，此时改动其实尚未编译。存疑就反射读一个已知常量确认版本。
+
 ### `build_getCompileErrors`
 
 获取当前编译错误列表。无参数。
@@ -277,6 +281,28 @@
 
 ---
 
+## Util 工具
+
+### `util_delay`
+
+等待指定毫秒后返回。用于给 Editor 侧异步过程（协程、资源加载、场景启动）留出推进时间，期间主线程照常走帧。
+
+| 参数 | 类型 | 必填 | 默认值 | 说明 |
+|------|------|------|--------|------|
+| `ms` | int | ❌ | 1000 | 等待毫秒数，范围 100–120000 |
+
+**响应格式：**
+
+```json
+{ "waitedMs": 12016, "playMode": "Playing" }
+```
+
+`playMode` 为等待结束时的状态（`Stopped` / `Paused` / `Playing`），便于判断期间是否发生状态跃迁。
+
+典型用法：`playmode_control(enter)` 之后等游戏框架起来，再读日志或截图，避免拿到中间态。若等待逻辑需要判断具体条件而非固定时长，优先用 `code_executeImmediate` 的跨帧模式轮询条件。
+
+---
+
 ## Code 工具（实验性，仅 Unity 2022 Mono）
 
 > 需在 Window → MCP Server 面板的 Experimental 区域手动开启。仅在 Unity 2022 (Mono) 下可用，Unity 6+ 不可见。
@@ -289,7 +315,7 @@
 |------|------|------|--------|------|
 | `code` | string | ✅ | - | 要编译执行的 C# 源代码 |
 | `mainThread` | bool | ❌ | `true` | 指定是否在主线程执行。`true`=可调用 Unity API 但无超时保护；`false`=后台线程执行，有超时保护但不可调用 Unity API |
-| `timeout` | int | ❌ | 5000 | 后台模式超时时间（毫秒），仅 `mainThread: false` 时生效，范围 1000–30000 |
+| `timeout` | int | ❌ | 见说明 | 超时毫秒数。后台模式默认 5000，范围 1000–30000；跨帧模式默认 30000，范围 1000–120000 |
 
 **响应格式：**
 
@@ -298,20 +324,73 @@
   "success": true,
   "output": "Console 输出",
   "error": "",
-  "warning": "系统警告（仅主线程模式）"
+  "warning": "系统警告（后台模式为空）",
+  "frames": 19,
+  "elapsedMs": 1815
 }
 ```
 
-**约定与限制：**
+`frames` / `elapsedMs` 仅跨帧模式返回。`warning` 在主线程模式（无超时保护提示）和跨帧模式（驱动方式提示）下都会填充，仅后台模式为空。
 
-- 入口方法：代码必须包含 `public static void Run()` 静态方法
-- 输出方式：通过 `Console.WriteLine` 输出，工具会捕获并返回
-- 双模式执行：
-  - **主线程模式**（默认，`mainThread: true`）：在 Unity 主线程直接执行，可调用 Unity API（如 `GameObject.Find`、`AssetDatabase` 等），但无超时保护，死循环将冻结 Editor
-  - **后台模式**（`mainThread: false`）：在后台线程执行，有超时保护（默认 5 秒，可通过 `timeout` 参数调整，范围 1–30 秒），但不可调用 Unity API
-- 不支持异步入口：`async Run()` 或返回 `Task` 的方法不受支持
+**三种执行模式：**
+
+| 入口签名 | `mainThread` | 行为 |
+|---------|-------------|------|
+| `void Run()` | `true`（默认） | 主线程同步执行，可调用 Unity API，**无超时保护**，死循环会冻结 Editor |
+| `void Run()` | `false` | 后台线程执行，有超时保护，**不可调用 Unity API** |
+| `IEnumerator Run()` | `true`（默认） | 主线程**跨帧**执行，可调用 Unity API，有超时保护 |
+
+`IEnumerator Run()` 搭配 `mainThread: false` 会被拒绝——帧只在主线程推进。
+
+**跨帧模式（`IEnumerator Run()`）**
+
+由 `EditorApplication.update` 逐帧驱动，Edit Mode 与 PlayMode 均可用。用于等待加载、等待回调、等待输入被消费等需要跨帧的场景，一次调用即可拿到完整结果，无需拆成「启动协程」+「读日志」两步。
+
+支持的 yield 形式：
+
+- `yield return null` — 等一帧
+- `yield return <IEnumerator>` — 嵌套子协程，同帧进入子协程第一步，子协程结束后同帧恢复父级
+- 其它 yield 值一律按等一帧处理。**不支持 `WaitForSeconds` 等 YieldInstruction 语义**，需要等时间请用 `while` 循环配合自行计时
+
+```csharp
+using System;
+using System.Collections;
+using UnityEngine;
+
+public class Probe
+{
+    public static IEnumerator Run()
+    {
+        for (int i = 0; i < 30; i++) yield return null;   // 等 30 帧
+
+        yield return WaitForCanvas();                     // 嵌套等待
+
+        Console.WriteLine("done at frame " + Time.frameCount);
+    }
+
+    private static IEnumerator WaitForCanvas()
+    {
+        int guard = 0;
+        while (UnityEngine.Object.FindObjectOfType<Canvas>() == null && guard++ < 600)
+            yield return null;
+    }
+}
+```
+
+注意事项：
+
+- **执行期间整个 Server 阻塞**（见文档开头）。实测 20 秒跨帧期间，一个 100 ms 的 `util_delay` 墙钟耗时 18 秒。**把 `timeout` 设成够用的最小值**，别无脑拉到 120000
+- **Edit Mode 帧率不固定**（Editor 失焦时可能低至 10 fps），不要用帧数估算时间，反之亦然
+- 域重载（编译、进出 PlayMode）会中断执行并返回相应 error
+
+**其它约定与限制：**
+
+- 入口方法：必须包含 `public static void Run()` 或 `public static IEnumerator Run()`
+- 输出方式：通过 `Console.WriteLine` 输出，工具会捕获并返回（跨帧模式全程捕获）。`Debug.Log` 不进 `output`，需用 `console_getLogs` 读取
+- 不支持 `async Run()` 或返回 `Task` 的入口
 - 仅单文件编译：每次调用只接受一段代码字符串，不支持多文件
 - 仅限已加载程序集：可引用 Editor AppDomain 中已加载的程序集，不支持外部 NuGet 包
+- **C# 语法支持到 7.x**：编译器为 Mono mcs（已启用 `-langversion:latest`）。元组、`out var`、模式匹配、插值字符串、`default` 字面量可用；**局部函数与 C# 8 语法（`switch` 表达式、`using` 声明、`??=`）不可用** —— mcs 解析器未实现，请改用 `private static` 方法
 
 **示例：**
 

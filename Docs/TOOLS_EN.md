@@ -4,6 +4,8 @@
 
 Detailed documentation for all built-in tools in Unity MCP Server, including parameters and usage examples.
 
+> **The server processes requests serially on a single thread.** While any long-running tool is executing (`build_compile`, `build_runTests`, `util_delay`, `code_executeImmediate` in cross-frame mode), all subsequent requests queue up — there is no concurrency. Set timeout/duration parameters on these tools to the smallest value that works.
+
 ---
 
 ## Debug Tools
@@ -262,6 +264,8 @@ Delete a specified Assets subdirectory and refresh AssetDatabase.
 
 Trigger script compilation and return results. No parameters.
 
+Internally calls `AssetDatabase.Refresh()`, then probes for 2 seconds to see whether compilation started; if not, it returns "nothing to compile, code is up to date". **When asset import takes longer than 2 seconds this verdict is a false negative** — the change has not actually been compiled yet. When in doubt, reflect on a known constant to confirm the version.
+
 ### `build_getCompileErrors`
 
 Get current compile error list. No parameters.
@@ -277,6 +281,28 @@ Run Unity Test Runner tests and return results.
 
 ---
 
+## Util Tools
+
+### `util_delay`
+
+Wait for the given number of milliseconds and return. Gives Editor-side asynchronous processes (coroutines, asset loading, scene startup) time to advance while the main thread keeps ticking frames.
+
+| Parameter | Type | Required | Default | Description |
+|-----------|------|----------|---------|-------------|
+| `ms` | int | ❌ | 1000 | Milliseconds to wait, range 100–120000 |
+
+**Response format:**
+
+```json
+{ "waitedMs": 12016, "playMode": "Playing" }
+```
+
+`playMode` is the state when the wait ends (`Stopped` / `Paused` / `Playing`), which makes state transitions during the wait easy to spot.
+
+Typical use: after `playmode_control(enter)`, wait for the game framework to come up before reading logs or taking a screenshot, so you don't capture an intermediate state. When the wait depends on a condition rather than a fixed duration, prefer polling it in `code_executeImmediate` cross-frame mode.
+
+---
+
 ## Code Tools (Experimental, Unity 2022 Mono only)
 
 > Must be manually enabled in the Experimental section of Window → MCP Server panel. Only available on Unity 2022 (Mono); not visible on Unity 6+.
@@ -289,7 +315,7 @@ Compile and execute C# code snippets at runtime.
 |-----------|------|----------|---------|-------------|
 | `code` | string | ✅ | - | C# source code to compile and execute |
 | `mainThread` | bool | ❌ | `true` | Execute on main thread. `true`=can call Unity API, no timeout; `false`=background thread with timeout, no Unity API |
-| `timeout` | int | ❌ | 5000 | Background mode timeout in milliseconds, only effective when `mainThread: false`, range 1000–30000 |
+| `timeout` | int | ❌ | see notes | Timeout in milliseconds. Background mode defaults to 5000, range 1000–30000; cross-frame mode defaults to 30000, range 1000–120000 |
 
 **Response format:**
 
@@ -298,20 +324,73 @@ Compile and execute C# code snippets at runtime.
   "success": true,
   "output": "Console output",
   "error": "",
-  "warning": "System warning (main thread mode only)"
+  "warning": "System warning (empty in background mode)",
+  "frames": 19,
+  "elapsedMs": 1815
 }
 ```
 
-**Conventions & Limitations:**
+`frames` / `elapsedMs` are returned in cross-frame mode only. `warning` is populated in both main-thread mode (no-timeout notice) and cross-frame mode (driver notice); it is empty only in background mode.
 
-- Entry point: code must contain a `public static void Run()` static method
-- Output: use `Console.WriteLine`; the tool captures and returns it
-- Dual execution modes:
-  - **Main thread mode** (default, `mainThread: true`): executes directly on the Unity main thread, can call Unity APIs (e.g., `GameObject.Find`, `AssetDatabase`), but has no timeout protection — infinite loops will freeze the Editor
-  - **Background mode** (`mainThread: false`): executes on a background thread with timeout protection (default 5s, adjustable via `timeout` parameter, range 1–30s), but cannot call Unity APIs
-- No async entry points: `async Run()` or `Task`-returning methods are not supported
+**Three execution modes:**
+
+| Entry signature | `mainThread` | Behavior |
+|----------------|-------------|----------|
+| `void Run()` | `true` (default) | Synchronous on the main thread, can call Unity APIs, **no timeout protection** — infinite loops freeze the Editor |
+| `void Run()` | `false` | Background thread with timeout protection, **cannot call Unity APIs** |
+| `IEnumerator Run()` | `true` (default) | **Cross-frame** on the main thread, can call Unity APIs, with timeout protection |
+
+`IEnumerator Run()` combined with `mainThread: false` is rejected — frames only advance on the main thread.
+
+**Cross-frame mode (`IEnumerator Run()`)**
+
+Driven frame by frame via `EditorApplication.update`; works in both Edit Mode and PlayMode. Use it to wait for loading, callbacks, or input consumption — a single call returns the complete result, with no need to split into "kick off a coroutine" plus "read the logs".
+
+Supported yield forms:
+
+- `yield return null` — wait one frame
+- `yield return <IEnumerator>` — nested coroutine; enters the child's first step in the same frame and resumes the parent in the same frame after the child completes
+- Any other yield value is treated as waiting one frame. **`WaitForSeconds` and other YieldInstruction semantics are not supported** — use a `while` loop with your own timing to wait on wall-clock time
+
+```csharp
+using System;
+using System.Collections;
+using UnityEngine;
+
+public class Probe
+{
+    public static IEnumerator Run()
+    {
+        for (int i = 0; i < 30; i++) yield return null;   // wait 30 frames
+
+        yield return WaitForCanvas();                     // nested wait
+
+        Console.WriteLine("done at frame " + Time.frameCount);
+    }
+
+    private static IEnumerator WaitForCanvas()
+    {
+        int guard = 0;
+        while (UnityEngine.Object.FindObjectOfType<Canvas>() == null && guard++ < 600)
+            yield return null;
+    }
+}
+```
+
+Caveats:
+
+- **The whole server blocks while it runs** (see the note at the top). Measured: during a 20-second cross-frame run, a 100 ms `util_delay` took 18 seconds wall-clock. **Set `timeout` to the smallest value that works** instead of maxing it out at 120000
+- **Edit Mode frame rate is not fixed** (can drop to ~10 fps when the Editor is unfocused) — do not use frame counts to estimate wall-clock time, or vice versa
+- A domain reload (compilation, entering/exiting PlayMode) aborts execution and returns a corresponding error
+
+**Other conventions & limitations:**
+
+- Entry point: code must contain `public static void Run()` or `public static IEnumerator Run()`
+- Output: use `Console.WriteLine`; the tool captures and returns it (captured for the whole run in cross-frame mode). `Debug.Log` does not reach `output` — read it with `console_getLogs`
+- No `async Run()` or `Task`-returning entry points
 - Single-file only: each call accepts one code string; multi-file compilation is not supported
 - Loaded assemblies only: can reference assemblies already loaded in the Editor's AppDomain; external NuGet packages are not supported
+- **C# syntax up to 7.x**: the compiler is Mono mcs (with `-langversion:latest` enabled). Tuples, `out var`, pattern matching, interpolated strings and the `default` literal work; **local functions and C# 8 syntax (`switch` expressions, `using` declarations, `??=`) do not** — mcs never implemented them, so use `private static` methods instead
 
 **Example:**
 
@@ -332,12 +411,12 @@ public class Example
 
 ```json
 {
-  "code": "using System;using System.Linq;public class Example{public static void Run(){var assemblies = AppDomain.CurrentDomain.GetAssemblies();var unityAsm = assemblies.Where(a => a.GetName().Name.StartsWith(\"UnityEngine\"));Console.WriteLine($\"已加载 {assemblies.Length} 个程序集，其中 Unity 引擎: {unityAsm.Count()}\");}}",
+  "code": "using System;using System.Linq;public class Example{public static void Run(){var assemblies = AppDomain.CurrentDomain.GetAssemblies();var unityAsm = assemblies.Where(a => a.GetName().Name.StartsWith(\"UnityEngine\"));Console.WriteLine($\"Loaded {assemblies.Length} assemblies, Unity engine: {unityAsm.Count()}\");}}",
   "mainThread": false
 }
 {
   "success": true,
-  "output": "已加载 164 个程序集，其中 Unity 引擎: 70\n",
+  "output": "Loaded 164 assemblies, Unity engine: 70\n",
   "error": "",
   "warning": ""
 }
