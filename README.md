@@ -75,6 +75,7 @@ Agent（如 Kiro、Cursor、Claude Code）可通过标准 MCP 协议连接到 Un
 
 | 工具 | 功能 |
 |------|------|
+| `asset_create` | 创建受限类型的 `.asset` 资产（ScriptableObject、Material、PhysicMaterial、PhysicsMaterial2D） |
 | `asset_deleteFolder` | 删除 Assets 子目录 |
 
 #### Build 工具

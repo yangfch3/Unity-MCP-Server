@@ -75,6 +75,7 @@ For full parameter details and usage examples, see the [Tools Reference](Docs/TO
 
 | Tool | Description |
 |------|-------------|
+| `asset_create` | Create restricted `.asset` types (ScriptableObject, Material, PhysicMaterial, PhysicsMaterial2D) |
 | `asset_deleteFolder` | Delete an Assets subdirectory |
 
 #### Build Tools

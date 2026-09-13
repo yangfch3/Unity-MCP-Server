@@ -248,6 +248,31 @@
 
 ### Asset（资产）
 
+#### `asset_create`
+
+创建受限类型的 `.asset` 资产：`scriptableObject`、`material`、`physicMaterial`、`physicsMaterial2D`。
+
+| 参数 | 类型 | 必填 | 默认值 | 说明 |
+|------|------|------|--------|------|
+| `kind` | string | ✅ | - | 资产类型：`scriptableObject`、`material`、`physicMaterial` 或 `physicsMaterial2D` |
+| `path` | string | ✅ | - | 目标 `.asset` 路径，必须位于已有的 `Assets/` 子目录下 |
+| `typeName` | string | 条件必填 | - | `scriptableObject` 时必填；非抽象 `ScriptableObject` 派生类的完整类型名 |
+| `shaderName` | string | 条件必填 | - | `material` 时必填；传给 `Shader.Find` 的 Shader 名称 |
+| `conflictStrategy` | string | ❌ | `error` | 目标已存在时的处理：`error`=报错，`unique`=生成唯一文件名 |
+
+不支持覆盖既有资产、任意 `UnityEngine.Object`、初始字段值、Scene 或 Prefab。`path` 会规范化为 `Assets/.../*.asset`；父目录不存在时返回错误。
+
+**响应格式：**
+
+```json
+{
+  "assetPath": "Assets/Data/EnemyConfig.asset",
+  "guid": "d4d8cb960b3a44d4984731d29d7eb96c",
+  "kind": "scriptableObject",
+  "typeName": "Game.Config.EnemyConfig"
+}
+```
+
 #### `asset_deleteFolder`
 
 删除指定 Assets 子目录并刷新 AssetDatabase。

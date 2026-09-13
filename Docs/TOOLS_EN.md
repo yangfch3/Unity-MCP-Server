@@ -248,6 +248,31 @@ Modify a component's serialized field value.
 
 ### Asset
 
+#### `asset_create`
+
+Create a restricted `.asset` type: `scriptableObject`, `material`, `physicMaterial`, or `physicsMaterial2D`.
+
+| Parameter | Type | Required | Default | Description |
+|-----------|------|----------|---------|-------------|
+| `kind` | string | ✅ | - | Asset type: `scriptableObject`, `material`, `physicMaterial`, or `physicsMaterial2D` |
+| `path` | string | ✅ | - | Target `.asset` path under an existing `Assets/` subdirectory |
+| `typeName` | string | Conditional | - | Required for `scriptableObject`; fully qualified name of a non-abstract `ScriptableObject` subtype |
+| `shaderName` | string | Conditional | - | Required for `material`; Shader name passed to `Shader.Find` |
+| `conflictStrategy` | string | ❌ | `error` | Handling when the target exists: `error`=fail, `unique`=generate a unique filename |
+
+Overwriting existing assets, arbitrary `UnityEngine.Object` types, initial field values, Scenes, and Prefabs are not supported. `path` is normalized to `Assets/.../*.asset`; a missing parent directory returns an error.
+
+**Response format:**
+
+```json
+{
+  "assetPath": "Assets/Data/EnemyConfig.asset",
+  "guid": "d4d8cb960b3a44d4984731d29d7eb96c",
+  "kind": "scriptableObject",
+  "typeName": "Game.Config.EnemyConfig"
+}
+```
+
 #### `asset_deleteFolder`
 
 Delete a specified Assets subdirectory and refresh AssetDatabase.
