@@ -12,7 +12,7 @@ namespace UnityMcp.Editor.Tests
     public class ToolRegistryTests
     {
         private ToolRegistry _registry;
-        private bool _prevGameScreenshotEnabled;
+        private bool _prevGameScreenshotDisabled;
         private bool _hadGameScreenshotPref;
         private bool _prevSceneScreenshotEnabled;
         private bool _hadSceneScreenshotPref;
@@ -20,11 +20,11 @@ namespace UnityMcp.Editor.Tests
         [SetUp]
         public void SetUp()
         {
-            _hadGameScreenshotPref = EditorPrefs.HasKey(GameScreenshotTool.PrefKey);
-            _prevGameScreenshotEnabled = EditorPrefs.GetBool(GameScreenshotTool.PrefKey, false);
+            _hadGameScreenshotPref = EditorPrefs.HasKey(GameScreenshotTool.DisablePrefKey);
+            _prevGameScreenshotDisabled = EditorPrefs.GetBool(GameScreenshotTool.DisablePrefKey, false);
             _hadSceneScreenshotPref = EditorPrefs.HasKey(SceneScreenshotTool.PrefKey);
             _prevSceneScreenshotEnabled = EditorPrefs.GetBool(SceneScreenshotTool.PrefKey, false);
-            EditorPrefs.SetBool(GameScreenshotTool.PrefKey, true);
+            EditorPrefs.SetBool(GameScreenshotTool.DisablePrefKey, false);
             EditorPrefs.SetBool(SceneScreenshotTool.PrefKey, true);
 
             _registry = new ToolRegistry();
@@ -34,7 +34,7 @@ namespace UnityMcp.Editor.Tests
         [TearDown]
         public void TearDown()
         {
-            RestorePref(GameScreenshotTool.PrefKey, _hadGameScreenshotPref, _prevGameScreenshotEnabled);
+            RestorePref(GameScreenshotTool.DisablePrefKey, _hadGameScreenshotPref, _prevGameScreenshotDisabled);
             RestorePref(SceneScreenshotTool.PrefKey, _hadSceneScreenshotPref, _prevSceneScreenshotEnabled);
         }
 
@@ -184,7 +184,7 @@ namespace UnityMcp.Editor.Tests
         [Test]
         public void AutoDiscover_ScreenshotDisabled_SkipsBothRegistrations()
         {
-            EditorPrefs.SetBool(GameScreenshotTool.PrefKey, false);
+            EditorPrefs.SetBool(GameScreenshotTool.DisablePrefKey, true);
             EditorPrefs.SetBool(SceneScreenshotTool.PrefKey, false);
             try
             {
@@ -196,7 +196,7 @@ namespace UnityMcp.Editor.Tests
             }
             finally
             {
-                EditorPrefs.SetBool(GameScreenshotTool.PrefKey, true);
+                EditorPrefs.SetBool(GameScreenshotTool.DisablePrefKey, false);
                 EditorPrefs.SetBool(SceneScreenshotTool.PrefKey, true);
             }
         }

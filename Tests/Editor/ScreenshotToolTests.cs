@@ -14,25 +14,25 @@ namespace UnityMcp.Editor.Tests
     public class ScreenshotToolTests
     {
         private bool _hadGameScreenshotPref;
-        private bool _previousGameScreenshotEnabled;
+        private bool _previousGameScreenshotDisabled;
         private bool _hadSceneScreenshotPref;
         private bool _previousSceneScreenshotEnabled;
 
         [SetUp]
         public void SetUp()
         {
-            _hadGameScreenshotPref = EditorPrefs.HasKey(GameScreenshotTool.PrefKey);
-            _previousGameScreenshotEnabled = EditorPrefs.GetBool(GameScreenshotTool.PrefKey, false);
+            _hadGameScreenshotPref = EditorPrefs.HasKey(GameScreenshotTool.DisablePrefKey);
+            _previousGameScreenshotDisabled = EditorPrefs.GetBool(GameScreenshotTool.DisablePrefKey, false);
             _hadSceneScreenshotPref = EditorPrefs.HasKey(SceneScreenshotTool.PrefKey);
             _previousSceneScreenshotEnabled = EditorPrefs.GetBool(SceneScreenshotTool.PrefKey, false);
-            EditorPrefs.SetBool(GameScreenshotTool.PrefKey, true);
+            EditorPrefs.SetBool(GameScreenshotTool.DisablePrefKey, false);
             EditorPrefs.SetBool(SceneScreenshotTool.PrefKey, true);
         }
 
         [TearDown]
         public void TearDown()
         {
-            RestorePref(GameScreenshotTool.PrefKey, _hadGameScreenshotPref, _previousGameScreenshotEnabled);
+            RestorePref(GameScreenshotTool.DisablePrefKey, _hadGameScreenshotPref, _previousGameScreenshotDisabled);
             RestorePref(SceneScreenshotTool.PrefKey, _hadSceneScreenshotPref, _previousSceneScreenshotEnabled);
         }
 

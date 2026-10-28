@@ -98,7 +98,7 @@ For full parameter details and usage examples, see the [Tools Reference](Docs/TO
 |------|-------------|
 | `code_executeImmediate` | Compile and execute C# code (main-thread / background / cross-frame coroutine modes) |
 
-> Must be manually enabled in Window → MCP Server panel. See [Tools Reference](Docs/TOOLS_EN.md) for details.
+> Enabled by default; can be disabled in Window → MCP Server panel. See [Tools Reference](Docs/TOOLS_EN.md) for details.
 
 ## Installation
 
@@ -144,7 +144,7 @@ After installing via Git URL, UPM locks the current commit hash in the host proj
 To lock a specific version, append a Git Tag to the URL:
 
 ```
-https://github.com/yangfch3/Unity-MCP-Server.git#v0.4.1
+https://github.com/yangfch3/Unity-MCP-Server.git#v0.4.2
 ```
 
 Corresponding `Packages/manifest.json` configuration:
@@ -152,7 +152,7 @@ Corresponding `Packages/manifest.json` configuration:
 ```json
 {
   "dependencies": {
-    "com.yangfch3.unity-mcp": "https://github.com/yangfch3/Unity-MCP-Server.git#v0.4.1"
+    "com.yangfch3.unity-mcp": "https://github.com/yangfch3/Unity-MCP-Server.git#v0.4.2"
   }
 }
 ```

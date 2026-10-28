@@ -33,7 +33,7 @@ namespace UnityMcp.Editor.Tools
             "{\"type\":\"object\",\"properties\":{\"code\":{\"type\":\"string\",\"description\":\"C# source code. MUST contain a public static void Run() OR public static IEnumerator Run() entry point. IEnumerator entry runs across frames (yield return null waits one frame; yield return <IEnumerator> nests). Use Console.WriteLine() for output (captured to response output field, including across frames). Debug.Log() will NOT appear in output.\"},\"mainThread\":{\"type\":\"boolean\",\"description\":\"指定是否在主线程执行。true（默认）可调用 Unity API 但无超时保护；false 在后台线程执行，有超时保护但不可调用 Unity API。IEnumerator 入口只支持 true\"},\"timeout\":{\"type\":\"integer\",\"description\":\"超时时间（毫秒）。后台模式（mainThread:false）默认 5000，范围 1000-30000；跨帧模式（IEnumerator 入口）默认 30000，范围 1000-120000\"}},\"required\":[\"code\"]}";
 
         private static readonly object _executionLock = new object();
-        private const string PrefKey = "McpServer_CodeExecuteImmediate";
+        public const string DisablePrefKey = "McpServer_DisableCodeExecuteImmediate";
         private const int DefaultTimeoutMs = 5000;
         private const int DefaultCrossFrameTimeoutMs = 30000;
         private const int MaxCrossFrameTimeoutMs = 120000;
@@ -66,7 +66,7 @@ namespace UnityMcp.Editor.Tools
                 return Task.FromResult(ToolResult.Success(BuildResponse("", "missing 'code' parameter")));
 
             // Check toggle
-            if (!EditorPrefs.GetBool(PrefKey, false))
+            if (EditorPrefs.GetBool(DisablePrefKey, false))
                 return Task.FromResult(ToolResult.Error("code_executeImmediate is disabled. Enable it in Window > MCP Server config panel."));
 
             if (_crossFrameBusy)

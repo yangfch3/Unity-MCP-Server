@@ -37,7 +37,7 @@ Get FPS, DrawCall, memory usage and other key performance metrics. No parameters
 
 Capture the Game view and return an image. PlayMode only; defaults to `JPG` with a maximum height of `1024`.
 
-> **Disabled by default**: enable **Enable Game Screen Shot** under Window → MCP Server → Experimental to register it. The Agent may need to reconnect after toggling.
+> **Enabled by default**: uncheck **Enable Game Screen Shot** under Window → MCP Server → Experimental to unregister it. The Agent may need to reconnect after toggling.
 
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
@@ -330,7 +330,7 @@ Typical use: after `playmode_control(enter)`, wait for the game framework to com
 
 ## Code Tools (Experimental, Unity 2022 Mono only)
 
-> Must be manually enabled in the Experimental section of Window → MCP Server panel. Only available on Unity 2022 (Mono); not visible on Unity 6+.
+> Enabled by default; can be disabled in the Experimental section of Window → MCP Server panel. Only available on Unity 2022 (Mono); not visible on Unity 6+.
 
 ### `code_executeImmediate`
 

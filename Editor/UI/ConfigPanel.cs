@@ -10,8 +10,10 @@ namespace UnityMcp.Editor
     public class ConfigPanel : EditorWindow
     {
         private const string PortPrefKey = "McpServer_Port";
-        private const string CodeExecuteImmediatePrefKey = "McpServer_CodeExecuteImmediate";
-        private const string GameScreenshotPrefKey = UnityMcp.Editor.Tools.GameScreenshotTool.PrefKey;
+#if !UNITY_6000_OR_NEWER
+        private const string DisableCodeExecuteImmediatePrefKey = UnityMcp.Editor.Tools.ExecuteImmediateTool.DisablePrefKey;
+#endif
+        private const string DisableGameScreenshotPrefKey = UnityMcp.Editor.Tools.GameScreenshotTool.DisablePrefKey;
         private const string SceneScreenshotPrefKey = UnityMcp.Editor.Tools.SceneScreenshotTool.PrefKey;
         private const int DefaultPort = 8090;
 
@@ -31,10 +33,10 @@ namespace UnityMcp.Editor
         private void OnEnable()
         {
             _port = EditorPrefs.GetInt(PortPrefKey, DefaultPort);
-            _enableGameScreenshot = EditorPrefs.GetBool(GameScreenshotPrefKey, false);
+            _enableGameScreenshot = !EditorPrefs.GetBool(DisableGameScreenshotPrefKey, false);
             _enableSceneScreenshot = EditorPrefs.GetBool(SceneScreenshotPrefKey, false);
 #if !UNITY_6000_OR_NEWER
-            _codeExecuteImmediate = EditorPrefs.GetBool(CodeExecuteImmediatePrefKey, false);
+            _codeExecuteImmediate = !EditorPrefs.GetBool(DisableCodeExecuteImmediatePrefKey, false);
 #endif
         }
 
@@ -101,12 +103,12 @@ namespace UnityMcp.Editor
 
             var newGameScreenshot = EditorGUILayout.ToggleLeft(
                 new GUIContent("Enable Game Screen Shot",
-                    "开启后 debug_screenshotGame 工具才会注册到 MCP 服务（默认关闭）。服务运行中切换立即生效。"),
+                    "开启后 debug_screenshotGame 工具才会注册到 MCP 服务（默认开启）。服务运行中切换立即生效。"),
                 _enableGameScreenshot);
             if (newGameScreenshot != _enableGameScreenshot)
             {
                 _enableGameScreenshot = newGameScreenshot;
-                EditorPrefs.SetBool(GameScreenshotPrefKey, _enableGameScreenshot);
+                EditorPrefs.SetBool(DisableGameScreenshotPrefKey, !_enableGameScreenshot);
                 ApplyScreenshotRegistration();
             }
 
@@ -124,12 +126,12 @@ namespace UnityMcp.Editor
 #if !UNITY_6000_OR_NEWER
             var newCodeExec = EditorGUILayout.ToggleLeft(
                 new GUIContent("Code Execute Immediate",
-                    "实验性功能：允许 AI Agent 动态编译并执行 C# 代码。仅限 Mono 环境，存在安全风险，请仅在受信任的环境中开启。"),
+                    "实验性功能：允许 AI Agent 动态编译并执行 C# 代码（默认开启）。仅限 Mono 环境，存在安全风险，请仅在受信任的环境中使用。"),
                 _codeExecuteImmediate);
             if (newCodeExec != _codeExecuteImmediate)
             {
                 _codeExecuteImmediate = newCodeExec;
-                EditorPrefs.SetBool(CodeExecuteImmediatePrefKey, _codeExecuteImmediate);
+                EditorPrefs.SetBool(DisableCodeExecuteImmediatePrefKey, !_codeExecuteImmediate);
             }
 #endif
 
@@ -144,7 +146,7 @@ namespace UnityMcp.Editor
             if (registry == null)
                 return;
 
-            bool gameEnabled = EditorPrefs.GetBool(GameScreenshotPrefKey, false);
+            bool gameEnabled = !EditorPrefs.GetBool(DisableGameScreenshotPrefKey, false);
             if (gameEnabled)
                 registry.Register(new UnityMcp.Editor.Tools.GameScreenshotTool());
             else

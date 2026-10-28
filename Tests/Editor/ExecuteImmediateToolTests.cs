@@ -17,7 +17,7 @@ namespace UnityMcp.Editor.Tests
     {
         private ExecuteImmediateTool _tool;
         private bool _originalPrefValue;
-        private const string PrefKey = "McpServer_CodeExecuteImmediate";
+        private const string PrefKey = ExecuteImmediateTool.DisablePrefKey;
 
         [SetUp]
         public void SetUp()
@@ -70,7 +70,7 @@ namespace UnityMcp.Editor.Tests
         [Test]
         public void Execute_MissingCodeParameter_ReturnsError()
         {
-            EditorPrefs.SetBool(PrefKey, true);
+            EditorPrefs.SetBool(PrefKey, false);
             var result = _tool.Execute(new Dictionary<string, object>()).Result;
             Assert.IsFalse(result.IsError);
             var json = MiniJson.Deserialize(result.Content[0].Text) as Dictionary<string, object>;
@@ -84,7 +84,7 @@ namespace UnityMcp.Editor.Tests
         [Test]
         public void Execute_ToggleOff_ReturnsError()
         {
-            EditorPrefs.SetBool(PrefKey, false);
+            EditorPrefs.SetBool(PrefKey, true);
             var result = _tool.Execute(new Dictionary<string, object>
             {
                 { "code", "class Foo { public static void Run() {} }" }
@@ -96,7 +96,7 @@ namespace UnityMcp.Editor.Tests
         [Test]
         public void Execute_CompilationError_ReturnsErrorWithLineNumbers()
         {
-            EditorPrefs.SetBool(PrefKey, true);
+            EditorPrefs.SetBool(PrefKey, false);
             var result = _tool.Execute(new Dictionary<string, object>
             {
                 { "code", "invalid c# code {" }
@@ -115,7 +115,7 @@ namespace UnityMcp.Editor.Tests
         [Test]
         public void Execute_NoRunMethod_ReturnsError()
         {
-            EditorPrefs.SetBool(PrefKey, true);
+            EditorPrefs.SetBool(PrefKey, false);
             var result = _tool.Execute(new Dictionary<string, object>
             {
                 { "code", "class Foo { }" }
@@ -132,7 +132,7 @@ namespace UnityMcp.Editor.Tests
         [Test]
         public void Execute_SuccessfulExecution_ReturnsOutput()
         {
-            EditorPrefs.SetBool(PrefKey, true);
+            EditorPrefs.SetBool(PrefKey, false);
             var code = @"
 using System;
 public class Test
@@ -158,7 +158,7 @@ public class Test
         [Test]
         public void Execute_RuntimeException_ReturnsErrorAndPartialOutput()
         {
-            EditorPrefs.SetBool(PrefKey, true);
+            EditorPrefs.SetBool(PrefKey, false);
             var code = @"
 using System;
 public class Test
@@ -200,7 +200,7 @@ public class Test
         [Test]
         public void Execute_ExplicitMainThreadTrue_BehavesLikeDefault()
         {
-            EditorPrefs.SetBool(PrefKey, true);
+            EditorPrefs.SetBool(PrefKey, false);
             var code = @"
 using System;
 public class Test
@@ -225,7 +225,7 @@ public class Test
         [Test]
         public void Execute_MainThread_ExceptionContainsStackTrace()
         {
-            EditorPrefs.SetBool(PrefKey, true);
+            EditorPrefs.SetBool(PrefKey, false);
             var code = @"
 using System;
 public class Test
@@ -253,7 +253,7 @@ public class Test
         [Test]
         public void Execute_BackgroundModeFalse_SuccessWithEmptyWarning()
         {
-            EditorPrefs.SetBool(PrefKey, true);
+            EditorPrefs.SetBool(PrefKey, false);
             var code = @"
 using System;
 public class Test
@@ -278,7 +278,7 @@ public class Test
         [Test]
         public void Execute_ToggleOff_RejectsMainThreadTrue()
         {
-            EditorPrefs.SetBool(PrefKey, false);
+            EditorPrefs.SetBool(PrefKey, true);
             var result = _tool.Execute(new Dictionary<string, object>
             {
                 { "code", "public class T { public static void Run() {} }" },
@@ -291,7 +291,7 @@ public class Test
         [Test]
         public void Execute_ToggleOff_RejectsMainThreadFalse()
         {
-            EditorPrefs.SetBool(PrefKey, false);
+            EditorPrefs.SetBool(PrefKey, true);
             var result = _tool.Execute(new Dictionary<string, object>
             {
                 { "code", "public class T { public static void Run() {} }" },
@@ -304,7 +304,7 @@ public class Test
         [Test]
         public void Execute_CompilationError_SameForBothModes()
         {
-            EditorPrefs.SetBool(PrefKey, true);
+            EditorPrefs.SetBool(PrefKey, false);
             var invalidCode = "this is not valid csharp {{{";
 
             var resultMain = _tool.Execute(new Dictionary<string, object>
@@ -359,7 +359,7 @@ public class Test
         [Test]
         public void Execute_NoRunMethod_ErrorMentionsBothSignatures()
         {
-            EditorPrefs.SetBool(PrefKey, true);
+            EditorPrefs.SetBool(PrefKey, false);
             var result = _tool.Execute(new Dictionary<string, object>
             {
                 { "code", "class Foo { }" }
@@ -373,7 +373,7 @@ public class Test
         [Test]
         public void Execute_IEnumeratorWithBackgroundMode_IsRejected()
         {
-            EditorPrefs.SetBool(PrefKey, true);
+            EditorPrefs.SetBool(PrefKey, false);
             var code = @"
 using System.Collections;
 public class Test
@@ -394,7 +394,7 @@ public class Test
         [UnityTest]
         public IEnumerator Execute_CrossFrame_CapturesOutputAndReportsFrames()
         {
-            EditorPrefs.SetBool(PrefKey, true);
+            EditorPrefs.SetBool(PrefKey, false);
             var code = @"
 using System;
 using System.Collections;
@@ -424,7 +424,7 @@ public class Test
         [UnityTest]
         public IEnumerator Execute_CrossFrame_NestedCoroutineRuns()
         {
-            EditorPrefs.SetBool(PrefKey, true);
+            EditorPrefs.SetBool(PrefKey, false);
             var code = @"
 using System;
 using System.Collections;
@@ -460,7 +460,7 @@ public class Test
         [UnityTest]
         public IEnumerator Execute_CrossFrame_Timeout_KeepsPartialOutput()
         {
-            EditorPrefs.SetBool(PrefKey, true);
+            EditorPrefs.SetBool(PrefKey, false);
             var code = @"
 using System;
 using System.Collections;
@@ -490,7 +490,7 @@ public class Test
         [UnityTest]
         public IEnumerator Execute_CrossFrame_ExceptionReportsStackTrace()
         {
-            EditorPrefs.SetBool(PrefKey, true);
+            EditorPrefs.SetBool(PrefKey, false);
             var code = @"
 using System;
 using System.Collections;
@@ -516,7 +516,7 @@ public class Test
         [UnityTest]
         public IEnumerator Execute_WhileCrossFrameRunning_SecondCallIsRejected()
         {
-            EditorPrefs.SetBool(PrefKey, true);
+            EditorPrefs.SetBool(PrefKey, false);
             var longRunning = @"
 using System.Collections;
 public class Test
@@ -554,7 +554,7 @@ public class Test
         [Test, Timeout(20000)]
         public void Execute_Timeout_ReturnsTimeoutError()
         {
-            EditorPrefs.SetBool(PrefKey, true);
+            EditorPrefs.SetBool(PrefKey, false);
             var code = @"
 using System;
 public class Test

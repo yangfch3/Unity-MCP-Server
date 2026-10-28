@@ -37,7 +37,7 @@
 
 截取 Game 视图并返回图片。仅 PlayMode 可用，默认输出 `JPG`，最大高度 `1024`。
 
-> **默认关闭**：在 Window → MCP Server → Experimental 中开启 **Enable Game Screen Shot** 后注册。切换后 Agent 可能需要重连刷新工具列表。
+> **默认开启**：可在 Window → MCP Server → Experimental 中取消勾选 **Enable Game Screen Shot** 以注销。切换后 Agent 可能需要重连刷新工具列表。
 
 | 参数 | 类型 | 默认值 | 说明 |
 |------|------|--------|------|
@@ -330,7 +330,7 @@
 
 ## Code 工具（实验性，仅 Unity 2022 Mono）
 
-> 需在 Window → MCP Server 面板的 Experimental 区域手动开启。仅在 Unity 2022 (Mono) 下可用，Unity 6+ 不可见。
+> 默认开启，可在 Window → MCP Server 面板的 Experimental 区域关闭。仅在 Unity 2022 (Mono) 下可用，Unity 6+ 不可见。
 
 ### `code_executeImmediate`
 

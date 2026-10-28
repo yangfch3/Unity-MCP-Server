@@ -10,7 +10,7 @@ namespace UnityMcp.Editor.Tools
     /// </summary>
     public class GameScreenshotTool : IMcpTool, IConditionalTool
     {
-        public const string PrefKey = "McpServer_EnableGameScreenshot";
+        public const string DisablePrefKey = "McpServer_DisableGameScreenshot";
         public const string ToolName = "debug_screenshotGame";
 
         public string Name => ToolName;
@@ -19,7 +19,7 @@ namespace UnityMcp.Editor.Tools
         public string InputSchema => "{\"type\":\"object\",\"properties\":{\"maxWidth\":{\"type\":\"integer\",\"description\":\"最大宽度，超出则等比缩小，0=不限制\",\"default\":0},\"maxHeight\":{\"type\":\"integer\",\"description\":\"最大高度，超出则等比缩小，0=不限制\",\"default\":1024},\"format\":{\"type\":\"string\",\"enum\":[\"png\",\"jpg\"],\"description\":\"图片格式\",\"default\":\"jpg\"},\"quality\":{\"type\":\"integer\",\"description\":\"jpg 质量 1-100\",\"default\":75}}}";
 
         /// <summary>是否启用 Game 截图工具。</summary>
-        public bool IsEnabled => EditorPrefs.GetBool(PrefKey, false);
+        public bool IsEnabled => !EditorPrefs.GetBool(DisablePrefKey, false);
 
         /// <summary>执行 Game 截图。</summary>
         public Task<ToolResult> Execute(Dictionary<string, object> parameters)
