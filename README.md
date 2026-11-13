@@ -20,6 +20,7 @@ Agent（如 Kiro、Cursor、Claude Code）可通过标准 MCP 协议连接到 Un
 - **进程内运行** — 无需外部 Node.js/Python 进程，直接在 Editor 内启动
 - **可扩展工具系统** — 实现 `IMcpTool` 接口即可注册新工具，零修改核心代码
 - **Domain Reload 自动恢复** — 进入/退出 PlayMode 后服务自动重启
+- **精简输出** — 返回结果省略默认值与冗余字段（如树节点的空 `children`、可由 `path` 推出的 `name`），节省 Agent 上下文
 
 ### 内置工具
 
@@ -144,7 +145,7 @@ UPM 通过 Git URL 安装后，会在宿主项目的 `packages-lock.json` 中锁
 如需锁定特定版本，可在 URL 末尾追加 Git Tag：
 
 ```
-https://github.com/yangfch3/Unity-MCP-Server.git#v0.4.2
+https://github.com/yangfch3/Unity-MCP-Server.git#v0.5.0
 ```
 
 对应 `Packages/manifest.json` 配置：
@@ -152,7 +153,7 @@ https://github.com/yangfch3/Unity-MCP-Server.git#v0.4.2
 ```json
 {
   "dependencies": {
-    "com.yangfch3.unity-mcp": "https://github.com/yangfch3/Unity-MCP-Server.git#v0.4.2"
+    "com.yangfch3.unity-mcp": "https://github.com/yangfch3/Unity-MCP-Server.git#v0.5.0"
   }
 }
 ```

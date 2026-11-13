@@ -14,7 +14,7 @@ namespace UnityMcp.Editor
     {
         private const string ProtocolVersion = "2025-03-26";
         private const string ServerName = "unity-mcp";
-        private const string ServerVersion = "0.4.2";
+        private const string ServerVersion = "0.5.0";
 
         private readonly ToolRegistry _registry;
         private readonly IMainThreadQueue _mainThreadQueue;

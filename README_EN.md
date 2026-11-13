@@ -20,6 +20,7 @@ This plugin is positioned as an AI Agent's **Unity perception layer + diagnostic
 - **In-Process** — No external Node.js/Python process required, runs directly inside the Editor
 - **Extensible Tool System** — Implement the `IMcpTool` interface to register new tools with zero core code changes
 - **Domain Reload Auto-Recovery** — Service automatically restarts after entering/exiting PlayMode
+- **Compact Output** — Results omit defaults and redundant fields (e.g. empty `children` on tree nodes, `name` derivable from `path`) to save Agent context
 
 ### Built-in Tools
 
@@ -144,7 +145,7 @@ After installing via Git URL, UPM locks the current commit hash in the host proj
 To lock a specific version, append a Git Tag to the URL:
 
 ```
-https://github.com/yangfch3/Unity-MCP-Server.git#v0.4.2
+https://github.com/yangfch3/Unity-MCP-Server.git#v0.5.0
 ```
 
 Corresponding `Packages/manifest.json` configuration:
@@ -152,7 +153,7 @@ Corresponding `Packages/manifest.json` configuration:
 ```json
 {
   "dependencies": {
-    "com.yangfch3.unity-mcp": "https://github.com/yangfch3/Unity-MCP-Server.git#v0.4.2"
+    "com.yangfch3.unity-mcp": "https://github.com/yangfch3/Unity-MCP-Server.git#v0.5.0"
   }
 }
 ```
