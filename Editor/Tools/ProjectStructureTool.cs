@@ -14,7 +14,7 @@ namespace UnityMcp.Editor.Tools
     {
         public string Name => "editor_getProjectStructure";
         public string Category => "editor";
-        public string Description => "获取 Assets 目录树（目录带 children，文件只有 name）";
+        public string Description => "获取 Assets 目录树";
         public string InputSchema => "{\"type\":\"object\",\"properties\":{\"maxDepth\":{\"type\":\"integer\",\"description\":\"最大遍历深度\",\"default\":3}}}";
 
         public Task<ToolResult> Execute(Dictionary<string, object> parameters)

@@ -20,7 +20,7 @@ namespace UnityMcp.Editor.Tools
         public string Category => "editor";
 
         /// <inheritdoc />
-        public string Description => "修改 Transform / RectTransform 属性，按需传，只回显传入项";
+        public string Description => "修改 Transform / RectTransform 属性";
 
         /// <inheritdoc />
         public string InputSchema => "{\"type\":\"object\",\"properties\":{\"instanceID\":{\"type\":\"integer\",\"description\":\"优先于 path\"},\"path\":{\"type\":\"string\",\"description\":\"如 /Root/Child\"},\"localPosition\":{\"type\":\"array\",\"items\":{\"type\":\"number\"},\"description\":\"[x,y,z]\"},\"localRotation\":{\"type\":\"array\",\"items\":{\"type\":\"number\"},\"description\":\"欧拉角 [x,y,z]\"},\"localScale\":{\"type\":\"array\",\"items\":{\"type\":\"number\"},\"description\":\"[x,y,z]\"},\"rect\":{\"type\":\"object\",\"description\":\"仅 RectTransform 节点\",\"properties\":{\"anchoredPosition\":{\"type\":\"array\",\"items\":{\"type\":\"number\"},\"description\":\"[x,y]\"},\"sizeDelta\":{\"type\":\"array\",\"items\":{\"type\":\"number\"},\"description\":\"[w,h]\"},\"pivot\":{\"type\":\"array\",\"items\":{\"type\":\"number\"},\"description\":\"[x,y]\"},\"anchorMin\":{\"type\":\"array\",\"items\":{\"type\":\"number\"},\"description\":\"[x,y]\"},\"anchorMax\":{\"type\":\"array\",\"items\":{\"type\":\"number\"},\"description\":\"[x,y]\"}}}}}";

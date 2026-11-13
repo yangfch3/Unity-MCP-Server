@@ -15,7 +15,7 @@ namespace UnityMcp.Editor.Tools
     {
         public string Name => "console_getLogs";
         public string Category => "debug";
-        public string Description => "获取 Unity Console 最近 N 条日志（Error 堆栈仅前 5 行，完整堆栈用 debug_getStackTrace）";
+        public string Description => "获取 Unity Console 最近 N 条日志";
         public string InputSchema =>
             "{\"type\":\"object\",\"properties\":{"
             + "\"count\":{\"type\":\"integer\",\"description\":\"日志条数\",\"default\":20},"

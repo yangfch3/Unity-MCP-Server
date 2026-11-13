@@ -21,10 +21,10 @@ namespace UnityMcp.Editor.Tools
         public string Category => "editor";
 
         /// <inheritdoc />
-        public string Description => "获取 GameObject 树（名称+组件，省略 Transform；active 仅 false 时输出）";
+        public string Description => "获取 GameObject 树（名称+组件）";
 
         /// <inheritdoc />
-        public string InputSchema => "{\"type\":\"object\",\"properties\":{\"maxDepth\":{\"type\":\"integer\",\"description\":\"最大遍历深度，-1 不限；被截断节点输出 childCount\",\"default\":" + DefaultMaxDepth + "},\"root\":{\"type\":\"string\",\"enum\":[\"\",\"selection\"],\"description\":\"空串=Prefab Stage 优先，回退 Active Scene；selection=以当前选中为根\",\"default\":\"\"}}}";
+        public string InputSchema => "{\"type\":\"object\",\"properties\":{\"maxDepth\":{\"type\":\"integer\",\"description\":\"最大遍历深度，-1 不限\",\"default\":" + DefaultMaxDepth + "},\"root\":{\"type\":\"string\",\"enum\":[\"\",\"selection\"],\"description\":\"空串=Prefab Stage 优先，回退 Active Scene；selection=以当前选中为根\",\"default\":\"\"}}}";
 
         private const int DefaultMaxDepth = 5;
 
