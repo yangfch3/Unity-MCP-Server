@@ -25,6 +25,14 @@ namespace UnityMcp.Editor.Tests
             ConsoleTool.ClearBuffer();
         }
 
+        [Test]
+        public void TruncateStackTrace_KeepsFirstFiveLines()
+        {
+            Assert.AreEqual("a\nb", ConsoleTool.TruncateStackTrace("a\nb\n"));
+            var truncated = ConsoleTool.TruncateStackTrace("1\n2\n3\n4\n5\n6\n7\n");
+            Assert.AreEqual("1\n2\n3\n4\n5\n...(+2 lines)", truncated);
+        }
+
         // Requirements: 3.2 — no level param returns all levels
         [Test]
         public void NoLevelParam_ReturnsAllLevels()

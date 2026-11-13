@@ -56,6 +56,27 @@ namespace UnityMcp.Editor.Tests
         }
 
         [Test]
+        public void Execute_PropertyStyleName_FallsBackToSerializedName()
+        {
+            var go = new GameObject("FieldAlias");
+            var col = go.AddComponent<BoxCollider>();
+            _created.Add(go);
+
+            var result = _tool.Execute(new Dictionary<string, object>
+            {
+                { "path", HierarchyToolTestHelper.GetGameObjectPath(go) },
+                { "componentType", "BoxCollider" },
+                { "fieldName", "isTrigger" },
+                { "value", true }
+            }).Result;
+
+            Assert.IsFalse(result.IsError, result.Content[0].Text);
+            Assert.IsTrue(col.isTrigger);
+            var json = MiniJson.Deserialize(result.Content[0].Text) as Dictionary<string, object>;
+            Assert.AreEqual("m_IsTrigger", json["fieldName"], "response should report the resolved serialized name");
+        }
+
+        [Test]
         public void Execute_SetFloatField_SetsCorrectly()
         {
             var go = new GameObject("FloatFieldGO");

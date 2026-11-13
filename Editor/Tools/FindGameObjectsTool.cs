@@ -101,9 +101,7 @@ namespace UnityMcp.Editor.Tools
             {
                 if (i > 0) sb.Append(',');
                 var go = results[i];
-                sb.Append("{\"name\":");
-                sb.Append(MiniJson.SerializeString(go.name));
-                sb.Append(",\"path\":");
+                sb.Append("{\"path\":");
                 sb.Append(MiniJson.SerializeString(GameObjectPathHelper.GetGameObjectPath(go)));
                 sb.Append(",\"instanceID\":");
                 sb.Append(go.GetInstanceID());

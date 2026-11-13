@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEditor;
@@ -19,10 +20,10 @@ namespace UnityMcp.Editor.Tools
         public string Category => "editor";
 
         /// <inheritdoc />
-        public string Description => "修改 Transform / RectTransform 属性";
+        public string Description => "修改 Transform / RectTransform 属性，按需传，只回显传入项";
 
         /// <inheritdoc />
-        public string InputSchema => "{\"type\":\"object\",\"description\":\"修改 Transform/RectTransform。instanceID/path 二选一，按需传属性\",\"properties\":{\"instanceID\":{\"type\":\"integer\"},\"path\":{\"type\":\"string\"},\"localPosition\":{\"type\":\"array\",\"items\":{\"type\":\"number\"},\"description\":\"[x,y,z]\"},\"localRotation\":{\"type\":\"array\",\"items\":{\"type\":\"number\"},\"description\":\"欧拉角 [x,y,z]\"},\"localScale\":{\"type\":\"array\",\"items\":{\"type\":\"number\"},\"description\":\"[x,y,z]\"},\"rect\":{\"type\":\"object\",\"description\":\"RectTransform 专用，仅 UI 节点生效，按需传\",\"properties\":{\"anchoredPosition\":{\"type\":\"array\",\"description\":\"[x,y]\"},\"sizeDelta\":{\"type\":\"array\",\"description\":\"[w,h]\"},\"pivot\":{\"type\":\"array\",\"description\":\"[x,y]\"},\"anchorMin\":{\"type\":\"array\",\"description\":\"[x,y]\"},\"anchorMax\":{\"type\":\"array\",\"description\":\"[x,y]\"}}}}}";
+        public string InputSchema => "{\"type\":\"object\",\"properties\":{\"instanceID\":{\"type\":\"integer\",\"description\":\"优先于 path\"},\"path\":{\"type\":\"string\",\"description\":\"如 /Root/Child\"},\"localPosition\":{\"type\":\"array\",\"items\":{\"type\":\"number\"},\"description\":\"[x,y,z]\"},\"localRotation\":{\"type\":\"array\",\"items\":{\"type\":\"number\"},\"description\":\"欧拉角 [x,y,z]\"},\"localScale\":{\"type\":\"array\",\"items\":{\"type\":\"number\"},\"description\":\"[x,y,z]\"},\"rect\":{\"type\":\"object\",\"description\":\"仅 RectTransform 节点\",\"properties\":{\"anchoredPosition\":{\"type\":\"array\",\"items\":{\"type\":\"number\"},\"description\":\"[x,y]\"},\"sizeDelta\":{\"type\":\"array\",\"items\":{\"type\":\"number\"},\"description\":\"[w,h]\"},\"pivot\":{\"type\":\"array\",\"items\":{\"type\":\"number\"},\"description\":\"[x,y]\"},\"anchorMin\":{\"type\":\"array\",\"items\":{\"type\":\"number\"},\"description\":\"[x,y]\"},\"anchorMax\":{\"type\":\"array\",\"items\":{\"type\":\"number\"},\"description\":\"[x,y]\"}}}}}";
 
         /// <inheritdoc />
         public Task<ToolResult> Execute(Dictionary<string, object> parameters)
@@ -100,36 +101,21 @@ namespace UnityMcp.Editor.Tools
                 if (!hasAnyProp)
                     return Task.FromResult(ToolResult.Error("至少需要提供一个属性参数"));
 
-                // 6. Build JSON response
-                var goPath = GameObjectPathHelper.GetGameObjectPath(go);
+                // 6. Build JSON response：只回显本次传入的属性（读回实际值）
                 var sb = new StringBuilder();
-                sb.Append("{\"name\":");
-                sb.Append(MiniJson.SerializeString(go.name));
-                sb.Append(",\"path\":");
-                sb.Append(MiniJson.SerializeString(goPath));
-                sb.Append(",\"localPosition\":\"");
-                AppendVector3(sb, transform.localPosition);
-                sb.Append("\",\"localEulerAngles\":\"");
-                AppendVector3(sb, transform.localEulerAngles);
-                sb.Append("\",\"localScale\":\"");
-                AppendVector3(sb, transform.localScale);
-                sb.Append('"');
-
+                sb.Append("{\"path\":");
+                sb.Append(MiniJson.SerializeString(GameObjectPathHelper.GetGameObjectPath(go)));
+                if (HasParam(parameters, "localPosition")) AppendVector(sb, "localPosition", transform.localPosition);
+                if (HasParam(parameters, "localRotation")) AppendVector(sb, "localRotation", transform.localEulerAngles);
+                if (HasParam(parameters, "localScale")) AppendVector(sb, "localScale", transform.localScale);
                 if (transform is RectTransform rtResult)
                 {
-                    sb.Append(",\"anchoredPosition\":\"");
-                    AppendVector2(sb, rtResult.anchoredPosition);
-                    sb.Append("\",\"sizeDelta\":\"");
-                    AppendVector2(sb, rtResult.sizeDelta);
-                    sb.Append("\",\"pivot\":\"");
-                    AppendVector2(sb, rtResult.pivot);
-                    sb.Append("\",\"anchorMin\":\"");
-                    AppendVector2(sb, rtResult.anchorMin);
-                    sb.Append("\",\"anchorMax\":\"");
-                    AppendVector2(sb, rtResult.anchorMax);
-                    sb.Append('"');
+                    if (HasParam(rtParams, "anchoredPosition")) AppendVector(sb, "anchoredPosition", rtResult.anchoredPosition);
+                    if (HasParam(rtParams, "sizeDelta")) AppendVector(sb, "sizeDelta", rtResult.sizeDelta);
+                    if (HasParam(rtParams, "pivot")) AppendVector(sb, "pivot", rtResult.pivot);
+                    if (HasParam(rtParams, "anchorMin")) AppendVector(sb, "anchorMin", rtResult.anchorMin);
+                    if (HasParam(rtParams, "anchorMax")) AppendVector(sb, "anchorMax", rtResult.anchorMax);
                 }
-
                 sb.Append('}');
 
                 return Task.FromResult(ToolResult.Success(sb.ToString()));
@@ -140,24 +126,23 @@ namespace UnityMcp.Editor.Tools
             }
         }
 
-        private static void AppendVector3(StringBuilder sb, Vector3 v)
+        private static bool HasParam(Dictionary<string, object> dict, string key)
         {
-            sb.Append('[');
-            sb.Append(v.x.ToString("G"));
-            sb.Append(", ");
-            sb.Append(v.y.ToString("G"));
-            sb.Append(", ");
-            sb.Append(v.z.ToString("G"));
-            sb.Append(']');
+            return dict != null && dict.TryGetValue(key, out var raw) && raw != null;
         }
 
-        private static void AppendVector2(StringBuilder sb, Vector2 v)
+        private static string Num(float f) => f.ToString("G", CultureInfo.InvariantCulture);
+
+        private static void AppendVector(StringBuilder sb, string key, Vector3 v)
         {
-            sb.Append('[');
-            sb.Append(v.x.ToString("G"));
-            sb.Append(", ");
-            sb.Append(v.y.ToString("G"));
-            sb.Append(']');
+            sb.Append(",\"").Append(key).Append("\":[")
+              .Append(Num(v.x)).Append(',').Append(Num(v.y)).Append(',').Append(Num(v.z)).Append(']');
+        }
+
+        private static void AppendVector(StringBuilder sb, string key, Vector2 v)
+        {
+            sb.Append(",\"").Append(key).Append("\":[")
+              .Append(Num(v.x)).Append(',').Append(Num(v.y)).Append(']');
         }
     }
 }

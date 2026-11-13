@@ -115,6 +115,25 @@ namespace UnityMcp.Editor.Tests
         }
 
         [Test]
+        public void Execute_DisableCollider_SetsEnabled()
+        {
+            var go = new GameObject("DisableCollider");
+            var col = go.AddComponent<BoxCollider>();
+            _created.Add(go);
+            var path = HierarchyToolTestHelper.GetGameObjectPath(go);
+
+            var result = _tool.Execute(new Dictionary<string, object>
+            {
+                { "path", path },
+                { "componentType", "BoxCollider" },
+                { "enabled", false }
+            }).Result;
+
+            Assert.IsFalse(result.IsError);
+            Assert.IsFalse(col.enabled, "BoxCollider should be disabled after setting enabled=false");
+        }
+
+        [Test]
         public void Execute_DisableRenderer_SetsEnabled()
         {
             var go = new GameObject("DisableRenderer");
@@ -173,12 +192,11 @@ namespace UnityMcp.Editor.Tests
             var json = MiniJson.Deserialize(result.Content[0].Text) as Dictionary<string, object>;
             Assert.IsNotNull(json);
             Assert.IsTrue(json.ContainsKey("componentType"), "JSON should contain 'componentType'");
-            Assert.IsTrue(json.ContainsKey("name"), "JSON should contain 'name'");
+            Assert.IsFalse(json.ContainsKey("name"), "name is derivable from path");
             Assert.IsTrue(json.ContainsKey("path"), "JSON should contain 'path'");
             Assert.IsTrue(json.ContainsKey("enabled"), "JSON should contain 'enabled'");
 
             Assert.AreEqual("Camera", json["componentType"]);
-            Assert.AreEqual("JSONCheck", json["name"]);
             Assert.AreEqual(expectedPath, json["path"]);
             Assert.AreEqual(false, json["enabled"]);
         }

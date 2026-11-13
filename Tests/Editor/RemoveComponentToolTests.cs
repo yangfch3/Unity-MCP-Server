@@ -107,11 +107,10 @@ namespace UnityMcp.Editor.Tests
             var json = MiniJson.Deserialize(result.Content[0].Text) as Dictionary<string, object>;
             Assert.IsNotNull(json);
             Assert.IsTrue(json.ContainsKey("componentType"), "JSON should contain 'componentType'");
-            Assert.IsTrue(json.ContainsKey("name"), "JSON should contain 'name'");
+            Assert.IsFalse(json.ContainsKey("name"), "name is derivable from path");
             Assert.IsTrue(json.ContainsKey("path"), "JSON should contain 'path'");
 
             Assert.AreEqual("BoxCollider", json["componentType"]);
-            Assert.AreEqual("JSONCheckRemove", json["name"]);
             Assert.AreEqual(path, json["path"]);
         }
 

@@ -68,9 +68,34 @@ namespace UnityMcp.Editor.Tests
             var result = _tool.Execute(args).Result;
             Assert.IsFalse(result.IsError);
             var json = result.Content[0].Text;
-            // maxDepth=0 时根节点的 children 应为空数组
+            // maxDepth=0 时根节点不展开 children，只给 childCount
             Assert.IsTrue(json.Contains("DepthParent"));
             Assert.IsFalse(json.Contains("DepthChild"));
+            Assert.IsTrue(json.Contains("\"childCount\":1"));
+        }
+
+        [Test]
+        public void Execute_OmitsDefaultFields()
+        {
+            var go = new GameObject("LeafActive");
+            _created.Add(go);
+            var inactive = new GameObject("LeafInactive");
+            _created.Add(inactive);
+            inactive.SetActive(false);
+
+            var nodes = MiniJson.Deserialize(_tool.Execute(new Dictionary<string, object>()).Result.Content[0].Text) as List<object>;
+            Dictionary<string, object> activeNode = null, inactiveNode = null;
+            foreach (var n in nodes)
+            {
+                var d = (Dictionary<string, object>)n;
+                if ((string)d["name"] == "LeafActive") activeNode = d;
+                if ((string)d["name"] == "LeafInactive") inactiveNode = d;
+            }
+            Assert.IsNotNull(activeNode);
+            Assert.IsFalse(activeNode.ContainsKey("active"));
+            Assert.IsFalse(activeNode.ContainsKey("children"));
+            Assert.IsFalse(activeNode.ContainsKey("components"), "Transform-only node should omit components");
+            Assert.AreEqual(false, inactiveNode["active"]);
         }
 
         [Test]
@@ -83,7 +108,7 @@ namespace UnityMcp.Editor.Tests
             var result = _tool.Execute(new Dictionary<string, object>()).Result;
             var json = result.Content[0].Text;
             Assert.IsTrue(json.Contains("BoxCollider"));
-            Assert.IsTrue(json.Contains("Transform"));
+            Assert.IsFalse(json.Contains("\"Transform\""));
         }
 
         // ── root 参数相关测试 ──

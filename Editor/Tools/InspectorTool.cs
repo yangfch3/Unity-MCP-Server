@@ -59,8 +59,12 @@ namespace UnityMcp.Editor.Tools
                             sb.Append(MiniJson.SerializeString(prop.name));
                             sb.Append(",\"type\":");
                             sb.Append(MiniJson.SerializeString(prop.propertyType.ToString()));
-                            sb.Append(",\"value\":");
-                            sb.Append(MiniJson.SerializeString(GetPropertyValue(prop)));
+                            var value = GetPropertyValue(prop);
+                            if (value != null)
+                            {
+                                sb.Append(",\"value\":");
+                                sb.Append(MiniJson.SerializeString(value));
+                            }
                             sb.Append('}');
                         }
                         while (prop.NextVisible(false));
@@ -111,7 +115,7 @@ namespace UnityMcp.Editor.Tools
                 case SerializedPropertyType.ObjectReference:
                     return prop.objectReferenceValue != null ? prop.objectReferenceValue.name : "null";
                 default:
-                    return prop.propertyType.ToString();
+                    return null; // 未支持的类型（Generic/数组等）不输出 value，避免与 type 重复
             }
         }
     }

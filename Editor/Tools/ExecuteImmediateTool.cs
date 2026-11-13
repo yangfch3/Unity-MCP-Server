@@ -30,7 +30,7 @@ namespace UnityMcp.Editor.Tools
 
         /// <summary>JSON Schema 描述参数。</summary>
         public string InputSchema =>
-            "{\"type\":\"object\",\"properties\":{\"code\":{\"type\":\"string\",\"description\":\"C# source code. MUST contain a public static void Run() OR public static IEnumerator Run() entry point. IEnumerator entry runs across frames (yield return null waits one frame; yield return <IEnumerator> nests). Use Console.WriteLine() for output (captured to response output field, including across frames). Debug.Log() will NOT appear in output.\"},\"mainThread\":{\"type\":\"boolean\",\"description\":\"指定是否在主线程执行。true（默认）可调用 Unity API 但无超时保护；false 在后台线程执行，有超时保护但不可调用 Unity API。IEnumerator 入口只支持 true\"},\"timeout\":{\"type\":\"integer\",\"description\":\"超时时间（毫秒）。后台模式（mainThread:false）默认 5000，范围 1000-30000；跨帧模式（IEnumerator 入口）默认 30000，范围 1000-120000\"}},\"required\":[\"code\"]}";
+            "{\"type\":\"object\",\"properties\":{\"code\":{\"type\":\"string\",\"description\":\"C# 源码，入口为 public static void Run() 或 public static IEnumerator Run()（跨帧：yield return null 等一帧，yield return IEnumerator 嵌套）。用 Console.WriteLine 输出，Debug.Log 不进 output\"},\"mainThread\":{\"type\":\"boolean\",\"description\":\"true（默认）可调 Unity API，无超时保护；false 在后台线程，有超时保护但不可调 Unity API。IEnumerator 入口仅支持 true\"},\"timeout\":{\"type\":\"integer\",\"description\":\"毫秒。后台模式默认 5000（1000-30000）；跨帧模式默认 30000（1000-120000）\"}},\"required\":[\"code\"]}";
 
         private static readonly object _executionLock = new object();
         public const string DisablePrefKey = "McpServer_DisableCodeExecuteImmediate";
@@ -40,10 +40,6 @@ namespace UnityMcp.Editor.Tools
 
         /// <summary>单帧内最多推进的迭代步数，防止不 yield 的嵌套协程冻结 Editor。</summary>
         private const int MaxStepsPerFrame = 1000;
-
-        /// <summary>跨帧模式统一的 warning 文案。</summary>
-        private const string CrossFrameWarning =
-            "[cross-frame mode] Driven by EditorApplication.update; Console output captured for the whole run.";
 
         /// <summary>
         /// 跨帧执行占用标记。跨帧期间 Console.Out 处于重定向状态，
@@ -63,15 +59,15 @@ namespace UnityMcp.Editor.Tools
 
 
             if (string.IsNullOrEmpty(code))
-                return Task.FromResult(ToolResult.Success(BuildResponse("", "missing 'code' parameter")));
+                return Task.FromResult(Respond("", "missing 'code' parameter"));
 
             // Check toggle
             if (EditorPrefs.GetBool(DisablePrefKey, false))
                 return Task.FromResult(ToolResult.Error("code_executeImmediate is disabled. Enable it in Window > MCP Server config panel."));
 
             if (_crossFrameBusy)
-                return Task.FromResult(ToolResult.Success(BuildResponse("",
-                    "A cross-frame execution (IEnumerator Run) is still running. Wait for it to finish before issuing another call.")));
+                return Task.FromResult(Respond("",
+                    "A cross-frame execution (IEnumerator Run) is still running. Wait for it to finish before issuing another call."));
 
             lock (_executionLock)
             {
@@ -88,13 +84,13 @@ namespace UnityMcp.Editor.Tools
                             sb.AppendFormat("({0},{1}): {2}", err.Line, err.Column, err.ErrorText);
                         }
                     }
-                    return Task.FromResult(ToolResult.Success(BuildResponse("", sb.ToString())));
+                    return Task.FromResult(Respond("", sb.ToString()));
                 }
 
                 // Find entry point
                 MethodInfo entryPoint = FindEntryPoint(compileResult.CompiledAssembly);
                 if (entryPoint == null)
-                    return Task.FromResult(ToolResult.Success(BuildResponse("", "No entry point found. Define a public static void Run() or public static IEnumerator Run() method.")));
+                    return Task.FromResult(Respond("", "No entry point found. Define a public static void Run() or public static IEnumerator Run() method."));
 
                 // Parse mainThread parameter (default: true)
                 bool useMainThread = true;
@@ -108,28 +104,18 @@ namespace UnityMcp.Editor.Tools
                 if (entryPoint.ReturnType == typeof(IEnumerator))
                 {
                     if (!useMainThread)
-                        return Task.FromResult(ToolResult.Success(BuildResponse("",
-                            "IEnumerator Run() requires mainThread:true (frames are only driven on the main thread).")));
+                        return Task.FromResult(Respond("",
+                            "IEnumerator Run() requires mainThread:true (frames are only driven on the main thread)."));
 
                     return RunAcrossFrames(entryPoint,
                         ParseTimeout(parameters, DefaultCrossFrameTimeoutMs, MaxCrossFrameTimeoutMs));
                 }
 
-                // Branch execution
-                string warning;
-                string output, error;
-                if (useMainThread)
-                {
-                    (output, error) = RunOnMainThread(entryPoint);
-                    warning = "[WARNING: mainThread mode] No timeout protection. Infinite loops will freeze the Editor. Use mainThread:false for timeout safety.";
-                }
-                else
-                {
-                    (output, error) = RunWithTimeout(entryPoint, ParseTimeout(parameters, DefaultTimeoutMs, 30000));
-                    warning = "";
-                }
+                var (output, error) = useMainThread
+                    ? RunOnMainThread(entryPoint)
+                    : RunWithTimeout(entryPoint, ParseTimeout(parameters, DefaultTimeoutMs, 30000));
 
-                return Task.FromResult(ToolResult.Success(BuildResponse(output, error, warning)));
+                return Task.FromResult(Respond(output, error));
             }
         }
 
@@ -246,16 +232,15 @@ namespace UnityMcp.Editor.Tools
             {
                 var inner = (ex as TargetInvocationException)?.InnerException ?? ex;
                 Console.SetOut(originalOut);
-                tcs.SetResult(ToolResult.Success(BuildResponse(writer.ToString(),
-                    inner.Message + "\n" + inner.StackTrace, CrossFrameWarning)));
+                tcs.SetResult(Respond(writer.ToString(), FormatError(inner)));
                 return tcs.Task;
             }
 
             if (root == null)
             {
                 Console.SetOut(originalOut);
-                tcs.SetResult(ToolResult.Success(BuildResponse(writer.ToString(),
-                    "IEnumerator Run() returned null.", CrossFrameWarning)));
+                tcs.SetResult(Respond(writer.ToString(),
+                    "IEnumerator Run() returned null."));
                 return tcs.Task;
             }
 
@@ -275,8 +260,8 @@ namespace UnityMcp.Editor.Tools
                 AssemblyReloadEvents.beforeAssemblyReload -= onReload;
                 Console.SetOut(originalOut);
                 _crossFrameBusy = false;
-                tcs.TrySetResult(ToolResult.Success(BuildResponse(writer.ToString(), error,
-                    CrossFrameWarning, frames, (int)watch.ElapsedMilliseconds)));
+                tcs.TrySetResult(Respond(writer.ToString(), error,
+                    frames, (int)watch.ElapsedMilliseconds));
             };
 
             onReload = () => finish("Aborted by assembly reload (domain reload) before the coroutine finished.");
@@ -312,7 +297,7 @@ namespace UnityMcp.Editor.Tools
                 }
                 catch (Exception ex)
                 {
-                    finish(ex.Message + "\n" + ex.StackTrace);
+                    finish(FormatError(ex));
                     return;
                 }
 
@@ -339,11 +324,11 @@ namespace UnityMcp.Editor.Tools
             catch (TargetInvocationException ex)
             {
                 var inner = ex.InnerException ?? ex;
-                return (writer.ToString(), inner.Message + "\n" + inner.StackTrace);
+                return (writer.ToString(), FormatError(inner));
             }
             catch (Exception ex)
             {
-                return (writer.ToString(), ex.Message + "\n" + ex.StackTrace);
+                return (writer.ToString(), FormatError(ex));
             }
             finally
             {
@@ -390,7 +375,7 @@ namespace UnityMcp.Editor.Tools
                 }
 
                 if (capturedException != null)
-                    return (output, capturedException.Message + "\n" + capturedException.StackTrace);
+                    return (output, FormatError(capturedException));
 
                 return (output, "");
             }
@@ -400,10 +385,37 @@ namespace UnityMcp.Editor.Tools
             }
         }
 
+        /// <summary>异常信息 + 堆栈，去掉末尾的反射调用与本工具驱动帧，只留用户代码帧。</summary>
+        internal static string FormatError(Exception ex)
+        {
+            var lines = (ex.StackTrace ?? "").Split('\n');
+            int end = lines.Length;
+            while (end > 0 && IsInfraFrame(lines[end - 1]))
+                end--;
+
+            var sb = new StringBuilder(ex.Message);
+            for (int i = 0; i < end; i++)
+                sb.Append('\n').Append(NoSymbolSuffix.Replace(lines[i].TrimEnd('\r'), ""));
+            return sb.ToString();
+        }
+
+        /// <summary>无符号帧尾部的 " [0x..] in &lt;guid&gt;:0"，只有 IL 偏移，无行号信息。</summary>
+        private static readonly System.Text.RegularExpressions.Regex NoSymbolSuffix =
+            new System.Text.RegularExpressions.Regex(@"\s*\[0x[0-9a-fA-F]+\] in <[0-9a-fA-F]+>:0\s*$");
+
+        private static bool IsInfraFrame(string line)
+        {
+            return line.Trim().Length == 0
+                || line.Contains("System.Reflection.")
+                || line.Contains("(wrapper managed-to-native)")
+                || line.Contains("UnityMcp.Editor.Tools.ExecuteImmediateTool");
+        }
+
         /// <summary>
-        /// 构建结构化 JSON 响应。frames/elapsedMs 为负时不输出（仅跨帧模式使用）。
+        /// 构建结构化 JSON 响应；失败时以 isError 返回（内容相同）。
+        /// error 为空时不输出；frames/elapsedMs 为负时不输出（仅跨帧模式使用）。
         /// </summary>
-        private static string BuildResponse(string output, string error, string warning = "",
+        private static ToolResult Respond(string output, string error,
             int frames = -1, int elapsedMs = -1)
         {
             bool success = string.IsNullOrEmpty(error);
@@ -412,10 +424,11 @@ namespace UnityMcp.Editor.Tools
             sb.Append(success ? "true" : "false");
             sb.Append(",\"output\":");
             sb.Append(MiniJson.SerializeString(output ?? ""));
-            sb.Append(",\"error\":");
-            sb.Append(MiniJson.SerializeString(error ?? ""));
-            sb.Append(",\"warning\":");
-            sb.Append(MiniJson.SerializeString(warning ?? ""));
+            if (!success)
+            {
+                sb.Append(",\"error\":");
+                sb.Append(MiniJson.SerializeString(error));
+            }
             if (frames >= 0)
             {
                 sb.Append(",\"frames\":");
@@ -427,7 +440,7 @@ namespace UnityMcp.Editor.Tools
                 sb.Append(elapsedMs);
             }
             sb.Append('}');
-            return sb.ToString();
+            return success ? ToolResult.Success(sb.ToString()) : ToolResult.Error(sb.ToString());
         }
     }
 }

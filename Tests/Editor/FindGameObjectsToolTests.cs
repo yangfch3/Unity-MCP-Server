@@ -30,6 +30,13 @@ namespace UnityMcp.Editor.Tests
 
         // ── 辅助方法 ──
 
+        /// <summary>结果项的 GameObject 名（path 末段）。</summary>
+        private static string NameOf(Dictionary<string, object> item)
+        {
+            var path = (string)item["path"];
+            return path.Substring(path.LastIndexOf('/') + 1);
+        }
+
         private GameObject Create(string name, Transform parent = null)
         {
             var go = new GameObject(name);
@@ -149,7 +156,7 @@ namespace UnityMcp.Editor.Tests
 
             Assert.AreEqual(1, results.Count);
             var item = results[0] as Dictionary<string, object>;
-            Assert.AreEqual("FooBarBaz", item["name"]);
+            Assert.AreEqual("FooBarBaz", NameOf(item));
         }
 
         [Test]
@@ -189,7 +196,7 @@ namespace UnityMcp.Editor.Tests
 
             Assert.GreaterOrEqual(results.Count, 1);
             var item = results[0] as Dictionary<string, object>;
-            Assert.AreEqual("MyCamera", item["name"]);
+            Assert.AreEqual("MyCamera", NameOf(item));
         }
 
         // ══════════════════════════════════════════════
@@ -208,7 +215,7 @@ namespace UnityMcp.Editor.Tests
 
             Assert.AreEqual(1, results.Count);
             var item = results[0] as Dictionary<string, object>;
-            Assert.AreEqual("WithCollider", item["name"]);
+            Assert.AreEqual("WithCollider", NameOf(item));
         }
 
         [Test]
@@ -225,7 +232,7 @@ namespace UnityMcp.Editor.Tests
             foreach (var r in results)
             {
                 var d = r as Dictionary<string, object>;
-                if ((string)d["name"] == "LightObj") { found = true; break; }
+                if (NameOf(d) == "LightObj") { found = true; break; }
             }
             Assert.IsTrue(found, "Should find LightObj with case-insensitive component search");
         }
@@ -252,7 +259,7 @@ namespace UnityMcp.Editor.Tests
 
             Assert.AreEqual(1, results.Count);
             var item = results[0] as Dictionary<string, object>;
-            Assert.AreEqual("EnemyA", item["name"]);
+            Assert.AreEqual("EnemyA", NameOf(item));
         }
 
         // ══════════════════════════════════════════════
@@ -327,7 +334,7 @@ namespace UnityMcp.Editor.Tests
 
             Assert.AreEqual(1, results.Count);
             var item = results[0] as Dictionary<string, object>;
-            Assert.AreEqual("RecDeepTarget", item["name"]);
+            Assert.AreEqual("RecDeepTarget", NameOf(item));
             Assert.AreEqual("/RecRoot/RecChild/RecGrandchild/RecDeepTarget", item["path"]);
         }
 
@@ -352,7 +359,7 @@ namespace UnityMcp.Editor.Tests
             // Only ActiveGO should be found
             Assert.AreEqual(1, results.Count);
             var item = results[0] as Dictionary<string, object>;
-            Assert.AreEqual("ActiveGO", item["name"]);
+            Assert.AreEqual("ActiveGO", NameOf(item));
         }
 
         [Test]
@@ -375,7 +382,7 @@ namespace UnityMcp.Editor.Tests
             foreach (var r in results)
             {
                 var d = r as Dictionary<string, object>;
-                names.Add((string)d["name"]);
+                names.Add(NameOf(d));
             }
             Assert.IsTrue(names.Contains("VisibleGO"), "Should contain active GO");
             Assert.IsTrue(names.Contains("HiddenGO"), "Should contain inactive GO");
@@ -399,7 +406,7 @@ namespace UnityMcp.Editor.Tests
             foreach (var r in results)
             {
                 var d = r as Dictionary<string, object>;
-                names.Add((string)d["name"]);
+                names.Add(NameOf(d));
             }
             Assert.IsTrue(names.Contains("DefaultActiveGO"), "Should contain active GO");
             Assert.IsFalse(names.Contains("DefaultInactiveGO"), "Should NOT contain inactive GO by default");
@@ -421,9 +428,8 @@ namespace UnityMcp.Editor.Tests
             Assert.AreEqual(1, results.Count);
             var item = results[0] as Dictionary<string, object>;
 
-            // name
-            Assert.IsTrue(item.ContainsKey("name"), "Missing 'name'");
-            Assert.AreEqual("StructTestGO", item["name"]);
+            // name 可由 path 末段推出，不单独输出
+            Assert.IsFalse(item.ContainsKey("name"), "name is derivable from path");
 
             // path
             Assert.IsTrue(item.ContainsKey("path"), "Missing 'path'");

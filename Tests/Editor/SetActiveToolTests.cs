@@ -106,11 +106,10 @@ namespace UnityMcp.Editor.Tests
 
             var json = MiniJson.Deserialize(result.Content[0].Text) as Dictionary<string, object>;
             Assert.IsNotNull(json);
-            Assert.IsTrue(json.ContainsKey("name"), "JSON should contain 'name'");
+            Assert.IsFalse(json.ContainsKey("name"), "name is derivable from path");
             Assert.IsTrue(json.ContainsKey("path"), "JSON should contain 'path'");
             Assert.IsTrue(json.ContainsKey("activeSelf"), "JSON should contain 'activeSelf'");
 
-            Assert.AreEqual("JSONCheck", json["name"]);
             Assert.AreEqual(expectedPath, json["path"]);
             Assert.AreEqual(false, json["activeSelf"]);
         }

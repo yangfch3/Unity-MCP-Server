@@ -21,6 +21,8 @@
 | `keyword` | string | ❌ | - | 关键字过滤（大小写不敏感） |
 | `beforeIndex` | int | ❌ | - | 上下文模式：锚点索引（稳定全局 ID） |
 
+`timestamp` 为本地时间 `HH:mm:ss.fff`；Error 条目的 `stackTrace` 只保留前 5 行，完整堆栈用 `debug_getStackTrace`。
+
 ### `console_clearLogs`
 
 清空日志缓冲区。无参数。
@@ -94,8 +96,10 @@
 
 | 参数 | 类型 | 必填 | 默认值 | 说明 |
 |------|------|------|--------|------|
-| `maxDepth` | int | ❌ | -1 | 最大遍历深度，-1 表示无限制 |
+| `maxDepth` | int | ❌ | 5 | 最大遍历深度，-1 表示无限制 |
 | `root` | string | ❌ | `""` | 根节点来源：空=Prefab Stage 优先回退 Active Scene（PlayMode 下自动包含 DontDestroyOnLoad）；`"selection"`=以当前选中 GameObject 为根 |
+
+节点精简输出：`components` 省略 `Transform`（为空则不输出）；`active` 仅为 `false` 时输出；无子节点不输出 `children`；超出 `maxDepth` 的节点输出 `childCount` 代替 `children`。
 
 #### `editor_selectGameObject`
 
@@ -127,9 +131,11 @@
 |------|------|------|--------|------|
 | `maxDepth` | int | ❌ | 3 | 最大遍历深度 |
 
+节点只含 `name`；目录额外带 `children`（超出深度时为空数组），文件没有 `children`。
+
 #### `editor_getInspector`
 
-获取选中对象的 Inspector 序列化字段值。无参数。
+获取选中对象的 Inspector 序列化字段值。无参数。不支持取值的类型（Generic、数组等）只输出 `name`/`type`，不输出 `value`。
 
 #### `editor_findGameObjects`
 
@@ -143,6 +149,8 @@
 | `activeOnly` | bool | ❌ | true | 是否仅搜索激活状态的 GameObject |
 
 ### Mutation（修改）
+
+修改类工具的响应只返回 `path`（不再单独返回 `name`，即 path 末段）。
 
 #### `editor_addGameObject`
 
@@ -218,7 +226,7 @@
 
 #### `editor_setTransform`
 
-修改 Transform / RectTransform 属性。instanceID/path 二选一，按需传属性。
+修改 Transform / RectTransform 属性。instanceID/path 二选一，按需传属性。响应只回显本次传入的属性（读回的实际值，数值数组），键名与参数一致，如 `{"path":"/Root","localRotation":[0,90,0]}`。
 
 | 参数 | 类型 | 必填 | 默认值 | 说明 |
 |------|------|------|--------|------|
@@ -348,14 +356,13 @@
 {
   "success": true,
   "output": "Console 输出",
-  "error": "",
-  "warning": "系统警告（后台模式为空）",
+  "error": "失败时才有",
   "frames": 19,
   "elapsedMs": 1815
 }
 ```
 
-`frames` / `elapsedMs` 仅跨帧模式返回。`warning` 在主线程模式（无超时保护提示）和跨帧模式（驱动方式提示）下都会填充，仅后台模式为空。
+`error` 仅失败（`success:false`）时返回，此时 MCP 结果的 `isError` 也为 `true`；`frames` / `elapsedMs` 仅跨帧模式返回。
 
 **三种执行模式：**
 
@@ -441,8 +448,6 @@ public class Example
 }
 {
   "success": true,
-  "output": "已加载 164 个程序集，其中 Unity 引擎: 70\n",
-  "error": "",
-  "warning": ""
+  "output": "已加载 164 个程序集，其中 Unity 引擎: 70\n"
 }
 ```

@@ -15,7 +15,7 @@ namespace UnityMcp.Editor.Tools
     {
         public string Name => "console_getLogs";
         public string Category => "debug";
-        public string Description => "获取 Unity Console 最近 N 条日志";
+        public string Description => "获取 Unity Console 最近 N 条日志（Error 堆栈仅前 5 行，完整堆栈用 debug_getStackTrace）";
         public string InputSchema =>
             "{\"type\":\"object\",\"properties\":{"
             + "\"count\":{\"type\":\"integer\",\"description\":\"日志条数\",\"default\":20},"
@@ -25,6 +25,7 @@ namespace UnityMcp.Editor.Tools
             + "}}";
 
         private const int MaxBufferSize = 2500;
+        private const int MaxStackTraceLines = 5;
 
         // 日志缓冲区及锁（logMessageReceived 可能在非主线程触发）
         private static readonly object _lock = new object();
@@ -153,9 +154,9 @@ namespace UnityMcp.Editor.Tools
             var entry = new LogEntry
             {
                 Level = ToLevel(type),
-                Timestamp = DateTime.UtcNow.ToString("o", CultureInfo.InvariantCulture),
+                Timestamp = DateTime.Now.ToString("HH:mm:ss.fff", CultureInfo.InvariantCulture),
                 Message = message,
-                StackTrace = isError && !string.IsNullOrEmpty(stackTrace) ? stackTrace : null
+                StackTrace = isError && !string.IsNullOrEmpty(stackTrace) ? TruncateStackTrace(stackTrace) : null
             };
 
             lock (_lock)
@@ -165,6 +166,16 @@ namespace UnityMcp.Editor.Tools
                 entry.Index = _nextIndex++;
                 _buffer.Add(entry);
             }
+        }
+
+        /// <summary>只保留前 MaxStackTraceLines 行，完整堆栈用 debug_getStackTrace 获取。</summary>
+        internal static string TruncateStackTrace(string stackTrace)
+        {
+            var lines = stackTrace.TrimEnd('\n', '\r').Split('\n');
+            if (lines.Length <= MaxStackTraceLines)
+                return string.Join("\n", lines);
+            return string.Join("\n", lines, 0, MaxStackTraceLines)
+                + $"\n...(+{lines.Length - MaxStackTraceLines} lines)";
         }
 
         /// <summary>

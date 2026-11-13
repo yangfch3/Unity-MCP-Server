@@ -64,7 +64,7 @@ namespace UnityMcp.Editor.Tools
                 {
                     Message = message,
                     StackTrace = stackTrace,
-                    Timestamp = DateTime.UtcNow.ToString("o", CultureInfo.InvariantCulture)
+                    Timestamp = DateTime.Now.ToString("HH:mm:ss.fff", CultureInfo.InvariantCulture)
                 };
             }
         }

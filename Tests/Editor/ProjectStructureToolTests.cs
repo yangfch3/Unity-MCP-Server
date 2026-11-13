@@ -25,6 +25,8 @@ namespace UnityMcp.Editor.Tests
             Assert.IsFalse(result.IsError);
             var json = result.Content[0].Text;
             Assert.IsTrue(json.StartsWith("["));
+            Assert.IsFalse(json.Contains("\"path\":"), "path is derivable from tree and should be omitted");
+            Assert.IsFalse(json.Contains("\"type\":"), "type is derivable from children and should be omitted");
         }
 
         [Test]

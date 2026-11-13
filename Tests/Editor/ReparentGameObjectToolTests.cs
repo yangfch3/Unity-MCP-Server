@@ -187,11 +187,10 @@ namespace UnityMcp.Editor.Tests
 
             var json = MiniJson.Deserialize(result.Content[0].Text) as Dictionary<string, object>;
             Assert.IsNotNull(json);
-            Assert.IsTrue(json.ContainsKey("name"), "JSON should contain 'name'");
+            Assert.IsFalse(json.ContainsKey("name"), "name is derivable from path");
             Assert.IsTrue(json.ContainsKey("path"), "JSON should contain 'path'");
             Assert.IsTrue(json.ContainsKey("instanceID"), "JSON should contain 'instanceID'");
 
-            Assert.AreEqual("JSONChild", json["name"]);
             // After reparent, path should reflect new parent
             var expectedPath = HierarchyToolTestHelper.GetGameObjectPath(go);
             Assert.AreEqual(expectedPath, json["path"]);

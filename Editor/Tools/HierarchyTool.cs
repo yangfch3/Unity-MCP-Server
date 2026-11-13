@@ -21,15 +21,17 @@ namespace UnityMcp.Editor.Tools
         public string Category => "editor";
 
         /// <inheritdoc />
-        public string Description => "获取当前场景的 GameObject 树结构，支持 root 参数指定根节点来源";
+        public string Description => "获取 GameObject 树（名称+组件，省略 Transform；active 仅 false 时输出）";
 
         /// <inheritdoc />
-        public string InputSchema => "{\"type\":\"object\",\"properties\":{\"maxDepth\":{\"type\":\"integer\",\"description\":\"最大遍历深度，-1 表示无限制\",\"default\":-1},\"root\":{\"type\":\"string\",\"enum\":[\"\",\"selection\"],\"description\":\"根节点来源：空串=自动（Prefab Stage 优先，回退 Active Scene）；selection=当前选中 GameObject\",\"default\":\"\"}}}";
+        public string InputSchema => "{\"type\":\"object\",\"properties\":{\"maxDepth\":{\"type\":\"integer\",\"description\":\"最大遍历深度，-1 不限；被截断节点输出 childCount\",\"default\":" + DefaultMaxDepth + "},\"root\":{\"type\":\"string\",\"enum\":[\"\",\"selection\"],\"description\":\"空串=Prefab Stage 优先，回退 Active Scene；selection=以当前选中为根\",\"default\":\"\"}}}";
+
+        private const int DefaultMaxDepth = 5;
 
         /// <inheritdoc />
         public Task<ToolResult> Execute(Dictionary<string, object> parameters)
         {
-            int maxDepth = -1;
+            int maxDepth = DefaultMaxDepth;
             if (parameters != null && parameters.TryGetValue("maxDepth", out var raw))
             {
                 if (raw is long l) maxDepth = (int)l;
@@ -100,35 +102,37 @@ namespace UnityMcp.Editor.Tools
                 var go = gameObjects[i];
                 sb.Append("{\"name\":");
                 sb.Append(MiniJson.SerializeString(go.name));
-                sb.Append(",\"active\":");
-                sb.Append(go.activeSelf ? "true" : "false");
+                if (!go.activeSelf)
+                    sb.Append(",\"active\":false");
 
-                // 组件列表
-                sb.Append(",\"components\":[");
+                // 组件列表（Transform 必然存在，省略）
                 var components = go.GetComponents<Component>();
                 bool first = true;
                 for (int c = 0; c < components.Length; c++)
                 {
-                    if (components[c] == null) continue;
-                    if (!first) sb.Append(',');
+                    if (components[c] == null || components[c].GetType() == typeof(Transform)) continue;
+                    sb.Append(first ? ",\"components\":[" : ",");
                     sb.Append(MiniJson.SerializeString(components[c].GetType().Name));
                     first = false;
                 }
-                sb.Append(']');
+                if (!first) sb.Append(']');
 
-                // 子节点
-                sb.Append(",\"children\":");
-                if (maxDepth == -1 || depth < maxDepth)
+                // 子节点：无子节点不输出；超深度只输出 childCount
+                var t = go.transform;
+                if (t.childCount > 0)
                 {
-                    var t = go.transform;
-                    var children = new GameObject[t.childCount];
-                    for (int ci = 0; ci < t.childCount; ci++)
-                        children[ci] = t.GetChild(ci).gameObject;
-                    BuildTree(sb, children, depth + 1, maxDepth);
-                }
-                else
-                {
-                    sb.Append("[]");
+                    if (maxDepth == -1 || depth < maxDepth)
+                    {
+                        var children = new GameObject[t.childCount];
+                        for (int ci = 0; ci < t.childCount; ci++)
+                            children[ci] = t.GetChild(ci).gameObject;
+                        sb.Append(",\"children\":");
+                        BuildTree(sb, children, depth + 1, maxDepth);
+                    }
+                    else
+                    {
+                        sb.Append(",\"childCount\":").Append(t.childCount);
+                    }
                 }
 
                 sb.Append('}');

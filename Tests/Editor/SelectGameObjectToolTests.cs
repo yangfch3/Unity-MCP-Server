@@ -88,10 +88,10 @@ namespace UnityMcp.Editor.Tests
             Assert.IsFalse(result.IsError);
             Assert.AreEqual(target, Selection.activeGameObject);
 
-            // 验证返回 JSON 中 name/path/instanceID 的正确性
+            // 验证返回 JSON 中 path/instanceID 的正确性
             var json = MiniJson.Deserialize(result.Content[0].Text) as Dictionary<string, object>;
             Assert.IsNotNull(json);
-            Assert.AreEqual("SelTarget", json["name"]);
+            Assert.IsFalse(json.ContainsKey("name"), "name is derivable from path");
             Assert.AreEqual(path, json["path"]);
             Assert.AreEqual((long)target.GetInstanceID(), json["instanceID"]);
         }
@@ -126,7 +126,7 @@ namespace UnityMcp.Editor.Tests
 
             var json = MiniJson.Deserialize(result.Content[0].Text) as Dictionary<string, object>;
             Assert.IsNotNull(json);
-            Assert.AreEqual("IdChild", json["name"]);
+            Assert.AreEqual("/IdRoot/IdChild", json["path"]);
             Assert.AreEqual((long)child.GetInstanceID(), json["instanceID"]);
         }
 

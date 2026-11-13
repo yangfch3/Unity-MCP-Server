@@ -72,13 +72,12 @@ namespace UnityMcp.Editor.Tests
         {
             EditorPrefs.SetBool(PrefKey, false);
             var result = _tool.Execute(new Dictionary<string, object>()).Result;
-            Assert.IsFalse(result.IsError);
+            Assert.IsTrue(result.IsError);
             var json = MiniJson.Deserialize(result.Content[0].Text) as Dictionary<string, object>;
             Assert.IsNotNull(json);
             Assert.AreEqual(false, json["success"]);
             Assert.IsTrue(((string)json["error"]).Contains("missing"));
-            Assert.IsTrue(json.ContainsKey("warning"), "Response should contain 'warning' key");
-            Assert.AreEqual("", (string)json["warning"]);
+            Assert.IsFalse(json.ContainsKey("warning"));
         }
 
         [Test]
@@ -101,15 +100,14 @@ namespace UnityMcp.Editor.Tests
             {
                 { "code", "invalid c# code {" }
             }).Result;
-            Assert.IsFalse(result.IsError);
+            Assert.IsTrue(result.IsError);
             var json = MiniJson.Deserialize(result.Content[0].Text) as Dictionary<string, object>;
             Assert.IsNotNull(json);
             Assert.AreEqual(false, json["success"]);
             var error = (string)json["error"];
             // Compiler errors should include line number info like "(1,..."
             Assert.IsTrue(error.Contains("(") && error.Contains(","), "Error should contain line number info");
-            Assert.IsTrue(json.ContainsKey("warning"), "Response should contain 'warning' key");
-            Assert.AreEqual("", (string)json["warning"]);
+            Assert.IsFalse(json.ContainsKey("warning"));
         }
 
         [Test]
@@ -120,13 +118,12 @@ namespace UnityMcp.Editor.Tests
             {
                 { "code", "class Foo { }" }
             }).Result;
-            Assert.IsFalse(result.IsError);
+            Assert.IsTrue(result.IsError);
             var json = MiniJson.Deserialize(result.Content[0].Text) as Dictionary<string, object>;
             Assert.IsNotNull(json);
             Assert.AreEqual(false, json["success"]);
             Assert.IsTrue(((string)json["error"]).Contains("No entry point found"));
-            Assert.IsTrue(json.ContainsKey("warning"), "Response should contain 'warning' key");
-            Assert.AreEqual("", (string)json["warning"]);
+            Assert.IsFalse(json.ContainsKey("warning"));
         }
 
         [Test]
@@ -151,8 +148,7 @@ public class Test
             Assert.IsNotNull(json);
             Assert.AreEqual(true, json["success"], "success should be true. Error: " + (json.ContainsKey("error") ? json["error"] : "N/A"));
             Assert.IsTrue(((string)json["output"]).Contains("hello"));
-            Assert.IsTrue(json.ContainsKey("warning"), "Response should contain 'warning' key");
-            Assert.IsNotEmpty((string)json["warning"], "Default mode (mainThread) should include a warning");
+            Assert.IsFalse(json.ContainsKey("warning"));
         }
 
         [Test]
@@ -173,14 +169,13 @@ public class Test
             {
                 { "code", code }
             }).Result;
-            Assert.IsFalse(result.IsError);
+            Assert.IsTrue(result.IsError);
             var json = MiniJson.Deserialize(result.Content[0].Text) as Dictionary<string, object>;
             Assert.IsNotNull(json);
             Assert.AreEqual(false, json["success"]);
             Assert.IsTrue(((string)json["output"]).Contains("before"));
             Assert.IsTrue(((string)json["error"]).Contains("boom"));
-            Assert.IsTrue(json.ContainsKey("warning"), "Response should contain 'warning' key");
-            Assert.IsNotEmpty((string)json["warning"], "Default mode (mainThread) should include a warning");
+            Assert.IsFalse(json.ContainsKey("warning"));
         }
 
         [Test]
@@ -219,7 +214,7 @@ public class Test
             var json = MiniJson.Deserialize(result.Content[0].Text) as Dictionary<string, object>;
             Assert.AreEqual(true, json["success"]);
             Assert.IsTrue(((string)json["output"]).Contains("explicit_true"));
-            Assert.IsNotEmpty((string)json["warning"], "mainThread:true should include a warning");
+            Assert.IsFalse(json.ContainsKey("error"), "success response should omit empty error");
         }
 
         [Test]
@@ -241,17 +236,18 @@ public class Test
                 { "code", code },
                 { "mainThread", true }
             }).Result;
-            Assert.IsFalse(result.IsError);
+            Assert.IsTrue(result.IsError);
             var json = MiniJson.Deserialize(result.Content[0].Text) as Dictionary<string, object>;
             Assert.AreEqual(false, json["success"]);
             var error = (string)json["error"];
             Assert.IsTrue(error.Contains("main_thread_boom"), "error should contain exception message");
             Assert.IsTrue(error.Contains("StackTrace") || error.Contains("at "), "error should contain stack trace");
+            StringAssert.DoesNotContain("[0x", error, "no-symbol IL offset suffix should be stripped");
             Assert.IsTrue(((string)json["output"]).Contains("partial"), "output should contain partial output before exception");
         }
 
         [Test]
-        public void Execute_BackgroundModeFalse_SuccessWithEmptyWarning()
+        public void Execute_BackgroundModeFalse_SuccessWithoutWarning()
         {
             EditorPrefs.SetBool(PrefKey, false);
             var code = @"
@@ -272,7 +268,7 @@ public class Test
             var json = MiniJson.Deserialize(result.Content[0].Text) as Dictionary<string, object>;
             Assert.AreEqual(true, json["success"]);
             Assert.IsTrue(((string)json["output"]).Contains("bg_output"));
-            Assert.AreEqual("", (string)json["warning"], "Background mode should have empty warning");
+            Assert.IsFalse(json.ContainsKey("warning"));
         }
 
         [Test]
@@ -343,7 +339,36 @@ public class Test
         private static Dictionary<string, object> ParseResult(Task<ToolResult> task)
         {
             Assert.IsTrue(task.IsCompleted, "cross-frame execution should complete");
-            return MiniJson.Deserialize(task.Result.Content[0].Text) as Dictionary<string, object>;
+            var json = MiniJson.Deserialize(task.Result.Content[0].Text) as Dictionary<string, object>;
+            Assert.AreEqual(!(bool)json["success"], task.Result.IsError, "isError should mirror success");
+            return json;
+        }
+
+        public static void ThrowForFormatTest()
+        {
+            throw new System.InvalidOperationException("format_boom");
+        }
+
+        [Test]
+        public void FormatError_TrimsTrailingReflectionFrames()
+        {
+            System.Exception inner = null;
+            try
+            {
+                typeof(ExecuteImmediateToolTests).GetMethod(nameof(ThrowForFormatTest)).Invoke(null, null);
+            }
+            catch (System.Reflection.TargetInvocationException ex)
+            {
+                inner = ex.InnerException;
+            }
+
+            Assert.IsNotNull(inner);
+            StringAssert.Contains("System.Reflection.", inner.StackTrace, "precondition: raw stack has reflection frames");
+            var formatted = ExecuteImmediateTool.FormatError(inner);
+            StringAssert.StartsWith("format_boom\n", formatted);
+            StringAssert.Contains(nameof(ThrowForFormatTest), formatted);
+            StringAssert.DoesNotContain("System.Reflection.", formatted);
+            StringAssert.DoesNotContain("\r", formatted);
         }
 
         [Test]
@@ -411,14 +436,14 @@ public class Test
             yield return DriveUntilComplete(task);
 
             var json = ParseResult(task);
-            Assert.AreEqual(true, json["success"], "Error: " + json["error"]);
+            Assert.AreEqual(true, json["success"], "Error: " + (json.ContainsKey("error") ? json["error"] : "N/A"));
             var output = (string)json["output"];
             Assert.IsTrue(output.Contains("first") && output.Contains("last"),
                 "output should be captured across frames, got: " + output);
             Assert.GreaterOrEqual(System.Convert.ToInt32(json["frames"]), 5,
                 "should report at least the 5 yielded frames");
             Assert.IsTrue(json.ContainsKey("elapsedMs"));
-            Assert.IsNotEmpty((string)json["warning"], "cross-frame mode should report its driver");
+            Assert.IsFalse(json.ContainsKey("warning"));
         }
 
         [UnityTest]
@@ -448,7 +473,7 @@ public class Test
             yield return DriveUntilComplete(task);
 
             var json = ParseResult(task);
-            Assert.AreEqual(true, json["success"], "Error: " + json["error"]);
+            Assert.AreEqual(true, json["success"], "Error: " + (json.ContainsKey("error") ? json["error"] : "N/A"));
             var output = (string)json["output"];
             Assert.IsTrue(output.Contains("inner done"), "nested coroutine must actually run");
             Assert.IsTrue(output.Contains("innerTicks=4"),
@@ -569,13 +594,12 @@ public class Test
                 { "code", code },
                 { "mainThread", false }
             }).Result;
-            Assert.IsFalse(result.IsError);
+            Assert.IsTrue(result.IsError);
             var json = MiniJson.Deserialize(result.Content[0].Text) as Dictionary<string, object>;
             Assert.IsNotNull(json);
             Assert.AreEqual(false, json["success"]);
             Assert.IsTrue(((string)json["error"]).Contains("timed out"));
-            Assert.IsTrue(json.ContainsKey("warning"), "Response should contain 'warning' key");
-            Assert.AreEqual("", (string)json["warning"], "Background mode should have empty warning");
+            Assert.IsFalse(json.ContainsKey("warning"));
         }
     }
 }

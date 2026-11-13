@@ -22,7 +22,7 @@ namespace UnityMcp.Editor.Tools
         public string Description => "通过路径选中 Hierarchy 中的 GameObject";
 
         /// <inheritdoc />
-        public string InputSchema => "{\"type\":\"object\",\"properties\":{\"path\":{\"type\":\"string\",\"description\":\"要选中的 GameObject 路径（如 \\\"/Root/Child/Target\\\"）\"},\"instanceID\":{\"type\":\"integer\",\"description\":\"要选中的 GameObject 的 instanceID（instanceID/path 二选一，同传则 ID 优先）\"}}}";
+        public string InputSchema => "{\"type\":\"object\",\"properties\":{\"path\":{\"type\":\"string\",\"description\":\"如 /Root/Child\"},\"instanceID\":{\"type\":\"integer\",\"description\":\"优先于 path\"}}}";
 
         /// <inheritdoc />
         public Task<ToolResult> Execute(Dictionary<string, object> parameters)
@@ -66,9 +66,7 @@ namespace UnityMcp.Editor.Tools
             string actualPath = path ?? GameObjectPathHelper.GetGameObjectPath(go);
 
             var sb = new StringBuilder();
-            sb.Append("{\"name\":");
-            sb.Append(MiniJson.SerializeString(go.name));
-            sb.Append(",\"path\":");
+            sb.Append("{\"path\":");
             sb.Append(MiniJson.SerializeString(actualPath));
             sb.Append(",\"instanceID\":");
             sb.Append(go.GetInstanceID());

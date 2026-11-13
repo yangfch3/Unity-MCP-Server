@@ -22,7 +22,7 @@ namespace UnityMcp.Editor.Tools
         public string Description => "修改 GameObject 上指定组件的序列化字段值";
 
         /// <inheritdoc />
-        public string InputSchema => "{\"type\":\"object\",\"properties\":{\"instanceID\":{\"type\":\"integer\",\"description\":\"目标 GameObject 的 instanceID（instanceID/path 二选一，同传则 ID 优先）\"},\"path\":{\"type\":\"string\",\"description\":\"目标 GameObject 的路径（如 \\\"/Root/Child\\\"）\"},\"componentType\":{\"type\":\"string\",\"description\":\"组件类型名（如 \\\"BoxCollider\\\"）\"},\"fieldName\":{\"type\":\"string\",\"description\":\"序列化字段名\"},\"value\":{\"description\":\"新值。Vector传[x,y,z]; Color传[r,g,b,a](0-1); ObjectReference传instanceID(int); Enum传显示名或索引\"}},\"required\":[\"componentType\",\"fieldName\",\"value\"]}";
+        public string InputSchema => "{\"type\":\"object\",\"properties\":{\"instanceID\":{\"type\":\"integer\",\"description\":\"优先于 path\"},\"path\":{\"type\":\"string\",\"description\":\"如 /Root/Child\"},\"componentType\":{\"type\":\"string\",\"description\":\"如 BoxCollider\"},\"fieldName\":{\"type\":\"string\",\"description\":\"序列化字段名；找不到时自动尝试 m_ 前缀（isTrigger→m_IsTrigger）\"},\"value\":{\"description\":\"新值。Vector传[x,y,z]; Color传[r,g,b,a](0-1); ObjectReference传instanceID(int); Enum传显示名或索引\"}},\"required\":[\"componentType\",\"fieldName\",\"value\"]}";
 
         /// <inheritdoc />
         public Task<ToolResult> Execute(Dictionary<string, object> parameters)
@@ -60,6 +60,13 @@ namespace UnityMcp.Editor.Tools
                 // 6. Create SerializedObject and find property
                 var so = new SerializedObject(comp);
                 var prop = so.FindProperty(fieldName);
+                // 回退：isTrigger → m_IsTrigger（内置组件的序列化名）
+                if (prop == null && !fieldName.StartsWith("m_"))
+                {
+                    var alias = "m_" + char.ToUpperInvariant(fieldName[0]) + fieldName.Substring(1);
+                    prop = so.FindProperty(alias);
+                    if (prop != null) fieldName = alias;
+                }
                 if (prop == null)
                     return Task.FromResult(ToolResult.Error(
                         $"在 {comp.GetType().Name} 上未找到序列化字段: {fieldName}"));

@@ -61,7 +61,7 @@ namespace UnityMcp.Editor.Tests
 
             var json = MiniJson.Deserialize(result.Content[0].Text) as Dictionary<string, object>;
             Assert.IsNotNull(json);
-            Assert.AreEqual("GameObject", json["name"]);
+            StringAssert.EndsWith("/GameObject", (string)json["path"]);
 
             // 清理：通过 instanceID 找到创建的 GO 并加入 _created
             var id = (long)json["instanceID"];
@@ -78,7 +78,7 @@ namespace UnityMcp.Editor.Tests
 
             var json = MiniJson.Deserialize(result.Content[0].Text) as Dictionary<string, object>;
             Assert.IsNotNull(json);
-            Assert.AreEqual("TestGO", json["name"]);
+            StringAssert.EndsWith("/TestGO", (string)json["path"]);
 
             var id = (long)json["instanceID"];
             var go = EditorUtility.InstanceIDToObject((int)id) as GameObject;
@@ -94,7 +94,7 @@ namespace UnityMcp.Editor.Tests
 
             var json = MiniJson.Deserialize(result.Content[0].Text) as Dictionary<string, object>;
             Assert.IsNotNull(json);
-            Assert.AreEqual("GameObject", json["name"]);
+            StringAssert.EndsWith("/GameObject", (string)json["path"]);
 
             var id = (long)json["instanceID"];
             var go = EditorUtility.InstanceIDToObject((int)id) as GameObject;
@@ -119,7 +119,7 @@ namespace UnityMcp.Editor.Tests
 
             var json = MiniJson.Deserialize(result.Content[0].Text) as Dictionary<string, object>;
             Assert.IsNotNull(json);
-            Assert.AreEqual("Child", json["name"]);
+            StringAssert.EndsWith("/Child", (string)json["path"]);
 
             var id = (long)json["instanceID"];
             var child = EditorUtility.InstanceIDToObject((int)id) as GameObject;
@@ -145,7 +145,7 @@ namespace UnityMcp.Editor.Tests
 
             var json = MiniJson.Deserialize(result.Content[0].Text) as Dictionary<string, object>;
             Assert.IsNotNull(json);
-            Assert.AreEqual("ChildByID", json["name"]);
+            StringAssert.EndsWith("/ChildByID", (string)json["path"]);
 
             var id = (long)json["instanceID"];
             var child = EditorUtility.InstanceIDToObject((int)id) as GameObject;
@@ -178,12 +178,11 @@ namespace UnityMcp.Editor.Tests
 
             var json = MiniJson.Deserialize(result.Content[0].Text) as Dictionary<string, object>;
             Assert.IsNotNull(json);
-            Assert.IsTrue(json.ContainsKey("name"), "JSON should contain 'name'");
+            Assert.IsFalse(json.ContainsKey("name"), "name is derivable from path");
             Assert.IsTrue(json.ContainsKey("path"), "JSON should contain 'path'");
             Assert.IsTrue(json.ContainsKey("instanceID"), "JSON should contain 'instanceID'");
 
-            Assert.AreEqual("JSONCheck", json["name"]);
-            Assert.IsInstanceOf<string>(json["path"]);
+            StringAssert.EndsWith("/JSONCheck", (string)json["path"]);
             Assert.IsInstanceOf<long>(json["instanceID"]);
 
             var id = (long)json["instanceID"];

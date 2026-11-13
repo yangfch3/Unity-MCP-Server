@@ -21,6 +21,8 @@ Get recent N log entries from Unity Console with level/keyword filtering and con
 | `keyword` | string | ❌ | - | Keyword filter (case-insensitive) |
 | `beforeIndex` | int | ❌ | - | Context mode: anchor index (stable global ID) |
 
+`timestamp` is local time `HH:mm:ss.fff`; `stackTrace` on Error entries keeps only the first 5 lines. Use `debug_getStackTrace` for the full stack.
+
 ### `console_clearLogs`
 
 Clear the log buffer. No parameters.
@@ -94,8 +96,10 @@ Get GameObject tree structure, supports Prefab Stage and Selection subtree. In P
 
 | Parameter | Type | Required | Default | Description |
 |-----------|------|----------|---------|-------------|
-| `maxDepth` | int | ❌ | -1 | Max traversal depth, -1 for unlimited |
+| `maxDepth` | int | ❌ | 5 | Max traversal depth, -1 for unlimited |
 | `root` | string | ❌ | `""` | Root source: empty=Prefab Stage first, fallback Active Scene (automatically includes DontDestroyOnLoad in PlayMode); `"selection"`=current selection as root |
+
+Compact node output: `components` omits `Transform` (omitted entirely if empty); `active` is emitted only when `false`; leaf nodes have no `children`; nodes beyond `maxDepth` emit `childCount` instead of `children`.
 
 #### `editor_selectGameObject`
 
@@ -127,9 +131,11 @@ Get Assets directory structure.
 |-----------|------|----------|---------|-------------|
 | `maxDepth` | int | ❌ | 3 | Max traversal depth |
 
+Nodes contain only `name`; directories also carry `children` (empty array beyond max depth), files have no `children`.
+
 #### `editor_getInspector`
 
-Get serialized field values of the selected object's Inspector. No parameters.
+Get serialized field values of the selected object's Inspector. No parameters. Fields whose type has no value conversion (Generic, arrays, etc.) emit only `name`/`type`, without `value`.
 
 #### `editor_findGameObjects`
 
@@ -143,6 +149,8 @@ Search GameObjects in scene by name/component type. In PlayMode, the search scop
 | `activeOnly` | bool | ❌ | true | Search active GameObjects only |
 
 ### Mutation
+
+Mutation tools return `path` only (no separate `name`; it is the last path segment).
 
 #### `editor_addGameObject`
 
@@ -218,7 +226,7 @@ Enable/disable a component on a GameObject.
 
 #### `editor_setTransform`
 
-Modify Transform / RectTransform properties. Use instanceID or path (not both; ID takes priority).
+Modify Transform / RectTransform properties. Use instanceID or path (not both; ID takes priority). The response echoes only the properties passed in (read-back values as number arrays), keyed like the parameters, e.g. `{"path":"/Root","localRotation":[0,90,0]}`.
 
 | Parameter | Type | Required | Default | Description |
 |-----------|------|----------|---------|-------------|
@@ -348,14 +356,13 @@ Compile and execute C# code snippets at runtime.
 {
   "success": true,
   "output": "Console output",
-  "error": "",
-  "warning": "System warning (empty in background mode)",
+  "error": "present only on failure",
   "frames": 19,
   "elapsedMs": 1815
 }
 ```
 
-`frames` / `elapsedMs` are returned in cross-frame mode only. `warning` is populated in both main-thread mode (no-timeout notice) and cross-frame mode (driver notice); it is empty only in background mode.
+`error` is returned only on failure (`success:false`), in which case the MCP result's `isError` is also `true`; `frames` / `elapsedMs` are returned in cross-frame mode only.
 
 **Three execution modes:**
 
@@ -441,8 +448,6 @@ public class Example
 }
 {
   "success": true,
-  "output": "Loaded 164 assemblies, Unity engine: 70\n",
-  "error": "",
-  "warning": ""
+  "output": "Loaded 164 assemblies, Unity engine: 70\n"
 }
 ```

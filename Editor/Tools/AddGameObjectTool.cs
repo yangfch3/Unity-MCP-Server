@@ -23,7 +23,7 @@ namespace UnityMcp.Editor.Tools
         public string Description => "在 Prefab Stage 或 Active Scene 中添加 GameObject";
 
         /// <inheritdoc />
-        public string InputSchema => "{\"type\":\"object\",\"properties\":{\"name\":{\"type\":\"string\",\"description\":\"新 GameObject 的名称（默认 \\\"GameObject\\\"）\"},\"parentInstanceID\":{\"type\":\"integer\",\"description\":\"父节点的 instanceID（parentInstanceID/parentPath 二选一，同传则 ID 优先）\"},\"parentPath\":{\"type\":\"string\",\"description\":\"父节点的路径（如 \\\"/Root/Child\\\"）\"}}}";
+        public string InputSchema => "{\"type\":\"object\",\"properties\":{\"name\":{\"type\":\"string\",\"description\":\"新 GameObject 的名称（默认 \\\"GameObject\\\"）\"},\"parentInstanceID\":{\"type\":\"integer\",\"description\":\"优先于 parentPath\"},\"parentPath\":{\"type\":\"string\",\"description\":\"如 /Root/Child；都不传则挂场景根或 Prefab 根\"}}}";
 
         /// <inheritdoc />
         public Task<ToolResult> Execute(Dictionary<string, object> parameters)
@@ -79,12 +79,10 @@ namespace UnityMcp.Editor.Tools
                 if (parent != null)
                     go.transform.SetParent(parent.transform, false);
 
-                // 7. Return JSON with name, path, instanceID
+                // 7. Return JSON with path, instanceID
                 var path = GameObjectPathHelper.GetGameObjectPath(go);
                 var sb = new StringBuilder();
-                sb.Append("{\"name\":");
-                sb.Append(MiniJson.SerializeString(go.name));
-                sb.Append(",\"path\":");
+                sb.Append("{\"path\":");
                 sb.Append(MiniJson.SerializeString(path));
                 sb.Append(",\"instanceID\":");
                 sb.Append(go.GetInstanceID());

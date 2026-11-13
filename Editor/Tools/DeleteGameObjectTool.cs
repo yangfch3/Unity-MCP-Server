@@ -21,7 +21,7 @@ namespace UnityMcp.Editor.Tools
         public string Description => "删除指定的 GameObject 及其所有子对象";
 
         /// <inheritdoc />
-        public string InputSchema => "{\"type\":\"object\",\"properties\":{\"instanceID\":{\"type\":\"integer\",\"description\":\"要删除的 GameObject 的 instanceID（instanceID/path 二选一，同传则 ID 优先）\"},\"path\":{\"type\":\"string\",\"description\":\"要删除的 GameObject 的路径（如 \\\"/Root/Child\\\"）\"}}}";
+        public string InputSchema => "{\"type\":\"object\",\"properties\":{\"instanceID\":{\"type\":\"integer\",\"description\":\"优先于 path\"},\"path\":{\"type\":\"string\",\"description\":\"如 /Root/Child\"}}}";
 
         /// <inheritdoc />
         public Task<ToolResult> Execute(Dictionary<string, object> parameters)
@@ -33,18 +33,15 @@ namespace UnityMcp.Editor.Tools
                 if (go == null)
                     return Task.FromResult(ToolResult.Error(err));
 
-                // 2. Save name and path before deletion
-                var goName = go.name;
+                // 2. Save path before deletion
                 var goPath = GameObjectPathHelper.GetGameObjectPath(go);
 
                 // 3. Delete with Undo support
                 Undo.DestroyObjectImmediate(go);
 
-                // 4. Return JSON with deleted GO's name and path
+                // 4. Return JSON with deleted GO's path
                 var sb = new StringBuilder();
-                sb.Append("{\"name\":");
-                sb.Append(MiniJson.SerializeString(goName));
-                sb.Append(",\"path\":");
+                sb.Append("{\"path\":");
                 sb.Append(MiniJson.SerializeString(goPath));
                 sb.Append('}');
 

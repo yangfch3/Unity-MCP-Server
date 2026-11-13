@@ -22,7 +22,7 @@ namespace UnityMcp.Editor.Tools
         public string Description => "移除指定 GameObject 上的组件";
 
         /// <inheritdoc />
-        public string InputSchema => "{\"type\":\"object\",\"properties\":{\"instanceID\":{\"type\":\"integer\",\"description\":\"目标 GameObject 的 instanceID（instanceID/path 二选一，同传则 ID 优先）\"},\"path\":{\"type\":\"string\",\"description\":\"目标 GameObject 的路径（如 \\\"/Root/Child\\\"）\"},\"componentType\":{\"type\":\"string\",\"description\":\"要移除的组件类型名（如 \\\"BoxCollider\\\"）\"}},\"required\":[\"componentType\"]}";
+        public string InputSchema => "{\"type\":\"object\",\"properties\":{\"instanceID\":{\"type\":\"integer\",\"description\":\"优先于 path\"},\"path\":{\"type\":\"string\",\"description\":\"如 /Root/Child\"},\"componentType\":{\"type\":\"string\",\"description\":\"如 BoxCollider\"}},\"required\":[\"componentType\"]}";
 
         /// <inheritdoc />
         public Task<ToolResult> Execute(Dictionary<string, object> parameters)
@@ -52,7 +52,6 @@ namespace UnityMcp.Editor.Tools
 
                 // 5. Remove component with Undo support
                 var actualTypeName = comp.GetType().Name;
-                var goName = go.name;
                 var path = GameObjectPathHelper.GetGameObjectPath(go);
 
                 Undo.DestroyObjectImmediate(comp);
@@ -61,8 +60,6 @@ namespace UnityMcp.Editor.Tools
                 var sb = new StringBuilder();
                 sb.Append("{\"componentType\":");
                 sb.Append(MiniJson.SerializeString(actualTypeName));
-                sb.Append(",\"name\":");
-                sb.Append(MiniJson.SerializeString(goName));
                 sb.Append(",\"path\":");
                 sb.Append(MiniJson.SerializeString(path));
                 sb.Append('}');

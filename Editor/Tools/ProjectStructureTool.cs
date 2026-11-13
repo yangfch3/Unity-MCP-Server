@@ -8,12 +8,13 @@ namespace UnityMcp.Editor.Tools
 {
     /// <summary>
     /// MCP 工具：获取 Assets 目录结构（可限定深度），排除 .meta 文件。
+    /// 目录节点必带 children（超出深度时为空数组），文件节点只有 name。
     /// </summary>
     public class ProjectStructureTool : IMcpTool
     {
         public string Name => "editor_getProjectStructure";
         public string Category => "editor";
-        public string Description => "获取 Assets 目录结构";
+        public string Description => "获取 Assets 目录树（目录带 children，文件只有 name）";
         public string InputSchema => "{\"type\":\"object\",\"properties\":{\"maxDepth\":{\"type\":\"integer\",\"description\":\"最大遍历深度\",\"default\":3}}}";
 
         public Task<ToolResult> Execute(Dictionary<string, object> parameters)
@@ -27,15 +28,12 @@ namespace UnityMcp.Editor.Tools
             }
             if (maxDepth < 1) maxDepth = 1;
 
-            string assetsPath = Application.dataPath; // 绝对路径到 Assets
-            string projectRoot = Directory.GetParent(assetsPath).FullName;
-
             var sb = new StringBuilder();
-            BuildDirTree(sb, assetsPath, projectRoot, 0, maxDepth);
+            BuildDirTree(sb, Application.dataPath, 0, maxDepth);
             return Task.FromResult(ToolResult.Success(sb.ToString()));
         }
 
-        private static void BuildDirTree(StringBuilder sb, string dirPath, string projectRoot, int depth, int maxDepth)
+        private static void BuildDirTree(StringBuilder sb, string dirPath, int depth, int maxDepth)
         {
             sb.Append('[');
             bool first = true;
@@ -47,22 +45,16 @@ namespace UnityMcp.Editor.Tools
 
             foreach (var dir in dirs)
             {
-                string name = Path.GetFileName(dir);
                 if (!first) sb.Append(',');
                 first = false;
 
-                string relativePath = GetRelativePath(dir, projectRoot);
                 sb.Append("{\"name\":");
-                sb.Append(MiniJson.SerializeString(name));
-                sb.Append(",\"type\":\"directory\",\"path\":");
-                sb.Append(MiniJson.SerializeString(relativePath));
-
+                sb.Append(MiniJson.SerializeString(Path.GetFileName(dir)));
                 sb.Append(",\"children\":");
                 if (depth < maxDepth - 1)
-                    BuildDirTree(sb, dir, projectRoot, depth + 1, maxDepth);
+                    BuildDirTree(sb, dir, depth + 1, maxDepth);
                 else
                     sb.Append("[]");
-
                 sb.Append('}');
             }
 
@@ -75,33 +67,15 @@ namespace UnityMcp.Editor.Tools
             {
                 if (file.EndsWith(".meta")) continue;
 
-                string name = Path.GetFileName(file);
                 if (!first) sb.Append(',');
                 first = false;
 
-                string relativePath = GetRelativePath(file, projectRoot);
                 sb.Append("{\"name\":");
-                sb.Append(MiniJson.SerializeString(name));
-                sb.Append(",\"type\":\"file\",\"path\":");
-                sb.Append(MiniJson.SerializeString(relativePath));
+                sb.Append(MiniJson.SerializeString(Path.GetFileName(file)));
                 sb.Append('}');
             }
 
             sb.Append(']');
-        }
-
-        private static string GetRelativePath(string fullPath, string basePath)
-        {
-            // 统一分隔符为正斜杠
-            string normalized = fullPath.Replace('\\', '/');
-            string normalizedBase = basePath.Replace('\\', '/');
-            if (!normalizedBase.EndsWith("/"))
-                normalizedBase += "/";
-
-            if (normalized.StartsWith(normalizedBase))
-                return normalized.Substring(normalizedBase.Length);
-
-            return normalized;
         }
     }
 }

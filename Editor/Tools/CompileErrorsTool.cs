@@ -44,9 +44,6 @@ namespace UnityMcp.Editor.Tools
                     sb.Append(err.line);
                     sb.Append(",\"column\":");
                     sb.Append(err.column);
-                    sb.Append(",\"code\":");
-                    // CompilerMessage 没有 code 字段，从 message 中提取 CSxxxx
-                    sb.Append(MiniJson.SerializeString(ExtractErrorCode(err.message)));
                     sb.Append(",\"message\":");
                     sb.Append(MiniJson.SerializeString(err.message ?? ""));
                     sb.Append('}');
@@ -82,17 +79,6 @@ namespace UnityMcp.Editor.Tools
                         _cachedErrors.Add(msg);
                 }
             }
-        }
-
-        private static string ExtractErrorCode(string message)
-        {
-            if (string.IsNullOrEmpty(message)) return "";
-            // 尝试匹配 "CSxxxx:" 模式
-            int idx = message.IndexOf("CS");
-            if (idx < 0) return "";
-            int end = idx + 2;
-            while (end < message.Length && char.IsDigit(message[end])) end++;
-            return end > idx + 2 ? message.Substring(idx, end - idx) : "";
         }
     }
 }

@@ -23,7 +23,7 @@ namespace UnityMcp.Editor.Tools
         public string Description => "修改 GameObject 的父节点";
 
         /// <inheritdoc />
-        public string InputSchema => "{\"type\":\"object\",\"properties\":{\"instanceID\":{\"type\":\"integer\",\"description\":\"目标 GameObject 的 instanceID（instanceID/path 二选一，同传则 ID 优先）\"},\"path\":{\"type\":\"string\",\"description\":\"目标 GameObject 的路径（如 \\\"/Root/Child\\\"）\"},\"newParentInstanceID\":{\"type\":\"integer\",\"description\":\"新父节点的 instanceID\"},\"newParentPath\":{\"type\":\"string\",\"description\":\"新父节点的路径\"},\"worldPositionStays\":{\"type\":\"boolean\",\"description\":\"是否保持世界坐标不变（默认 true）\"}}}";
+        public string InputSchema => "{\"type\":\"object\",\"properties\":{\"instanceID\":{\"type\":\"integer\",\"description\":\"优先于 path\"},\"path\":{\"type\":\"string\",\"description\":\"如 /Root/Child\"},\"newParentInstanceID\":{\"type\":\"integer\",\"description\":\"新父节点的 instanceID\"},\"newParentPath\":{\"type\":\"string\",\"description\":\"新父节点的路径\"},\"worldPositionStays\":{\"type\":\"boolean\",\"description\":\"是否保持世界坐标不变（默认 true）\"}}}";
 
         /// <inheritdoc />
         public Task<ToolResult> Execute(Dictionary<string, object> parameters)
@@ -81,9 +81,7 @@ namespace UnityMcp.Editor.Tools
                 // 7. Return JSON with name, path (new), instanceID
                 var path = GameObjectPathHelper.GetGameObjectPath(go);
                 var sb = new StringBuilder();
-                sb.Append("{\"name\":");
-                sb.Append(MiniJson.SerializeString(go.name));
-                sb.Append(",\"path\":");
+                sb.Append("{\"path\":");
                 sb.Append(MiniJson.SerializeString(path));
                 sb.Append(",\"instanceID\":");
                 sb.Append(go.GetInstanceID());

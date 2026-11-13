@@ -22,7 +22,7 @@ namespace UnityMcp.Editor.Tools
         public string Description => "修改 GameObject 上指定组件的启用/禁用状态";
 
         /// <inheritdoc />
-        public string InputSchema => "{\"type\":\"object\",\"properties\":{\"instanceID\":{\"type\":\"integer\",\"description\":\"目标 GameObject 的 instanceID（instanceID/path 二选一，同传则 ID 优先）\"},\"path\":{\"type\":\"string\",\"description\":\"目标 GameObject 的路径（如 \\\"/Root/Child\\\"）\"},\"componentType\":{\"type\":\"string\",\"description\":\"组件类型名（如 \\\"BoxCollider\\\"）\"},\"enabled\":{\"type\":\"boolean\",\"description\":\"启用/禁用状态\"}},\"required\":[\"componentType\",\"enabled\"]}";
+        public string InputSchema => "{\"type\":\"object\",\"properties\":{\"instanceID\":{\"type\":\"integer\",\"description\":\"优先于 path\"},\"path\":{\"type\":\"string\",\"description\":\"如 /Root/Child\"},\"componentType\":{\"type\":\"string\",\"description\":\"如 BoxCollider\"},\"enabled\":{\"type\":\"boolean\",\"description\":\"启用/禁用状态\"}},\"required\":[\"componentType\",\"enabled\"]}";
 
         /// <inheritdoc />
         public Task<ToolResult> Execute(Dictionary<string, object> parameters)
@@ -67,10 +67,15 @@ namespace UnityMcp.Editor.Tools
                     Undo.RecordObject(renderer, "Set Enabled");
                     renderer.enabled = enabled;
                 }
+                else if (comp is Collider collider)
+                {
+                    Undo.RecordObject(collider, "Set Enabled");
+                    collider.enabled = enabled;
+                }
                 else
                 {
                     return Task.FromResult(ToolResult.Error(
-                        $"组件 {comp.GetType().Name} 不支持启停操作（需继承自 Behaviour 或 Renderer）"));
+                        $"组件 {comp.GetType().Name} 不支持启停操作（需为 Behaviour、Renderer 或 Collider）"));
                 }
 
                 // 6. Return JSON result
@@ -78,8 +83,6 @@ namespace UnityMcp.Editor.Tools
                 var sb = new StringBuilder();
                 sb.Append("{\"componentType\":");
                 sb.Append(MiniJson.SerializeString(comp.GetType().Name));
-                sb.Append(",\"name\":");
-                sb.Append(MiniJson.SerializeString(go.name));
                 sb.Append(",\"path\":");
                 sb.Append(MiniJson.SerializeString(goPath));
                 sb.Append(",\"enabled\":");

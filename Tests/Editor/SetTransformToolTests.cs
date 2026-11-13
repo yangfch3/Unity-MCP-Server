@@ -198,14 +198,17 @@ namespace UnityMcp.Editor.Tests
 
             var json = MiniJson.Deserialize(result.Content[0].Text) as Dictionary<string, object>;
             Assert.IsNotNull(json);
-            Assert.IsTrue(json.ContainsKey("name"), "JSON should contain 'name'");
+            Assert.IsFalse(json.ContainsKey("name"), "name is derivable from path");
             Assert.IsTrue(json.ContainsKey("path"), "JSON should contain 'path'");
-            Assert.IsTrue(json.ContainsKey("localPosition"), "JSON should contain 'localPosition'");
-            Assert.IsTrue(json.ContainsKey("localEulerAngles"), "JSON should contain 'localEulerAngles'");
-            Assert.IsTrue(json.ContainsKey("localScale"), "JSON should contain 'localScale'");
+            Assert.IsFalse(json.ContainsKey("localRotation"), "only changed properties should be echoed");
+            Assert.IsFalse(json.ContainsKey("localScale"), "only changed properties should be echoed");
 
-            Assert.AreEqual("JSONCheck", json["name"]);
             Assert.AreEqual(expectedPath, json["path"]);
+            var pos = json["localPosition"] as List<object>;
+            Assert.IsNotNull(pos, "localPosition should be a JSON array");
+            Assert.AreEqual(3, pos.Count);
+            Assert.AreEqual(5.0, System.Convert.ToDouble(pos[0]), 0.001);
+            Assert.AreEqual(7.0, System.Convert.ToDouble(pos[2]), 0.001);
         }
 
         [Test]
