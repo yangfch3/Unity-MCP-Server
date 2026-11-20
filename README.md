@@ -145,7 +145,7 @@ UPM 通过 Git URL 安装后，会在宿主项目的 `packages-lock.json` 中锁
 如需锁定特定版本，可在 URL 末尾追加 Git Tag：
 
 ```
-https://github.com/yangfch3/Unity-MCP-Server.git#v0.5.1
+https://github.com/yangfch3/Unity-MCP-Server.git#v0.5.2
 ```
 
 对应 `Packages/manifest.json` 配置：
@@ -153,7 +153,7 @@ https://github.com/yangfch3/Unity-MCP-Server.git#v0.5.1
 ```json
 {
   "dependencies": {
-    "com.yangfch3.unity-mcp": "https://github.com/yangfch3/Unity-MCP-Server.git#v0.5.1"
+    "com.yangfch3.unity-mcp": "https://github.com/yangfch3/Unity-MCP-Server.git#v0.5.2"
   }
 }
 ```

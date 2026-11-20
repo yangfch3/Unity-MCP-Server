@@ -145,7 +145,7 @@ After installing via Git URL, UPM locks the current commit hash in the host proj
 To lock a specific version, append a Git Tag to the URL:
 
 ```
-https://github.com/yangfch3/Unity-MCP-Server.git#v0.5.1
+https://github.com/yangfch3/Unity-MCP-Server.git#v0.5.2
 ```
 
 Corresponding `Packages/manifest.json` configuration:
@@ -153,7 +153,7 @@ Corresponding `Packages/manifest.json` configuration:
 ```json
 {
   "dependencies": {
-    "com.yangfch3.unity-mcp": "https://github.com/yangfch3/Unity-MCP-Server.git#v0.5.1"
+    "com.yangfch3.unity-mcp": "https://github.com/yangfch3/Unity-MCP-Server.git#v0.5.2"
   }
 }
 ```
