@@ -54,6 +54,7 @@ namespace UnityMcp.Editor
         private static readonly string HistoryPath = Path.Combine(ProjectRoot, "Library/UnityMcp/StartupTimes.json");
         private static readonly string WaitPrefKey = "UnityMcp.StartupWaitSeconds." + Application.dataPath;
         private static long _settingsStamp = -1;
+        private static UnityMcpProjectSettings _projectSettings;
         private static StartupTimingSettings _settings = new StartupTimingSettings();
         private static StartupTimingHistory _history;
 
@@ -97,7 +98,9 @@ namespace UnityMcp.Editor
             long stamp = File.Exists(SettingsPath) ? File.GetLastWriteTimeUtc(SettingsPath).Ticks : 0;
             if (stamp == _settingsStamp) return;
             _settingsStamp = stamp;
-            _settings = Read<StartupTimingSettings>(SettingsPath) ?? new StartupTimingSettings();
+            _projectSettings = Read<UnityMcpProjectSettings>(SettingsPath) ?? new UnityMcpProjectSettings();
+            _settings = _projectSettings.startupTiming ?? new StartupTimingSettings();
+            _projectSettings.startupTiming = _settings;
             _settings.keyword = _settings.keyword ?? "";
             CancelIfSettingsChanged();
             EnsureHistory();
@@ -106,7 +109,8 @@ namespace UnityMcp.Editor
         internal static void SaveSettings(bool enabled, string keyword)
         {
             _settings = new StartupTimingSettings { enabled = enabled, keyword = keyword };
-            Write(SettingsPath, _settings);
+            _projectSettings.startupTiming = _settings;
+            Write(SettingsPath, _projectSettings);
             _settingsStamp = File.GetLastWriteTimeUtc(SettingsPath).Ticks;
             CancelIfSettingsChanged();
             EnsureHistory();

@@ -73,15 +73,21 @@ namespace UnityMcp.Editor.Tests
         }
 
         [Test]
-        public void SharedSettings_JsonContainsOnlyToggleAndKeyword()
+        public void SharedSettings_GroupsStartupTimingUnderProjectRoot()
         {
             var json = UnityEngine.JsonUtility.ToJson(
-                new StartupTimingSettings { enabled = true, keyword = "GameState: Enter" });
+                new UnityMcpProjectSettings
+                {
+                    startupTiming = new StartupTimingSettings { enabled = true, keyword = "GameState: Enter" }
+                });
             var fields = (System.Collections.Generic.Dictionary<string, object>)MiniJson.Deserialize(json);
-            CollectionAssert.AreEquivalent(new[] { "enabled", "keyword" }, fields.Keys);
-            var restored = UnityEngine.JsonUtility.FromJson<StartupTimingSettings>(json);
-            Assert.IsTrue(restored.enabled);
-            Assert.AreEqual("GameState: Enter", restored.keyword);
+            CollectionAssert.AreEquivalent(new[] { "startupTiming" }, fields.Keys);
+            var timing = (System.Collections.Generic.Dictionary<string, object>)fields["startupTiming"];
+            CollectionAssert.AreEquivalent(new[] { "enabled", "keyword" }, timing.Keys);
+            var restored = UnityEngine.JsonUtility.FromJson<UnityMcpProjectSettings>(json);
+            Assert.IsTrue(restored.startupTiming.enabled);
+            Assert.AreEqual("GameState: Enter", restored.startupTiming.keyword);
         }
+
     }
 }

@@ -182,7 +182,7 @@ https://github.com/yangfch3/Unity-MCP-Server.git#v0.5.3
 ### 进游等待与启动耗时统计
 
 - 在面板 PlayMode 区域填写等待秒数，留空默认 5 秒；手填值仅本机、本项目保存，`playmode_control enter` 明确提示 sleep 对应秒数。
-- Experimental 中可开启启动耗时统计并填写一个区分大小写的就绪日志关键字。开关和关键字保存在项目根目录的 `ProjectSettings/UnityMcpSettings.json`，可纳入 SVN；统计默认关闭。
+- Experimental 中可开启启动耗时统计并填写一个区分大小写的就绪日志关键字。开关和关键字按 startupTiming.enabled / startupTiming.keyword 分组，保存在项目根目录的 `ProjectSettings/UnityMcpSettings.json`，可纳入 SVN；统计默认关闭。
 - 从开始进游到首次命中关键字计时，包含 Domain Reload；保留最近 50 次 2～30 秒的有效样本，存于本机 `Library/UnityMcp/StartupTimes.json`。满 10 次后显示 `ceil(P90 + 1秒)` 推荐值，不覆盖手填值；支持清空统计。
 
 详见 [工具详细文档](Docs/TOOLS.md#playmode_control)。
