@@ -90,7 +90,7 @@ namespace UnityMcp.Editor
         {
             var number = seconds.ToString(CultureInfo.InvariantCulture);
             return "{\"message\":\"进游中，sleep " + number
-                + " 秒后查询状态；Playing 仅表示 PlayMode，项目可用性需另行确认\",\"suggestedWaitSeconds\":" + number + "}";
+                + " 秒后再执行后续操作\",\"suggestedWaitSeconds\":" + number + "}";
         }
 
         internal static void RefreshSettings()

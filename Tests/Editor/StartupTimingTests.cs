@@ -58,7 +58,7 @@ namespace UnityMcp.Editor.Tests
         {
             var response = StartupTiming.EnterResponse(7.5f);
             StringAssert.Contains("\"suggestedWaitSeconds\":7.5", response);
-            StringAssert.Contains("sleep 7.5 秒后查询状态", response);
+            StringAssert.Contains("进游中，sleep 7.5 秒后再执行后续操作", response);
         }
 
         [Test]
