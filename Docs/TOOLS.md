@@ -84,6 +84,12 @@
 |------|------|------|--------|------|
 | `action` | string | ✅ | - | 操作：`enter`、`exit`、`pause`、`resume`、`status` |
 
+`enter` 开始进游或进游尚未完成时，返回明确的等待提示和 `suggestedWaitSeconds`。等待秒数在 Window → MCP Server 的 PlayMode 区域填写，仅保存在本机并按项目隔离；留空或无效值使用 5 秒。`status=Playing` 仅表示 Unity PlayMode，不保证项目已可用。
+
+Experimental 中的启动耗时统计默认关闭，支持一个区分大小写的就绪日志包含字符串。开关和关键字保存到项目根目录的 `ProjectSettings/UnityMcpSettings.json`，可提交 SVN；文件在修改配置时创建。MCP 和手动进游均从开始切换 PlayMode 计时，包含 Domain Reload，到首次命中关键字结束。仅记录 2～30 秒（含边界）的启动；未就绪就退出、暂停或运行中脚本重载的启动不记录。
+
+本机样本保存在 `Library/UnityMcp/StartupTimes.json`，仅留最近 50 次有效记录，不共享。满 10 次后，等待输入框右侧显示 `ceil(P90 + 1秒)`（P90 采用最近秩法），仅供参考，不覆盖手填值。修改关键字或点击清空统计会清除本机样本；清理 Library 也会清空样本。修改设置后从下次进游开始采样。
+
 ### Query（查询）
 
 #### `editor_getSelection`

@@ -20,6 +20,7 @@ This plugin is positioned as an AI Agent's **Unity perception layer + diagnostic
 - **In-Process** — No external Node.js/Python process required, runs directly inside the Editor
 - **Extensible Tool System** — Implement the `IMcpTool` interface to register new tools with zero core code changes
 - **Domain Reload Auto-Recovery** — Service automatically restarts after entering/exiting PlayMode
+- **Startup Wait Hints and Timing** — Returns explicit sleep durations and recommends a wait based on local startup samples
 - **Compact Output** — Results omit defaults and redundant fields (e.g. empty `children` on tree nodes, `name` derivable from `path`) to save Agent context
 
 ### Built-in Tools
@@ -145,7 +146,7 @@ After installing via Git URL, UPM locks the current commit hash in the host proj
 To lock a specific version, append a Git Tag to the URL:
 
 ```
-https://github.com/yangfch3/Unity-MCP-Server.git#v0.5.2
+https://github.com/yangfch3/Unity-MCP-Server.git#v0.5.3
 ```
 
 Corresponding `Packages/manifest.json` configuration:
@@ -153,7 +154,7 @@ Corresponding `Packages/manifest.json` configuration:
 ```json
 {
   "dependencies": {
-    "com.yangfch3.unity-mcp": "https://github.com/yangfch3/Unity-MCP-Server.git#v0.5.2"
+    "com.yangfch3.unity-mcp": "https://github.com/yangfch3/Unity-MCP-Server.git#v0.5.3"
   }
 }
 ```
@@ -177,6 +178,14 @@ To update, change the `#tag` suffix in `manifest.json` to the new version, or re
 1. Unity Editor → Window → MCP Server
 2. Set the port (default 8090), click Start
 3. Copy the configuration JSON from the panel
+
+### Startup Wait and Timing
+
+- Set the wait in the panel's PlayMode section; blank defaults to 5 seconds. The value is local to this machine and project. `playmode_control enter` explicitly instructs the Agent to sleep for that duration.
+- Enable startup timing under Experimental and enter one case-sensitive readiness log substring. The toggle and keyword are stored in the project root's `ProjectSettings/UnityMcpSettings.json` for version control. Timing is off by default.
+- Timing runs from entry initiation to the first matching log, including Domain Reload. The latest 50 valid samples of 2–30 seconds are stored locally in `Library/UnityMcp/StartupTimes.json`. After 10 samples, the panel shows `ceil(P90 + 1 second)` without overriding the manual wait. Local statistics can be cleared.
+
+See the [Tools Reference](Docs/TOOLS_EN.md#playmode_control).
 
 ### Configure Your Agent
 

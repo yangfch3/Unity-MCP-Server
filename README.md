@@ -20,6 +20,7 @@ Agent（如 Kiro、Cursor、Claude Code）可通过标准 MCP 协议连接到 Un
 - **进程内运行** — 无需外部 Node.js/Python 进程，直接在 Editor 内启动
 - **可扩展工具系统** — 实现 `IMcpTool` 接口即可注册新工具，零修改核心代码
 - **Domain Reload 自动恢复** — 进入/退出 PlayMode 后服务自动重启
+- **进游等待提示与耗时统计** — 明确返回 sleep 秒数，可根据本机启动样本显示推荐等待时间
 - **精简输出** — 返回结果省略默认值与冗余字段（如树节点的空 `children`、可由 `path` 推出的 `name`），节省 Agent 上下文
 
 ### 内置工具
@@ -145,7 +146,7 @@ UPM 通过 Git URL 安装后，会在宿主项目的 `packages-lock.json` 中锁
 如需锁定特定版本，可在 URL 末尾追加 Git Tag：
 
 ```
-https://github.com/yangfch3/Unity-MCP-Server.git#v0.5.2
+https://github.com/yangfch3/Unity-MCP-Server.git#v0.5.3
 ```
 
 对应 `Packages/manifest.json` 配置：
@@ -153,7 +154,7 @@ https://github.com/yangfch3/Unity-MCP-Server.git#v0.5.2
 ```json
 {
   "dependencies": {
-    "com.yangfch3.unity-mcp": "https://github.com/yangfch3/Unity-MCP-Server.git#v0.5.2"
+    "com.yangfch3.unity-mcp": "https://github.com/yangfch3/Unity-MCP-Server.git#v0.5.3"
   }
 }
 ```
@@ -177,6 +178,14 @@ https://github.com/yangfch3/Unity-MCP-Server.git#v0.5.2
 1. Unity Editor → Window → MCP Server
 2. 设置端口（默认 8090），点击 Start
 3. 复制面板中的配置 JSON
+
+### 进游等待与启动耗时统计
+
+- 在面板 PlayMode 区域填写等待秒数，留空默认 5 秒；手填值仅本机、本项目保存，`playmode_control enter` 明确提示 sleep 对应秒数。
+- Experimental 中可开启启动耗时统计并填写一个区分大小写的就绪日志关键字。开关和关键字保存在项目根目录的 `ProjectSettings/UnityMcpSettings.json`，可纳入 SVN；统计默认关闭。
+- 从开始进游到首次命中关键字计时，包含 Domain Reload；保留最近 50 次 2～30 秒的有效样本，存于本机 `Library/UnityMcp/StartupTimes.json`。满 10 次后显示 `ceil(P90 + 1秒)` 推荐值，不覆盖手填值；支持清空统计。
+
+详见 [工具详细文档](Docs/TOOLS.md#playmode_control)。
 
 ### 配置 Agent
 

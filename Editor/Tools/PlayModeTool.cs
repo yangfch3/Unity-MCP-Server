@@ -26,8 +26,11 @@ namespace UnityMcp.Editor.Tools
                 case "enter":
                     if (EditorApplication.isPlaying)
                         return Task.FromResult(ToolResult.Success("已处于 PlayMode"));
+                    if (EditorApplication.isPlayingOrWillChangePlaymode)
+                        return Task.FromResult(ToolResult.Success(StartupTiming.EnterResponse(StartupTiming.WaitSeconds)));
+                    StartupTiming.Begin();
                     EditorApplication.isPlaying = true;
-                    return Task.FromResult(ToolResult.Success("进游中，数秒后来查询状态"));
+                    return Task.FromResult(ToolResult.Success(StartupTiming.EnterResponse(StartupTiming.WaitSeconds)));
 
                 case "exit":
                     if (!EditorApplication.isPlaying)

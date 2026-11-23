@@ -84,6 +84,12 @@ Enter/exit/pause/resume/query PlayMode state.
 |-----------|------|----------|---------|-------------|
 | `action` | string | ✅ | - | Action: `enter`, `exit`, `pause`, `resume`, `status` |
 
+When `enter` starts or is still entering PlayMode, it returns an explicit wait message and `suggestedWaitSeconds`. Set the wait in Window → MCP Server → PlayMode. It is local to this machine and project; blank or invalid values use 5 seconds. `status=Playing` indicates Unity PlayMode, not application readiness.
+
+Experimental startup timing is off by default. Configure one case-sensitive log substring identifying readiness. The toggle and keyword are saved on edit to `ProjectSettings/UnityMcpSettings.json` in the project root for version control. Both manual and MCP entry are measured from the start of the PlayMode transition, including Domain Reload, to the first matching log. Only durations of 2–30 seconds inclusive are recorded. Exit, pause, or a script reload during play before readiness discards the sample.
+
+The latest 50 valid samples are stored locally in `Library/UnityMcp/StartupTimes.json`. After 10 samples, `ceil(P90 + 1 second)` (nearest-rank P90) appears beside the wait field without overriding it. Changing the keyword or clearing statistics removes local samples; deleting Library also removes them. Settings changes apply to sampling from the next entry.
+
 ### Query
 
 #### `editor_getSelection`

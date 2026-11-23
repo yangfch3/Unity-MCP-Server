@@ -20,6 +20,7 @@ namespace UnityMcp.Editor
         private int _port;
         private bool _enableGameScreenshot;
         private bool _enableSceneScreenshot;
+        private Vector2 _scrollPosition;
 #if !UNITY_6000_OR_NEWER
         private bool _codeExecuteImmediate;
 #endif
@@ -42,6 +43,7 @@ namespace UnityMcp.Editor
 
         private void OnGUI()
         {
+            _scrollPosition = EditorGUILayout.BeginScrollView(_scrollPosition);
             GUILayout.Label("MCP Server", EditorStyles.boldLabel);
             GUILayout.Space(4);
 
@@ -99,7 +101,43 @@ namespace UnityMcp.Editor
                 EditorGUIUtility.systemCopyBuffer = configJson;
 
             GUILayout.Space(12);
+            GUILayout.Label("PlayMode", EditorStyles.boldLabel);
+            StartupTiming.RefreshSettings();
+            EditorGUILayout.BeginHorizontal();
+            var waitText = EditorGUILayout.DelayedTextField(
+                new GUIContent("Startup wait (seconds)", "本机、本项目设置；留空或无效值使用 5 秒。仅建议等待，不保证项目就绪。"),
+                StartupTiming.WaitText);
+            if (waitText != StartupTiming.WaitText)
+                StartupTiming.WaitText = waitText;
+            var recommendation = StartupTiming.Recommendation;
+            if (recommendation.HasValue)
+                GUILayout.Label("Recommended: " + recommendation.Value + "s", GUILayout.ExpandWidth(false));
+            EditorGUILayout.EndHorizontal();
+            if (string.IsNullOrWhiteSpace(waitText))
+                EditorGUILayout.LabelField("Effective wait", "5s (default)");
+            else if (!float.TryParse(waitText, System.Globalization.NumberStyles.Float,
+                         System.Globalization.CultureInfo.InvariantCulture, out var wait)
+                     || wait <= 0 || float.IsInfinity(wait) || float.IsNaN(wait))
+                EditorGUILayout.HelpBox("请输入正数秒数；当前使用默认值 5s。", MessageType.Warning);
+
+            GUILayout.Space(12);
             GUILayout.Label("Experimental", EditorStyles.boldLabel);
+
+            var timingSettings = StartupTiming.Settings;
+            var timingEnabled = EditorGUILayout.ToggleLeft(
+                new GUIContent("Measure startup time (shared project setting)",
+                    "默认关闭。开关和关键字保存到 ProjectSettings/UnityMcpSettings.json，可纳入 SVN。"),
+                timingSettings.enabled);
+            var timingKeyword = EditorGUILayout.DelayedTextField(
+                new GUIContent("Ready log keyword", "单个、区分大小写的包含字符串。每次启动只取首次命中；修改后清空本机旧样本。"),
+                timingSettings.keyword);
+            if (timingEnabled != timingSettings.enabled || timingKeyword != timingSettings.keyword)
+                StartupTiming.SaveSettings(timingEnabled, timingKeyword);
+            if (timingEnabled && string.IsNullOrWhiteSpace(timingKeyword))
+                EditorGUILayout.HelpBox("填写就绪日志关键字后才会采样。", MessageType.Info);
+            EditorGUILayout.LabelField("Local samples", StartupTiming.SampleCount + "/50 (recommendation after 10)");
+            if (GUILayout.Button("Clear local startup statistics"))
+                StartupTiming.ClearHistory();
 
             var newGameScreenshot = EditorGUILayout.ToggleLeft(
                 new GUIContent("Enable Game Screen Shot",
@@ -135,7 +173,8 @@ namespace UnityMcp.Editor
             }
 #endif
 
-            if (running)
+            EditorGUILayout.EndScrollView();
+            if (running || EditorApplication.isPlaying)
                 Repaint();
         }
 
