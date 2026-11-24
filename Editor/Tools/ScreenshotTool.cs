@@ -44,85 +44,89 @@ namespace UnityMcp.Editor.Tools
             int width = Mathf.Max(1, (int)size.x);
             int height = Mathf.Max(1, (int)size.y);
 
-            var rt = RenderTexture.GetTemporary(width, height, 24, RenderTextureFormat.ARGB32);
             var prevTarget = (RenderTexture)mttField.GetValue(window);
+            var rt = RenderTexture.GetTemporary(width, height, 24, RenderTextureFormat.ARGB32);
             var tcs = new TaskCompletionSource<ToolResult>();
             int tick = 0;
             int blackRetries = 0;
             bool finished = false;
 
             EditorApplication.CallbackFunction callback = null;
+            AssemblyReloadEvents.AssemblyReloadCallback onReload = null;
+            Action<PlayModeStateChange> onPlayModeChanged = null;
+            Action<ToolResult> finish = result =>
+            {
+                if (finished) return;
+                finished = true;
+                EditorApplication.update -= callback;
+                AssemblyReloadEvents.beforeAssemblyReload -= onReload;
+                EditorApplication.playModeStateChanged -= onPlayModeChanged;
+                RestoreGameView(window, mttField, prevTarget, rt);
+                tcs.TrySetResult(result);
+            };
+            onReload = () => finish(ToolResult.Error("截图失败: 捕获期间发生程序集重载，请重新调用"));
+            onPlayModeChanged = state =>
+            {
+                if (state == PlayModeStateChange.ExitingPlayMode)
+                    finish(ToolResult.Error("截图失败: 捕获期间退出了 Play 模式，请重新调用"));
+            };
             callback = () =>
             {
-                if (finished)
-                {
-                    EditorApplication.update -= callback;
-                    return;
-                }
-
-                if (!EditorApplication.isPlaying)
-                {
-                    finished = true;
-                    EditorApplication.update -= callback;
-                    RestoreGameView(window, mttField, prevTarget, rt);
-                    tcs.TrySetResult(ToolResult.Error("截图失败: 捕获期间退出了 Play 模式，请重新调用"));
-                    return;
-                }
-
-                tick++;
-                if (tick > MaxTicks)
-                {
-                    finished = true;
-                    EditorApplication.update -= callback;
-                    RestoreGameView(window, mttField, prevTarget, rt);
-                    tcs.TrySetResult(ToolResult.Error("截图失败: 等待 Game 视图渲染超时"));
-                    return;
-                }
-
-                if (tick == 1)
-                {
-                    mttField.SetValue(window, rt);
-                    window.Repaint();
-                    return;
-                }
-                if (tick < WaitForTicks)
-                    return;
-
+                if (finished) return;
+                Texture2D shot = null;
                 try
                 {
-                    Texture2D shot = ReadRenderTexture(rt, width, height, true);
-                    if (IsUniformBlack(shot) && blackRetries < MaxBlackRetries)
+                    if (!EditorApplication.isPlaying)
+                    {
+                        finish(ToolResult.Error("截图失败: 捕获期间退出了 Play 模式，请重新调用"));
+                        return;
+                    }
+                    if (++tick > MaxTicks)
+                    {
+                        finish(ToolResult.Error("截图失败: 等待 Game 视图渲染超时"));
+                        return;
+                    }
+                    if (tick == 1)
+                    {
+                        mttField.SetValue(window, rt);
+                        window.Repaint();
+                        return;
+                    }
+                    if (tick < WaitForTicks) return;
+
+                    shot = ReadRenderTexture(rt, width, height, true);
+                    bool isBlack = IsUniformBlack(shot);
+                    if (isBlack && blackRetries < MaxBlackRetries)
                     {
                         blackRetries++;
-                        UnityEngine.Object.DestroyImmediate(shot);
                         window.Repaint();
                         return;
                     }
 
-                    finished = true;
-                    EditorApplication.update -= callback;
-                    RestoreGameView(window, mttField, prevTarget, rt);
-
-                    if (IsUniformBlack(shot))
+                    if (isBlack)
                     {
                         var warning = new ContentItem("text",
                             "警告: Game 视图画面接近纯黑。可能是渲染未完成，也可能是游戏本身处于黑屏状态");
                         var image = new ContentItem("image", Convert.ToBase64String(shot.EncodeToPNG()), "image/png");
-                        UnityEngine.Object.DestroyImmediate(shot);
-                        tcs.TrySetResult(ToolResult.Success(new List<ContentItem> { warning, image }));
+                        finish(ToolResult.Success(new List<ContentItem> { warning, image }));
                         return;
                     }
 
-                    tcs.TrySetResult(EncodeResult(shot, maxWidth, maxHeight, format, quality));
+                    var ownedShot = shot;
+                    shot = null;
+                    finish(EncodeResult(ownedShot, maxWidth, maxHeight, format, quality));
                 }
                 catch (Exception ex)
                 {
-                    finished = true;
-                    EditorApplication.update -= callback;
-                    RestoreGameView(window, mttField, prevTarget, rt);
-                    tcs.TrySetResult(ToolResult.Error($"截图失败: {ex.Message}"));
+                    finish(ToolResult.Error($"截图失败: {ex.Message}"));
+                }
+                finally
+                {
+                    if (shot != null) UnityEngine.Object.DestroyImmediate(shot);
                 }
             };
+            AssemblyReloadEvents.beforeAssemblyReload += onReload;
+            EditorApplication.playModeStateChanged += onPlayModeChanged;
             EditorApplication.update += callback;
             return tcs.Task;
         }
@@ -227,21 +231,26 @@ namespace UnityMcp.Editor.Tools
         {
             RenderTexture source = rt;
             RenderTexture temp = null;
-            if (flipY)
-            {
-                temp = RenderTexture.GetTemporary(width, height, 0, RenderTextureFormat.ARGB32);
-                Graphics.Blit(rt, temp, new Vector2(1f, -1f), new Vector2(0f, 1f));
-                source = temp;
-            }
-
+            Texture2D tex = null;
             var prevActive = RenderTexture.active;
-            RenderTexture.active = source;
             try
             {
-                var tex = new Texture2D(width, height, TextureFormat.RGBA32, false);
+                if (flipY)
+                {
+                    temp = RenderTexture.GetTemporary(width, height, 0, RenderTextureFormat.ARGB32);
+                    Graphics.Blit(rt, temp, new Vector2(1f, -1f), new Vector2(0f, 1f));
+                    source = temp;
+                }
+                RenderTexture.active = source;
+                tex = new Texture2D(width, height, TextureFormat.RGBA32, false);
                 tex.ReadPixels(new Rect(0, 0, width, height), 0, 0);
                 tex.Apply();
                 return tex;
+            }
+            catch
+            {
+                if (tex != null) UnityEngine.Object.DestroyImmediate(tex);
+                throw;
             }
             finally
             {
@@ -263,11 +272,12 @@ namespace UnityMcp.Editor.Tools
             return true;
         }
 
-        private static ToolResult EncodeResult(Texture2D shot, int maxWidth, int maxHeight, string format, int quality)
+        internal static ToolResult EncodeResult(Texture2D shot, int maxWidth, int maxHeight, string format, int quality)
         {
+            Texture2D output = null;
             try
             {
-                Texture2D output = DownscaleIfNeeded(shot, maxWidth, maxHeight);
+                output = DownscaleIfNeeded(shot, maxWidth, maxHeight);
                 byte[] data;
                 string mimeType;
                 if (format == "jpg")
@@ -284,6 +294,8 @@ namespace UnityMcp.Editor.Tools
             }
             finally
             {
+                if (output != null && output != shot)
+                    UnityEngine.Object.DestroyImmediate(output);
                 UnityEngine.Object.DestroyImmediate(shot);
             }
         }
@@ -301,14 +313,10 @@ namespace UnityMcp.Editor.Tools
 
             var rt = RenderTexture.GetTemporary(newWidth, newHeight, 0, RenderTextureFormat.ARGB32);
             var prevActive = RenderTexture.active;
-            RenderTexture.active = rt;
             try
             {
                 Graphics.Blit(source, rt);
-                var result = new Texture2D(newWidth, newHeight, TextureFormat.RGBA32, false);
-                result.ReadPixels(new Rect(0, 0, newWidth, newHeight), 0, 0);
-                result.Apply();
-                return result;
+                return ReadRenderTexture(rt, newWidth, newHeight, false);
             }
             finally
             {

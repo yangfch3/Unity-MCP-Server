@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using NUnit.Framework;
 using UnityEditor;
 using UnityEngine;
@@ -17,6 +18,36 @@ namespace UnityMcp.Editor.Tests
         private bool _previousGameScreenshotDisabled;
         private bool _hadSceneScreenshotPref;
         private bool _previousSceneScreenshotEnabled;
+
+        [TestCase(0)]
+        [TestCase(32)]
+        public void EncodeResult_RepeatedCaptures_DoNotRetainTextures(int maxHeight)
+        {
+            // 预热编码器与渲染资源，排除首次初始化引入的对象。
+            ScreenshotTool.EncodeResult(new Texture2D(64, 64), 0, maxHeight, "jpg", 75);
+            var before = new HashSet<int>(Resources.FindObjectsOfTypeAll<Texture2D>().Select(t => t.GetInstanceID()));
+            try
+            {
+                for (int i = 0; i < 10; i++)
+                {
+                    var shot = new Texture2D(64, 64);
+                    var result = ScreenshotTool.EncodeResult(shot, 0, maxHeight, "jpg", 75);
+                    Assert.IsTrue(shot == null, "Source texture must be destroyed.");
+                    var decoded = LoadTexture(GetImage(result));
+                    try { Assert.AreEqual(maxHeight == 0 ? 64 : maxHeight, decoded.height); }
+                    finally { UnityEngine.Object.DestroyImmediate(decoded); }
+                }
+                var retained = Resources.FindObjectsOfTypeAll<Texture2D>()
+                    .Where(t => !before.Contains(t.GetInstanceID()) && (t.width == 32 || t.width == 64)).ToArray();
+                Assert.IsEmpty(retained, "Screenshot textures must be destroyed after encoding.");
+            }
+            finally
+            {
+                foreach (var texture in Resources.FindObjectsOfTypeAll<Texture2D>()
+                    .Where(t => !before.Contains(t.GetInstanceID()) && (t.width == 32 || t.width == 64)))
+                    UnityEngine.Object.DestroyImmediate(texture);
+            }
+        }
 
         [SetUp]
         public void SetUp()

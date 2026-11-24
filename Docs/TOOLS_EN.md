@@ -352,7 +352,8 @@ Compile and execute C# code snippets at runtime.
 
 | Parameter | Type | Required | Default | Description |
 |-----------|------|----------|---------|-------------|
-| `code` | string | ✅ | - | C# source code to compile and execute |
+| `code` | string | One of two | - | C# source code to compile and execute |
+| `filePath` | string | One of two | - | Code file path, relative to the Unity project root or absolute |
 | `mainThread` | bool | ❌ | `true` | Execute on main thread. `true`=can call Unity API, no timeout; `false`=background thread with timeout, no Unity API |
 | `timeout` | int | ❌ | see notes | Timeout in milliseconds. Background mode defaults to 5000, range 1000–30000; cross-frame mode defaults to 30000, range 1000–120000 |
 

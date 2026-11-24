@@ -98,7 +98,7 @@ Agent（如 Kiro、Cursor、Claude Code）可通过标准 MCP 协议连接到 Un
 
 | 工具 | 功能 |
 |------|------|
-| `code_executeImmediate` | 动态编译并执行 C# 代码（主线程 / 后台 / 跨帧协程三种模式） |
+| `code_executeImmediate` | 动态编译并执行 C#，支持源码或文件路径（主线程 / 后台 / 跨帧协程） |
 
 > 默认开启，可在 Window → MCP Server 面板关闭。详见 [工具详细文档](Docs/TOOLS.md)。
 
@@ -146,7 +146,7 @@ UPM 通过 Git URL 安装后，会在宿主项目的 `packages-lock.json` 中锁
 如需锁定特定版本，可在 URL 末尾追加 Git Tag：
 
 ```
-https://github.com/yangfch3/Unity-MCP-Server.git#v0.5.3
+https://github.com/yangfch3/Unity-MCP-Server.git#v0.5.4
 ```
 
 对应 `Packages/manifest.json` 配置：
@@ -154,7 +154,7 @@ https://github.com/yangfch3/Unity-MCP-Server.git#v0.5.3
 ```json
 {
   "dependencies": {
-    "com.yangfch3.unity-mcp": "https://github.com/yangfch3/Unity-MCP-Server.git#v0.5.3"
+    "com.yangfch3.unity-mcp": "https://github.com/yangfch3/Unity-MCP-Server.git#v0.5.4"
   }
 }
 ```

@@ -1,6 +1,7 @@
 #if !UNITY_6000_OR_NEWER
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Threading.Tasks;
 using NUnit.Framework;
 using UnityEditor;
@@ -40,7 +41,7 @@ namespace UnityMcp.Editor.Tests
         }
 
         [Test]
-        public void InputSchema_HasRequiredCodeParameter()
+        public void InputSchema_RequiresCodeOrFilePath()
         {
             var schema = MiniJson.Deserialize(_tool.InputSchema) as Dictionary<string, object>;
             Assert.IsNotNull(schema);
@@ -53,9 +54,86 @@ namespace UnityMcp.Editor.Tests
             Assert.IsNotNull(codeProp);
             Assert.AreEqual("string", codeProp["type"]);
 
-            var required = schema["required"] as List<object>;
-            Assert.IsNotNull(required);
-            Assert.Contains("code", required);
+            Assert.IsTrue(props.ContainsKey("filePath"));
+            var alternatives = (List<object>)schema["oneOf"];
+            Assert.AreEqual(2, alternatives.Count);
+            CollectionAssert.AreEqual(new[] { "code" },
+                (List<object>)((Dictionary<string, object>)alternatives[0])["required"]);
+            CollectionAssert.AreEqual(new[] { "filePath" },
+                (List<object>)((Dictionary<string, object>)alternatives[1])["required"]);
+        }
+
+        [TestCase(false)]
+        [TestCase(true)]
+        public void Execute_FilePath_ReadsAndRunsCode(bool absolute)
+        {
+            EditorPrefs.SetBool(PrefKey, false);
+            var path = CreateCodeFile("using System; public class FileEntry { public static void Run() { Console.Write(\"from-file\"); } }");
+            try
+            {
+                var filePath = absolute ? path : "Assets/.Temp~/" + Path.GetFileName(path);
+                var result = ParseResult(_tool.Execute(new Dictionary<string, object> { { "filePath", filePath } }));
+                Assert.AreEqual(true, result["success"], result.ContainsKey("error") ? (string)result["error"] : "");
+                Assert.AreEqual("from-file", result["output"]);
+            }
+            finally { File.Delete(path); }
+        }
+
+        [UnityTest]
+        public IEnumerator Execute_FilePath_SupportsCrossFrameEntry()
+        {
+            EditorPrefs.SetBool(PrefKey, false);
+            var path = CreateCodeFile("using System; using System.Collections; public class FileEntry { public static IEnumerator Run() { yield return null; Console.Write(\"after-frame\"); } }");
+            try
+            {
+                var task = _tool.Execute(new Dictionary<string, object> { { "filePath", path } });
+                yield return DriveUntilComplete(task);
+                Assert.AreEqual(true, ParseResult(task)["success"]);
+                Assert.AreEqual("after-frame", ParseResult(task)["output"]);
+            }
+            finally { File.Delete(path); }
+        }
+
+        [Test]
+        public void Execute_CodeAndFilePath_ReturnsError()
+        {
+            var result = _tool.Execute(new Dictionary<string, object>
+            {
+                { "code", "public class FileEntry { public static void Run() {} }" },
+                { "filePath", "unused.cs" }
+            }).Result;
+            Assert.IsTrue(result.IsError);
+            StringAssert.Contains("not both", result.Content[0].Text);
+        }
+
+        [Test]
+        public void Execute_MissingFile_ReturnsReadError()
+        {
+            EditorPrefs.SetBool(PrefKey, false);
+            var result = _tool.Execute(new Dictionary<string, object>
+            {
+                { "filePath", "Assets/.Temp~/" + System.Guid.NewGuid() + ".cs" }
+            }).Result;
+            Assert.IsTrue(result.IsError);
+            StringAssert.Contains("Cannot read filePath", result.Content[0].Text);
+        }
+
+        [Test]
+        public void Execute_FilePath_WhenDisabled_RejectsBeforeReading()
+        {
+            EditorPrefs.SetBool(PrefKey, true);
+            var result = _tool.Execute(new Dictionary<string, object> { { "filePath", "missing.cs" } }).Result;
+            Assert.IsTrue(result.IsError);
+            StringAssert.Contains("disabled", result.Content[0].Text);
+        }
+
+        private static string CreateCodeFile(string code)
+        {
+            var directory = Path.Combine(UnityEngine.Application.dataPath, ".Temp~");
+            Directory.CreateDirectory(directory);
+            var path = Path.Combine(directory, "McpFileExecution-" + System.Guid.NewGuid() + ".cs");
+            File.WriteAllText(path, code);
+            return path;
         }
 
         [Test]
@@ -188,8 +266,7 @@ public class Test
             var mtProp = props["mainThread"] as Dictionary<string, object>;
             Assert.AreEqual("boolean", mtProp["type"]);
 
-            var required = schema["required"] as List<object>;
-            Assert.IsFalse(required.Contains("mainThread"), "mainThread should NOT be in required array");
+            Assert.IsFalse(schema.ContainsKey("required"), "Only code/filePath alternatives are required.");
         }
 
         [Test]

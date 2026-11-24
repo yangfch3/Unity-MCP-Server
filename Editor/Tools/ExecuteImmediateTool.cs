@@ -30,7 +30,7 @@ namespace UnityMcp.Editor.Tools
 
         /// <summary>JSON Schema 描述参数。</summary>
         public string InputSchema =>
-            "{\"type\":\"object\",\"properties\":{\"code\":{\"type\":\"string\",\"description\":\"C# 源码，入口为 public static void Run() 或 public static IEnumerator Run()（跨帧：yield return null 等一帧，yield return IEnumerator 嵌套）。用 Console.WriteLine 输出，Debug.Log 不进 output\"},\"mainThread\":{\"type\":\"boolean\",\"description\":\"true（默认）可调 Unity API，无超时保护；false 在后台线程，有超时保护但不可调 Unity API。IEnumerator 入口仅支持 true\"},\"timeout\":{\"type\":\"integer\",\"description\":\"毫秒。后台模式默认 5000（1000-30000）；跨帧模式默认 30000（1000-120000）\"}},\"required\":[\"code\"]}";
+            "{\"type\":\"object\",\"properties\":{\"code\":{\"type\":\"string\",\"description\":\"C# 源码，入口为 public static void Run() 或 public static IEnumerator Run()（跨帧：yield return null 等一帧，yield return IEnumerator 嵌套）。用 Console.WriteLine 输出，Debug.Log 不进 output\"},\"filePath\":{\"type\":\"string\",\"description\":\"支持传入代码文件路径；相对 Unity 项目根目录路径或绝对路径\"},\"mainThread\":{\"type\":\"boolean\",\"description\":\"true（默认）可调 Unity API，无超时保护；false 在后台线程，有超时保护但不可调 Unity API。IEnumerator 入口仅支持 true\"},\"timeout\":{\"type\":\"integer\",\"description\":\"毫秒。后台模式默认 5000（1000-30000）；跨帧模式默认 30000（1000-120000）\"}},\"oneOf\":[{\"required\":[\"code\"]},{\"required\":[\"filePath\"]}]}";
 
         private static readonly object _executionLock = new object();
         public const string DisablePrefKey = "McpServer_DisableCodeExecuteImmediate";
@@ -52,14 +52,12 @@ namespace UnityMcp.Editor.Tools
         /// <summary>执行工具逻辑。</summary>
         public Task<ToolResult> Execute(Dictionary<string, object> parameters)
         {
-            // Extract code parameter
-            string code = null;
-            if (parameters != null && parameters.ContainsKey("code"))
-                code = parameters["code"] as string;
-
-
-            if (string.IsNullOrEmpty(code))
-                return Task.FromResult(Respond("", "missing 'code' parameter"));
+            string code = parameters != null && parameters.TryGetValue("code", out var rawCode) ? rawCode as string : null;
+            string filePath = parameters != null && parameters.TryGetValue("filePath", out var rawPath) ? rawPath as string : null;
+            if (string.IsNullOrWhiteSpace(code) && string.IsNullOrWhiteSpace(filePath))
+                return Task.FromResult(Respond("", "missing 'code' or 'filePath' parameter"));
+            if (parameters.ContainsKey("code") && parameters.ContainsKey("filePath"))
+                return Task.FromResult(Respond("", "Specify either 'code' or 'filePath', not both."));
 
             // Check toggle
             if (EditorPrefs.GetBool(DisablePrefKey, false))
@@ -68,6 +66,21 @@ namespace UnityMcp.Editor.Tools
             if (_crossFrameBusy)
                 return Task.FromResult(Respond("",
                     "A cross-frame execution (IEnumerator Run) is still running. Wait for it to finish before issuing another call."));
+
+            if (!string.IsNullOrWhiteSpace(filePath))
+            {
+                try
+                {
+                    string path = Path.IsPathRooted(filePath) ? filePath
+                        : Path.Combine(Path.GetDirectoryName(Application.dataPath), filePath);
+                    code = File.ReadAllText(path);
+                }
+                catch (Exception ex) when (ex is IOException || ex is UnauthorizedAccessException
+                    || ex is ArgumentException || ex is NotSupportedException)
+                {
+                    return Task.FromResult(Respond("", "Cannot read filePath: " + ex.Message));
+                }
+            }
 
             lock (_executionLock)
             {
