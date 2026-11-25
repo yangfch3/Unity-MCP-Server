@@ -88,12 +88,6 @@ For full parameter details and usage examples, see the [Tools Reference](Docs/TO
 | `build_getCompileErrors` | Get compile error list |
 | `build_runTests` | Run Test Runner tests |
 
-#### Util Tools
-
-| Tool | Description |
-|------|-------------|
-| `util_delay` | Wait a given number of milliseconds (Editor keeps ticking frames) |
-
 #### Code Tools (Experimental, Unity 2022 Mono only)
 
 | Tool | Description |
@@ -146,7 +140,7 @@ After installing via Git URL, UPM locks the current commit hash in the host proj
 To lock a specific version, append a Git Tag to the URL:
 
 ```
-https://github.com/yangfch3/Unity-MCP-Server.git#v0.5.4
+https://github.com/yangfch3/Unity-MCP-Server.git#v0.5.5
 ```
 
 Corresponding `Packages/manifest.json` configuration:
@@ -154,7 +148,7 @@ Corresponding `Packages/manifest.json` configuration:
 ```json
 {
   "dependencies": {
-    "com.yangfch3.unity-mcp": "https://github.com/yangfch3/Unity-MCP-Server.git#v0.5.4"
+    "com.yangfch3.unity-mcp": "https://github.com/yangfch3/Unity-MCP-Server.git#v0.5.5"
   }
 }
 ```

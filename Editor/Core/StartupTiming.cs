@@ -89,7 +89,7 @@ namespace UnityMcp.Editor
         internal static string EnterResponse(float seconds)
         {
             var number = seconds.ToString(CultureInfo.InvariantCulture);
-            return "{\"message\":\"进游中，sleep " + number
+            return "{\"message\":\"进游中，shell sleep " + number
                 + " 秒后再执行后续操作\",\"suggestedWaitSeconds\":" + number + "}";
         }
 

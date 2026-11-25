@@ -4,7 +4,7 @@
 
 本文档详细描述 Unity MCP Server 的所有内置工具，包括参数说明和使用示例。
 
-> **Server 单线程串行处理请求。** 任何耗时工具（`build_compile`、`build_runTests`、`util_delay`、`code_executeImmediate` 跨帧模式）执行期间，后续请求一律排队等待，无法并发。给这类工具设超时/时长参数时按需给最小值。
+> **Server 单线程串行处理请求。** 任何耗时工具（`build_compile`、`build_runTests`、`code_executeImmediate` 跨帧模式）执行期间，后续请求一律排队等待，无法并发。给这类工具设超时/时长参数时按需给最小值。
 
 ---
 
@@ -320,28 +320,6 @@ Experimental 中的启动耗时统计默认关闭，支持一个区分大小写�
 
 ---
 
-## Util 工具
-
-### `util_delay`
-
-等待指定毫秒后返回。用于给 Editor 侧异步过程（协程、资源加载、场景启动）留出推进时间，期间主线程照常走帧。
-
-| 参数 | 类型 | 必填 | 默认值 | 说明 |
-|------|------|------|--------|------|
-| `ms` | int | ❌ | 1000 | 等待毫秒数，范围 100–120000 |
-
-**响应格式：**
-
-```json
-{ "waitedMs": 12016, "playMode": "Playing" }
-```
-
-`playMode` 为等待结束时的状态（`Stopped` / `Paused` / `Playing`），便于判断期间是否发生状态跃迁。
-
-典型用法：`playmode_control(enter)` 之后等游戏框架起来，再读日志或截图，避免拿到中间态。若等待逻辑需要判断具体条件而非固定时长，优先用 `code_executeImmediate` 的跨帧模式轮询条件。
-
----
-
 ## Code 工具（实验性，仅 Unity 2022 Mono）
 
 > 默认开启，可在 Window → MCP Server 面板的 Experimental 区域关闭。仅在 Unity 2022 (Mono) 下可用，Unity 6+ 不可见。
@@ -418,7 +396,7 @@ public class Probe
 
 注意事项：
 
-- **执行期间整个 Server 阻塞**（见文档开头）。实测 20 秒跨帧期间，一个 100 ms 的 `util_delay` 墙钟耗时 18 秒。**把 `timeout` 设成够用的最小值**，别无脑拉到 120000
+- **执行期间整个 Server 阻塞**（见文档开头）。实测 20 秒跨帧期间，一个 100 ms 的请求墙钟耗时 18 秒。**把 `timeout` 设成够用的最小值**，别无脑拉到 120000
 - **Edit Mode 帧率不固定**（Editor 失焦时可能低至 10 fps），不要用帧数估算时间，反之亦然
 - 域重载（编译、进出 PlayMode）会中断执行并返回相应 error
 

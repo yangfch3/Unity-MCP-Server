@@ -88,12 +88,6 @@ Agent（如 Kiro、Cursor、Claude Code）可通过标准 MCP 协议连接到 Un
 | `build_getCompileErrors` | 获取编译错误列表 |
 | `build_runTests` | 运行 Test Runner 测试 |
 
-#### Util 工具
-
-| 工具 | 功能 |
-|------|------|
-| `util_delay` | 等待指定毫秒（期间 Editor 照常走帧） |
-
 #### Code 工具（实验性，仅 Unity 2022 Mono）
 
 | 工具 | 功能 |
@@ -146,7 +140,7 @@ UPM 通过 Git URL 安装后，会在宿主项目的 `packages-lock.json` 中锁
 如需锁定特定版本，可在 URL 末尾追加 Git Tag：
 
 ```
-https://github.com/yangfch3/Unity-MCP-Server.git#v0.5.4
+https://github.com/yangfch3/Unity-MCP-Server.git#v0.5.5
 ```
 
 对应 `Packages/manifest.json` 配置：
@@ -154,7 +148,7 @@ https://github.com/yangfch3/Unity-MCP-Server.git#v0.5.4
 ```json
 {
   "dependencies": {
-    "com.yangfch3.unity-mcp": "https://github.com/yangfch3/Unity-MCP-Server.git#v0.5.4"
+    "com.yangfch3.unity-mcp": "https://github.com/yangfch3/Unity-MCP-Server.git#v0.5.5"
   }
 }
 ```

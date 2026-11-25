@@ -4,7 +4,7 @@
 
 Detailed documentation for all built-in tools in Unity MCP Server, including parameters and usage examples.
 
-> **The server processes requests serially on a single thread.** While any long-running tool is executing (`build_compile`, `build_runTests`, `util_delay`, `code_executeImmediate` in cross-frame mode), all subsequent requests queue up — there is no concurrency. Set timeout/duration parameters on these tools to the smallest value that works.
+> **The server processes requests serially on a single thread.** While any long-running tool is executing (`build_compile`, `build_runTests`, `code_executeImmediate` in cross-frame mode), all subsequent requests queue up — there is no concurrency. Set timeout/duration parameters on these tools to the smallest value that works.
 
 ---
 
@@ -320,28 +320,6 @@ Run Unity Test Runner tests and return results.
 
 ---
 
-## Util Tools
-
-### `util_delay`
-
-Wait for the given number of milliseconds and return. Gives Editor-side asynchronous processes (coroutines, asset loading, scene startup) time to advance while the main thread keeps ticking frames.
-
-| Parameter | Type | Required | Default | Description |
-|-----------|------|----------|---------|-------------|
-| `ms` | int | ❌ | 1000 | Milliseconds to wait, range 100–120000 |
-
-**Response format:**
-
-```json
-{ "waitedMs": 12016, "playMode": "Playing" }
-```
-
-`playMode` is the state when the wait ends (`Stopped` / `Paused` / `Playing`), which makes state transitions during the wait easy to spot.
-
-Typical use: after `playmode_control(enter)`, wait for the game framework to come up before reading logs or taking a screenshot, so you don't capture an intermediate state. When the wait depends on a condition rather than a fixed duration, prefer polling it in `code_executeImmediate` cross-frame mode.
-
----
-
 ## Code Tools (Experimental, Unity 2022 Mono only)
 
 > Enabled by default; can be disabled in the Experimental section of Window → MCP Server panel. Only available on Unity 2022 (Mono); not visible on Unity 6+.
@@ -418,7 +396,7 @@ public class Probe
 
 Caveats:
 
-- **The whole server blocks while it runs** (see the note at the top). Measured: during a 20-second cross-frame run, a 100 ms `util_delay` took 18 seconds wall-clock. **Set `timeout` to the smallest value that works** instead of maxing it out at 120000
+- **The whole server blocks while it runs** (see the note at the top). Measured: during a 20-second cross-frame run, a 100 ms request took 18 seconds wall-clock. **Set `timeout` to the smallest value that works** instead of maxing it out at 120000
 - **Edit Mode frame rate is not fixed** (can drop to ~10 fps when the Editor is unfocused) — do not use frame counts to estimate wall-clock time, or vice versa
 - A domain reload (compilation, entering/exiting PlayMode) aborts execution and returns a corresponding error
 
